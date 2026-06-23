@@ -1,62 +1,6 @@
 <template>
   <div class="overview-page" :class="themeClass">
     <div class="overview-shell">
-      <header class="overview-hero">
-        <div class="overview-hero__main">
-          <div class="overview-hero__copy">
-            <span class="overview-kicker">RELEASE OPERATIONS</span>
-            <h1>运营监控总览</h1>
-            <p>系统执行优先，状态消息实时追踪。</p>
-          </div>
-          <div class="overview-hero__actions">
-            <button class="theme-action" type="button" @click="toggleTheme">
-              <span class="tech-icon">
-                <svg-icon icon-class="theme" />
-              </span>
-              {{ resolvedTheme === 'light' ? 'Light' : 'Dark' }}
-            </button>
-            <button class="ghost-action" type="button" @click="refreshOverview">
-              <span class="tech-icon">
-                <svg-icon icon-class="monitor" />
-              </span>
-              刷新数据
-            </button>
-            <button class="primary-action" type="button" @click="messageCollapsed = !messageCollapsed">
-              <span class="tech-icon">
-                <svg-icon :icon-class="messageCollapsed ? 'message' : 'more-up'" />
-              </span>
-              {{ messageCollapsed ? '展开消息' : '收起消息' }}
-            </button>
-          </div>
-        </div>
-        <div class="overview-hero__metrics">
-          <section class="metric-grid">
-            <article
-              v-for="metric in metricCards"
-              :key="metric.key"
-              class="metric-card"
-              :style="metricStyle(metric)"
-            >
-              <div class="metric-card__head">
-                <span>{{ metric.label }}</span>
-                <em>{{ metric.delta }}</em>
-              </div>
-              <div class="metric-card__value">
-                <strong>{{ metric.value }}</strong>
-                <span v-if="metric.suffix">{{ metric.suffix }}</span>
-              </div>
-              <div class="metric-card__foot">
-                <small>{{ metric.meta }}</small>
-                <svg class="metric-sparkline" viewBox="0 0 128 42" preserveAspectRatio="none" aria-hidden="true">
-                  <path :d="sparklineArea(metric.series, 128, 42)" />
-                  <polyline :points="sparklinePoints(metric.series, 128, 42)" />
-                </svg>
-              </div>
-            </article>
-          </section>
-        </div>
-      </header>
-
       <main class="overview-layout" :class="{ 'is-message-collapsed': messageCollapsed }">
         <section class="execution-panel panel-surface">
           <div class="panel-head">
@@ -70,6 +14,24 @@
               </div>
             </div>
             <div class="execution-toolbar">
+              <button class="quick-action" type="button" @click="toggleTheme">
+                <span class="tech-icon">
+                  <svg-icon icon-class="theme" />
+                </span>
+                {{ resolvedTheme === 'light' ? 'Light' : 'Dark' }}
+              </button>
+              <button class="quick-action" type="button" @click="refreshOverview">
+                <span class="tech-icon">
+                  <svg-icon icon-class="monitor" />
+                </span>
+                刷新数据
+              </button>
+              <button class="quick-action" type="button" @click="messageCollapsed = !messageCollapsed">
+                <span class="tech-icon">
+                  <svg-icon :icon-class="messageCollapsed ? 'message' : 'more-up'" />
+                </span>
+                {{ messageCollapsed ? '展开消息' : '收起消息' }}
+              </button>
               <button
                 v-for="action in quickActions"
                 :key="action.key"
@@ -328,7 +290,7 @@ export default {
       messagePageNum: 1,
       messagePageSize: 10,
       knownMessageKeys: [],
-      messageCollapsed: false,
+      messageCollapsed: true,
       messageTimer: null,
       executionTimer: null,
       messageNewTimer: null,
@@ -399,51 +361,6 @@ export default {
         percent: total ? Math.min(100, Math.round((finished / total) * 100)) : 0
       }
     },
-    metricCards() {
-      const stats = this.overviewStats
-      return [
-        {
-          key: 'systems',
-          label: '系统总数',
-          value: stats.systems,
-          suffix: '',
-          delta: 'Active',
-          meta: '纳管服务',
-          tone: '#22D3EE',
-          series: this.metricSeries(stats.systems * 12 + 18, 2)
-        },
-        {
-          key: 'running',
-          label: '执行系统',
-          value: stats.runningSystems,
-          suffix: '',
-          delta: stats.runningSystems ? 'Live' : 'Idle',
-          meta: '实时运行',
-          tone: '#00F5A0',
-          series: this.metricSeries(stats.runningSystems * 18 + 12, 5)
-        },
-        {
-          key: 'envs',
-          label: '环境总数',
-          value: stats.envs,
-          suffix: '',
-          delta: `${stats.runningEnvs} live`,
-          meta: '环境实例',
-          tone: '#FFB84D',
-          series: this.metricSeries(stats.envs * 8 + 20, 8)
-        },
-        {
-          key: 'progress',
-          label: '总进度',
-          value: stats.percent,
-          suffix: '%',
-          delta: stats.percent >= 80 ? 'Stable' : 'Watch',
-          meta: '完成比例',
-          tone: '#8B5CF6',
-          series: this.metricSeries(stats.percent || 10, 11)
-        }
-      ]
-    }
   },
   created() {
     this.initTheme()
@@ -759,52 +676,6 @@ export default {
     normalizeLevel(level) {
       return String(level || 'info').toLowerCase()
     },
-    metricStyle(metric) {
-      const toneMap = {
-        '#22D3EE': '#06B6D4',
-        '#00F5A0': '#10B981',
-        '#FFB84D': '#F59E0B',
-        '#8B5CF6': '#8B5CF6'
-      }
-      const tone = this.resolvedTheme === 'light' ? (toneMap[metric.tone] || metric.tone) : metric.tone
-      return {
-        '--metric-tone': tone,
-        '--metric-glow': this.hexToRgba(tone, this.resolvedTheme === 'light' ? 0.12 : 0.22)
-      }
-    },
-    metricSeries(value, seed) {
-      const base = Math.max(8, Math.min(92, Number(value) || 8))
-      return Array.from({ length: 9 }).map((_, index) => {
-        const wave = Math.sin((index + seed) * 0.9) * 12
-        const lift = index * 1.8
-        return Math.max(4, Math.min(98, base + wave + lift))
-      })
-    },
-    sparklinePoints(values, width = 128, height = 42) {
-      const points = this.normalizePoints(values, width, height)
-      return points.map(point => `${point.x},${point.y}`).join(' ')
-    },
-    sparklineArea(values, width = 128, height = 42) {
-      const points = this.normalizePoints(values, width, height)
-      if (!points.length) {
-        return ''
-      }
-      const line = points.map(point => `${point.x},${point.y}`).join(' L ')
-      return `M ${points[0].x},${height} L ${line} L ${points[points.length - 1].x},${height} Z`
-    },
-    normalizePoints(values, width, height) {
-      if (!Array.isArray(values) || !values.length) {
-        return []
-      }
-      const max = Math.max(...values, 1)
-      const min = Math.min(...values, 0)
-      const range = Math.max(max - min, 1)
-      return values.map((value, index) => {
-        const x = values.length === 1 ? 0 : Math.round((index / (values.length - 1)) * width)
-        const y = Math.round(height - ((value - min) / range) * (height - 8) - 4)
-        return { x, y }
-      })
-    },
     systemStyle(system, index) {
       const item = SYSTEM_PALETTE[index % SYSTEM_PALETTE.length]
       const color = this.resolvedTheme === 'light' ? item.lightColor : item.color
@@ -1047,137 +918,6 @@ export default {
   min-height: 0;
 }
 
-.overview-hero {
-  display: grid;
-  grid-template-columns: minmax(520px, 1fr) 392px;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 0;
-  height: 104px;
-  max-height: 112px;
-}
-
-.overview-hero__main {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 2px 0;
-}
-
-.overview-hero__copy {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.overview-kicker {
-  display: inline-flex;
-  margin-bottom: 4px;
-  color: var(--accent);
-  font-family: Consolas, Monaco, monospace;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.overview-hero h1 {
-  margin: 0;
-  color: var(--text-main);
-  font-size: 40px;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0;
-  white-space: nowrap;
-}
-
-.overview-hero p {
-  margin: 4px 0 0;
-  color: var(--text-soft);
-  font-size: 14px;
-}
-
-.overview-hero__metrics {
-  min-width: 0;
-  width: 352px;
-  align-self: start;
-  justify-self: end;
-}
-
-.overview-hero__metrics .metric-grid {
-  justify-content: end;
-}
-
-.overview-hero__telemetry {
-  flex: 0 1 430px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  padding: 1px;
-  border: 1px solid rgba(34, 211, 238, 0.16);
-  border-radius: 16px;
-  background:
-    linear-gradient(135deg, rgba(34, 211, 238, 0.18), rgba(0, 245, 160, 0.08)),
-    rgba(255, 255, 255, 0.035);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 36px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(18px) saturate(135%);
-  -webkit-backdrop-filter: blur(18px) saturate(135%);
-}
-
-.overview-hero__telemetry div {
-  min-width: 0;
-  padding: 11px 12px;
-  background: var(--muted-surface);
-}
-
-.overview-hero__telemetry span {
-  display: block;
-  overflow: hidden;
-  color: var(--text-soft);
-  font-family: Consolas, Monaco, monospace;
-  font-size: 10px;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.overview-hero__telemetry strong {
-  display: block;
-  margin-top: 5px;
-  background: linear-gradient(135deg, #FFFFFF, var(--accent), var(--success));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  font-family: Consolas, Monaco, monospace;
-  font-size: 22px;
-  line-height: 1;
-}
-
-.overview-hero__actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 0 0 auto;
-}
-
-.theme-action,
-.ghost-action,
-.primary-action {
-  height: 36px;
-  padding: 0 12px 0 6px;
-  color: var(--text-main);
-  border-radius: 12px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  white-space: nowrap;
-  transition: all 0.3s ease;
-}
 
 .tech-icon {
   position: relative;
@@ -1216,38 +956,6 @@ export default {
   filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.7));
 }
 
-.theme-action,
-.ghost-action,
-.primary-action {
-  background: var(--button-bg);
-  border: 1px solid var(--button-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.theme-action:hover,
-.ghost-action:hover,
-.primary-action:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
-  box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
-}
-
-.theme-action .tech-icon .svg-icon,
-.ghost-action .tech-icon .svg-icon,
-.primary-action .tech-icon .svg-icon {
-  width: 16px;
-  height: 16px;
-}
-
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 80px);
-  justify-content: end;
-  gap: 8px;
-}
-
-.metric-card,
 .panel-surface,
 .system-card {
   border: 1px solid var(--panel-border);
@@ -1257,121 +965,10 @@ export default {
   -webkit-backdrop-filter: blur(18px) saturate(130%);
 }
 
-.metric-card {
-  position: relative;
-  overflow: hidden;
-  width: 80px;
-  height: 72px;
-  min-height: 72px;
-  padding: 8px;
-  border-radius: 14px;
-  transition: all 0.3s ease;
-}
-
-.metric-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 34%),
-    linear-gradient(90deg, var(--metric-glow), transparent 48%);
-  opacity: 0.48;
-}
-
-.metric-card:hover,
 .system-card:hover,
 .panel-surface:hover {
   border-color: var(--panel-border-strong);
   box-shadow: var(--shadow-hover), 0 0 0 1px rgba(34, 211, 238, 0.08);
-}
-
-.metric-card:hover {
-  border-color: var(--panel-border-strong);
-  box-shadow: var(--shadow-soft);
-  transform: none;
-}
-
-.metric-card__head,
-.metric-card__value,
-.metric-card__foot {
-  position: relative;
-  z-index: 1;
-}
-
-.metric-card__head,
-.metric-card__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.metric-card__head span,
-.metric-card__foot small {
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1;
-}
-
-.metric-card__head em {
-  display: none;
-}
-
-.metric-card__value {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin-top: 6px;
-}
-
-.metric-card__value strong {
-  background: linear-gradient(135deg, #FFFFFF, var(--metric-tone), #B8FFF2);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  font-family: Consolas, Monaco, monospace;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 0.95;
-}
-
-.metric-card__value span {
-  color: var(--metric-tone);
-  font-family: Consolas, Monaco, monospace;
-  font-size: 11px;
-}
-
-.metric-card__foot {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 7px;
-  margin-top: 0;
-  justify-content: flex-end;
-}
-
-.metric-card__foot small {
-  display: none;
-}
-
-.metric-sparkline {
-  width: 48px;
-  height: 18px;
-  overflow: visible;
-}
-
-.metric-sparkline path {
-  fill: var(--metric-glow, var(--system-accent-soft));
-}
-
-.metric-sparkline polyline {
-  fill: none;
-  stroke: var(--metric-tone, var(--system-accent));
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 8px currentColor);
 }
 
 .overview-layout {
@@ -2364,25 +1961,6 @@ export default {
 }
 
 @media (max-width: 1280px) {
-  .overview-hero {
-    grid-template-columns: 1fr;
-    height: auto;
-    max-height: none;
-  }
-
-  .overview-hero__main {
-    padding-top: 0;
-  }
-
-  .overview-hero h1 {
-    white-space: normal;
-  }
-
-  .metric-grid {
-    grid-template-columns: repeat(4, 80px);
-    justify-content: start;
-  }
-
   .overview-layout,
   .overview-layout.is-message-collapsed {
     grid-template-columns: 1fr;
@@ -2406,35 +1984,6 @@ export default {
     padding: 12px;
   }
 
-  .overview-hero {
-    align-items: flex-start;
-    display: flex;
-    flex-direction: column;
-    height: auto;
-  }
-
-  .overview-hero__main {
-    width: 100%;
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .overview-hero__actions {
-    width: 100%;
-  }
-
-  .overview-hero__metrics {
-    width: 100%;
-    flex-basis: auto;
-  }
-
-  .theme-action,
-  .ghost-action,
-  .primary-action {
-    flex: 1;
-  }
-
-  .metric-grid,
   .system-grid,
   .skeleton-grid {
     grid-template-columns: 1fr;
@@ -2496,20 +2045,6 @@ export default {
 }
 
 @media (max-width: 560px) {
-  .metric-grid {
-    grid-template-columns: repeat(2, 80px);
-  }
-
-  .overview-hero__actions {
-    flex-direction: column;
-  }
-
-  .theme-action,
-  .ghost-action,
-  .primary-action {
-    width: 100%;
-  }
-
   .quick-action {
     flex-basis: 100%;
   }
