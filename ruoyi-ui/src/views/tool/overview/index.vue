@@ -108,6 +108,54 @@
                 :class="{ 'is-running': system.hasRunning }"
                 :style="systemStyle(system, index)"
               >
+                <el-popover
+                  :ref="'inspectionPopover-' + system.name"
+                  :value="Boolean(inspectionVisible[system.name])"
+                  :placement="inspectionPlacement(system)"
+                  :width="360"
+                  trigger="manual"
+                  :visible-arrow="true"
+                  :offset="10"
+                  transition=""
+                  :popper-options="inspectionPopperOptions"
+                  :popper-class="inspectionPopperClass"
+                >
+                  <div
+                    class="inspection-popover__body"
+                    @mouseenter="showInspection(system.name)"
+                    @mouseleave="scheduleInspectionHide(system.name)"
+                  >
+                    <section
+                      v-for="item in inspectionItems(system)"
+                      :key="system.name + '-' + item.key"
+                      class="inspection-popover__item"
+                    >
+                      <div class="inspection-popover__line">
+                        <span class="inspection-popover__label">{{ item.label }}：</span>
+                        <span class="inspection-popover__status" :class="'is-' + item.status">
+                          {{ inspectionStatusText(item.status) }}
+                        </span>
+                      </div>
+                      <time class="inspection-popover__time">{{ item.time }}</time>
+                    </section>
+                  </div>
+                  <button
+                    slot="reference"
+                    class="system-info-trigger"
+                    type="button"
+                    :aria-label="system.name + ' 更多巡检状态'"
+                    aria-haspopup="true"
+                    :aria-expanded="inspectionVisible[system.name] ? 'true' : 'false'"
+                    @mouseenter="showInspection(system.name)"
+                    @mouseleave="scheduleInspectionHide(system.name)"
+                    @focus="showInspection(system.name)"
+                    @blur="scheduleInspectionHide(system.name)"
+                    @keydown.esc.stop.prevent="hideInspection(system.name)"
+                  >
+                    <i class="el-icon-info" aria-hidden="true" />
+                  </button>
+                </el-popover>
+
                 <div class="system-card__top">
                   <div class="progress-ring">
                     <svg viewBox="0 0 100 100" aria-hidden="true">
@@ -257,6 +305,13 @@ const SYSTEM_PALETTE = [
 
 const THEME_STORAGE_KEY = 'overview-theme'
 const CORE_SYSTEM_ORDER = ['ACT', 'DASP', 'PAY', 'BILLING']
+const DEFAULT_INSPECTION_TIME = '2025-05-20 18:00:00'
+const INSPECTION_FIELDS = [
+  { key: 'impact', label: '关联系统影响' },
+  { key: 'fullLink', label: '全链路' },
+  { key: 'alert', label: '待处理告警' },
+  { key: 'logCloud', label: '日志云' }
+]
 
 export default {
   name: 'Overview',
@@ -285,6 +340,14 @@ export default {
       messageLoadingMore: false,
       messageLoadMoreArmed: true,
       messageRequestSeq: 0,
+      inspectionVisible: {},
+      inspectionHideTimers: {},
+      inspectionPopperOptions: {
+        gpuAcceleration: false,
+        boundariesElement: 'viewport',
+        boundariesPadding: 12,
+        flipBehavior: 'flip'
+      },
       quickActions: [
         { key: 'cicd', label: 'CICD实施情况', icon: 'dashboard' },
         { key: 'manual', label: '手动协同', icon: 'peoples' },
@@ -300,6 +363,9 @@ export default {
     themeClass() {
       return 'theme-' + this.resolvedTheme
     },
+    inspectionPopperClass() {
+      return 'overview-inspection-popover overview-inspection-popover--' + this.resolvedTheme
+    },
     visibleSystems() {
       return Object.keys(this.executionMap).map(name => {
         const source = this.executionMap[name] || {}
@@ -310,6 +376,7 @@ export default {
           name,
           raw: source,
           envs,
+          inspection: this.normalizeInspection(source),
           hasRunning: envs.some(env => env.running),
           percent: total ? Math.min(100, Math.round((finished / total) * 100)) : 0
         }
@@ -389,6 +456,9 @@ export default {
     window.clearInterval(this.executionTimer)
     window.clearInterval(this.messageTimer)
     window.clearTimeout(this.messageNewTimer)
+    Object.keys(this.inspectionHideTimers).forEach(name => {
+      window.clearTimeout(this.inspectionHideTimers[name])
+    })
     this.destroyThemeListener()
   },
   methods: {
@@ -545,6 +615,61 @@ export default {
         percent,
         running: finished < total
       }
+    },
+    normalizeInspection(source) {
+      const nested = source.inspection || {}
+      return INSPECTION_FIELDS.reduce((result, field) => {
+        result[field.key] = this.normalizeInspectionItem(nested[field.key] || source[field.key])
+        return result
+      }, {})
+    },
+    normalizeInspectionItem(item) {
+      const sourceStatus = item && item.status ? String(item.status).toLowerCase() : ''
+      const status = sourceStatus === 'error' ? 'error' : 'inspected'
+      const time = item && item.time ? String(item.time) : DEFAULT_INSPECTION_TIME
+      return {
+        status,
+        time
+      }
+    },
+    inspectionItems(system) {
+      const inspection = system.inspection || {}
+      return INSPECTION_FIELDS.map(field => ({
+        key: field.key,
+        label: field.label,
+        status: (inspection[field.key] && inspection[field.key].status) || 'inspected',
+        time: (inspection[field.key] && inspection[field.key].time) || DEFAULT_INSPECTION_TIME
+      }))
+    },
+    inspectionStatusText(status) {
+      return status === 'error' ? '异常' : '已巡检'
+    },
+    inspectionPlacement(system) {
+      return system.name === 'BILLING' ? 'left-start' : 'right-start'
+    },
+    showInspection(name) {
+      Object.keys(this.inspectionHideTimers).forEach(key => {
+        window.clearTimeout(this.inspectionHideTimers[key])
+        this.$delete(this.inspectionHideTimers, key)
+      })
+      Object.keys(this.inspectionVisible).forEach(key => {
+        if (key !== name) {
+          this.$set(this.inspectionVisible, key, false)
+        }
+      })
+      this.$set(this.inspectionVisible, name, true)
+    },
+    scheduleInspectionHide(name) {
+      window.clearTimeout(this.inspectionHideTimers[name])
+      const timer = window.setTimeout(() => {
+        this.hideInspection(name)
+      }, 180)
+      this.$set(this.inspectionHideTimers, name, timer)
+    },
+    hideInspection(name) {
+      window.clearTimeout(this.inspectionHideTimers[name])
+      this.$delete(this.inspectionHideTimers, name)
+      this.$set(this.inspectionVisible, name, false)
     },
     sortMessages(a, b) {
       const timeA = a.createTime || a.updateTime || ''
@@ -1461,6 +1586,58 @@ export default {
   box-shadow: 0 16px 42px rgba(0, 0, 0, 0.38), 0 0 24px var(--system-glow);
 }
 
+.system-info-trigger {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  cursor: help;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 0.22s ease;
+}
+
+.system-info-trigger .el-icon-info {
+  display: block;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.system-info-trigger:hover,
+.system-info-trigger:focus-visible,
+.system-info-trigger[aria-expanded="true"] {
+  color: var(--system-accent);
+  background: var(--system-accent-soft);
+  border-color: var(--system-accent);
+  box-shadow: 0 0 18px var(--system-glow), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.overview-page.theme-light .system-info-trigger {
+  color: #64748B;
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.overview-page.theme-light .system-info-trigger:hover,
+.overview-page.theme-light .system-info-trigger:focus-visible,
+.overview-page.theme-light .system-info-trigger[aria-expanded="true"] {
+  color: var(--system-accent);
+  background: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.34);
+  box-shadow: 0 12px 24px rgba(6, 182, 212, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
 .system-card__top,
 .env-status-list {
   position: relative;
@@ -2283,6 +2460,11 @@ export default {
     padding: 20px;
   }
 
+  .system-info-trigger {
+    top: 12px;
+    right: 12px;
+  }
+
   .system-card__top {
     grid-template-columns: 112px minmax(0, 1fr);
   }
@@ -2342,6 +2524,219 @@ export default {
 
   .message-panel__body {
     padding-right: 4px;
+  }
+}
+</style>
+
+<style lang="scss">
+.overview-inspection-popover {
+  box-sizing: border-box;
+  width: min(360px, calc(100vw - 24px)) !important;
+  padding: 0;
+  border-radius: 14px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.4;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.overview-inspection-popover.fade-in-linear-enter,
+.overview-inspection-popover.fade-in-linear-leave-active,
+.overview-inspection-popover.el-fade-in-linear-enter,
+.overview-inspection-popover.el-fade-in-linear-leave-active {
+  opacity: 1;
+}
+
+.overview-inspection-popover,
+.overview-inspection-popover[x-placement^="right"] .popper__arrow::after,
+.overview-inspection-popover[x-placement^="left"] .popper__arrow::after,
+.overview-inspection-popover[x-placement^="top"] .popper__arrow::after,
+.overview-inspection-popover[x-placement^="bottom"] .popper__arrow::after {
+  background: rgba(11, 22, 38, 0.94);
+}
+
+.overview-inspection-popover--dark {
+  color: #EAF4FF;
+  border: 1px solid rgba(34, 211, 238, 0.34);
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 32px rgba(34, 211, 238, 0.14);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+}
+
+.overview-inspection-popover--light {
+  color: #0F172A;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow:
+    0 22px 48px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+}
+
+.overview-inspection-popover--light[x-placement^="right"] .popper__arrow::after,
+.overview-inspection-popover--light[x-placement^="left"] .popper__arrow::after,
+.overview-inspection-popover--light[x-placement^="top"] .popper__arrow::after,
+.overview-inspection-popover--light[x-placement^="bottom"] .popper__arrow::after {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.overview-inspection-popover[x-placement^="right"] .popper__arrow {
+  border-right-color: rgba(34, 211, 238, 0.34);
+}
+
+.overview-inspection-popover[x-placement^="right"] .popper__arrow::after {
+  border-right-color: rgba(11, 22, 38, 0.94);
+}
+
+.overview-inspection-popover[x-placement^="left"] .popper__arrow {
+  border-left-color: rgba(34, 211, 238, 0.34);
+}
+
+.overview-inspection-popover[x-placement^="left"] .popper__arrow::after {
+  border-left-color: rgba(11, 22, 38, 0.94);
+}
+
+.overview-inspection-popover[x-placement^="top"] .popper__arrow {
+  border-top-color: rgba(34, 211, 238, 0.34);
+}
+
+.overview-inspection-popover[x-placement^="top"] .popper__arrow::after {
+  border-top-color: rgba(11, 22, 38, 0.94);
+}
+
+.overview-inspection-popover[x-placement^="bottom"] .popper__arrow {
+  border-bottom-color: rgba(34, 211, 238, 0.34);
+}
+
+.overview-inspection-popover[x-placement^="bottom"] .popper__arrow::after {
+  border-bottom-color: rgba(11, 22, 38, 0.94);
+}
+
+.overview-inspection-popover--light[x-placement^="right"] .popper__arrow {
+  border-right-color: rgba(15, 23, 42, 0.1);
+}
+
+.overview-inspection-popover--light[x-placement^="right"] .popper__arrow::after {
+  border-right-color: rgba(255, 255, 255, 0.94);
+}
+
+.overview-inspection-popover--light[x-placement^="left"] .popper__arrow {
+  border-left-color: rgba(15, 23, 42, 0.1);
+}
+
+.overview-inspection-popover--light[x-placement^="left"] .popper__arrow::after {
+  border-left-color: rgba(255, 255, 255, 0.94);
+}
+
+.overview-inspection-popover--light[x-placement^="top"] .popper__arrow {
+  border-top-color: rgba(15, 23, 42, 0.1);
+}
+
+.overview-inspection-popover--light[x-placement^="top"] .popper__arrow::after {
+  border-top-color: rgba(255, 255, 255, 0.94);
+}
+
+.overview-inspection-popover--light[x-placement^="bottom"] .popper__arrow {
+  border-bottom-color: rgba(15, 23, 42, 0.1);
+}
+
+.overview-inspection-popover--light[x-placement^="bottom"] .popper__arrow::after {
+  border-bottom-color: rgba(255, 255, 255, 0.94);
+}
+
+.inspection-popover__body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  padding: 14px;
+}
+
+.inspection-popover__item {
+  min-width: 0;
+}
+
+.inspection-popover__line {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.inspection-popover__label {
+  flex: 0 0 auto;
+  color: #A5B4FC;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.overview-inspection-popover--light .inspection-popover__label {
+  color: #4F46E5;
+}
+
+.inspection-popover__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.inspection-popover__status.is-inspected {
+  color: #34D399;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.24);
+}
+
+.inspection-popover__status.is-error {
+  color: #FB7185;
+  background: rgba(244, 63, 94, 0.14);
+  border: 1px solid rgba(251, 113, 133, 0.24);
+}
+
+.overview-inspection-popover--light .inspection-popover__status.is-inspected {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.overview-inspection-popover--light .inspection-popover__status.is-error {
+  color: #BE123C;
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.18);
+}
+
+.inspection-popover__time {
+  display: block;
+  margin-top: 8px;
+  color: #9FB3C8;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.overview-inspection-popover--light .inspection-popover__time {
+  color: #64748B;
+}
+
+@media (max-width: 560px) {
+  .overview-inspection-popover {
+    width: min(320px, calc(100vw - 24px)) !important;
+  }
+
+  .inspection-popover__body {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 </style>
