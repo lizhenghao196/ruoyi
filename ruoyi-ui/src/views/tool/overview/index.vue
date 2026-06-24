@@ -45,7 +45,7 @@
               </button>
               <div class="panel-live">
                 <i />
-                Live
+                <span class="panel-live__time">{{ fullDateTime }}</span>
               </div>
             </div>
           </div>
@@ -70,89 +70,40 @@
                 :class="{ 'is-running': system.hasRunning }"
                 :style="systemStyle(system, index)"
               >
-                <el-popover
-                  :ref="'inspectionPopover-' + system.name"
-                  :value="Boolean(inspectionVisible[system.name])"
-                  :placement="inspectionPlacement(system)"
-                  :width="360"
-                  trigger="manual"
-                  :visible-arrow="true"
-                  :offset="10"
-                  transition=""
-                  :popper-options="inspectionPopperOptions"
-                  :popper-class="inspectionPopperClass"
-                >
-                  <div
-                    class="inspection-popover__body"
-                    @mouseenter="showInspection(system.name)"
-                    @mouseleave="scheduleInspectionHide(system.name)"
-                  >
-                    <section
-                      v-for="item in inspectionItems(system)"
-                      :key="system.name + '-' + item.key"
-                      class="inspection-popover__item"
-                    >
-                      <div class="inspection-popover__line">
-                        <span class="inspection-popover__label">{{ item.label }}：</span>
-                        <span class="inspection-popover__status" :class="'is-' + item.status">
-                          {{ inspectionStatusText(item.status) }}
-                        </span>
-                      </div>
-                      <time class="inspection-popover__time">{{ item.time }}</time>
-                    </section>
-                  </div>
-                  <button
-                    slot="reference"
-                    class="system-info-trigger"
-                    type="button"
-                    :aria-label="system.name + ' 更多巡检状态'"
-                    aria-haspopup="true"
-                    :aria-expanded="inspectionVisible[system.name] ? 'true' : 'false'"
-                    @mouseenter="showInspection(system.name)"
-                    @mouseleave="scheduleInspectionHide(system.name)"
-                    @focus="showInspection(system.name)"
-                    @blur="scheduleInspectionHide(system.name)"
-                    @keydown.esc.stop.prevent="hideInspection(system.name)"
-                  >
-                    <i class="el-icon-info" aria-hidden="true" />
-                  </button>
-                </el-popover>
-
-                <div class="system-card__top">
-                  <div class="progress-ring">
-                    <svg viewBox="0 0 100 100" aria-hidden="true">
-                      <circle class="ring-track" cx="50" cy="50" r="42" />
-                      <circle class="ring-value" cx="50" cy="50" r="42" :style="ringStyle(system.percent)" />
-                    </svg>
-                    <div class="progress-center">
-                      <strong>{{ system.percent }}</strong>
-                      <span>%</span>
+                <div class="system-card__identity">
+                  <div class="system-identity__main">
+                    <div class="system-identity__head">
+                      <h3>{{ system.name }}</h3>
+                      <span class="system-status" :class="systemStatusClass(system)">
+                        {{ systemStatusText(system) }}
+                      </span>
                     </div>
-                  </div>
-                  <div class="system-card__summary">
-                    <span class="system-status" :class="systemStatusClass(system)">
-                      {{ systemStatusText(system) }}
-                    </span>
-                    <h3>{{ system.name }}</h3>
                     <p>{{ system.envs.length }} 个环境，{{ systemActiveText(system) }}</p>
+                  </div>
+                  <div class="system-identity__metrics">
+                    <span class="system-metric" :class="systemAlertClass(system)">
+                      <span class="system-metric__label">告警</span>
+                      <span class="system-metric__value">{{ systemAlertCount(system) }}</span>
+                    </span>
+                    <span class="system-metric" :class="systemInspectionClass(system)">
+                      <span class="system-metric__label">巡检</span>
+                      <span class="system-metric__value">{{ systemInspectionStatus(system) }}</span>
+                    </span>
                   </div>
                 </div>
 
-                <div class="env-status-list">
+                <div class="env-grid">
                   <div
                     v-for="env in system.envs"
                     :key="system.name + '-' + env.key"
-                    class="env-status-row"
-                    :class="[envStatusClass(env), { 'is-sweeping': env.percent < 100 }]"
+                    class="env-block"
+                    :class="[envBlockClass(env), { 'is-sweeping': env.percent < 100 }]"
+                    tabindex="0"
                   >
-                    <div class="env-status-row__main">
-                      <span class="env-dot" />
-                      <span class="env-name">{{ env.label }}</span>
-                    </div>
-                    <div class="env-progress">
-                      <i :style="{ width: env.percent + '%' }" />
-                    </div>
-                    <strong>{{ env.percent }}%</strong>
+                    <span class="env-block__dot" />
+                    <span class="env-block__name">{{ env.label }}</span>
+                    <strong class="env-block__percent">{{ env.percent }}%</strong>
+                    <span class="env-block__status">{{ envActiveText(env) }}</span>
                   </div>
                 </div>
               </article>
@@ -174,6 +125,14 @@
             <transition name="message-new-tip">
               <em v-if="newMessageCount">{{ newMessageCount }} 条新增</em>
             </transition>
+            <button
+              class="message-panel__close"
+              type="button"
+              :aria-label="'关闭消息面板'"
+              @click="messageCollapsed = true"
+            >
+              <svg-icon icon-class="close" />
+            </button>
           </div>
 
           <div
@@ -302,14 +261,8 @@ export default {
       messageLoadingMore: false,
       messageLoadMoreArmed: true,
       messageRequestSeq: 0,
-      inspectionVisible: {},
-      inspectionHideTimers: {},
-      inspectionPopperOptions: {
-        gpuAcceleration: false,
-        boundariesElement: 'viewport',
-        boundariesPadding: 12,
-        flipBehavior: 'flip'
-      },
+      now: Date.now(),
+      clockTimer: null,
       quickActions: [
         { key: 'cicd', label: 'CICD实施情况', icon: 'dashboard' },
         { key: 'manual', label: '手动协同', icon: 'peoples' },
@@ -324,9 +277,6 @@ export default {
     },
     themeClass() {
       return 'theme-' + this.resolvedTheme
-    },
-    inspectionPopperClass() {
-      return 'overview-inspection-popover overview-inspection-popover--' + this.resolvedTheme
     },
     visibleSystems() {
       return Object.keys(this.executionMap).map(name => {
@@ -361,6 +311,12 @@ export default {
         percent: total ? Math.min(100, Math.round((finished / total) * 100)) : 0
       }
     },
+    currentTime() {
+      return this.formatClockTime(new Date(this.now))
+    },
+    fullDateTime() {
+      return this.formatFullDateTime(new Date(this.now))
+    },
   },
   created() {
     this.initTheme()
@@ -368,14 +324,15 @@ export default {
     this.fetchMessages({ appendNew: false })
     this.executionTimer = window.setInterval(this.fetchExecutions, 12000)
     this.messageTimer = window.setInterval(() => this.fetchMessages({ appendNew: true }), 5000)
+    this.clockTimer = window.setInterval(() => {
+      this.now = Date.now()
+    }, 1000)
   },
   beforeDestroy() {
     window.clearInterval(this.executionTimer)
     window.clearInterval(this.messageTimer)
+    window.clearInterval(this.clockTimer)
     window.clearTimeout(this.messageNewTimer)
-    Object.keys(this.inspectionHideTimers).forEach(name => {
-      window.clearTimeout(this.inspectionHideTimers[name])
-    })
     this.destroyThemeListener()
   },
   methods: {
@@ -549,45 +506,6 @@ export default {
         time
       }
     },
-    inspectionItems(system) {
-      const inspection = system.inspection || {}
-      return INSPECTION_FIELDS.map(field => ({
-        key: field.key,
-        label: field.label,
-        status: (inspection[field.key] && inspection[field.key].status) || 'inspected',
-        time: (inspection[field.key] && inspection[field.key].time) || DEFAULT_INSPECTION_TIME
-      }))
-    },
-    inspectionStatusText(status) {
-      return status === 'error' ? '异常' : '已巡检'
-    },
-    inspectionPlacement(system) {
-      return system.name === 'BILLING' ? 'left-start' : 'right-start'
-    },
-    showInspection(name) {
-      Object.keys(this.inspectionHideTimers).forEach(key => {
-        window.clearTimeout(this.inspectionHideTimers[key])
-        this.$delete(this.inspectionHideTimers, key)
-      })
-      Object.keys(this.inspectionVisible).forEach(key => {
-        if (key !== name) {
-          this.$set(this.inspectionVisible, key, false)
-        }
-      })
-      this.$set(this.inspectionVisible, name, true)
-    },
-    scheduleInspectionHide(name) {
-      window.clearTimeout(this.inspectionHideTimers[name])
-      const timer = window.setTimeout(() => {
-        this.hideInspection(name)
-      }, 180)
-      this.$set(this.inspectionHideTimers, name, timer)
-    },
-    hideInspection(name) {
-      window.clearTimeout(this.inspectionHideTimers[name])
-      this.$delete(this.inspectionHideTimers, name)
-      this.$set(this.inspectionVisible, name, false)
-    },
     sortMessages(a, b) {
       const timeA = a.createTime || a.updateTime || ''
       const timeB = b.createTime || b.updateTime || ''
@@ -685,12 +603,6 @@ export default {
         '--system-glow': this.hexToRgba(color, this.resolvedTheme === 'light' ? 0.18 : 0.26)
       }
     },
-    ringStyle(percent) {
-      const circumference = 263.89
-      return {
-        strokeDashoffset: circumference - (circumference * Math.max(0, Math.min(100, percent))) / 100
-      }
-    },
     systemStatusClass(system) {
       if (system.hasRunning) {
         return 'is-running'
@@ -715,6 +627,39 @@ export default {
         return 'is-running'
       }
       return env.percent >= 100 ? 'is-complete' : 'is-waiting'
+    },
+    // 环境方块样式类
+    envBlockClass(env) {
+      if (env.running) {
+        return 'is-active'
+      }
+      return env.percent >= 100 ? 'is-done' : 'is-idle'
+    },
+    // 环境激活文案（后续可对接后端字段 env.activeStatus）
+    envActiveText(env) {
+      return env.running || env.percent >= 100 ? '已激活' : '未激活'
+    },
+    // 告警数量（占位：从巡检数据 alert 字段派生）
+    systemAlertCount(system) {
+      const alertItem = system.inspection && system.inspection.alert
+      return alertItem && alertItem.status === 'error' ? 1 : 0
+    },
+    // 告警指标样式类
+    systemAlertClass(system) {
+      return this.systemAlertCount(system) > 0 ? 'is-warning' : ''
+    },
+    // 巡检状态（占位：后续需对接后端字段 system.patrolStatus）
+    systemInspectionStatus(system) {
+      const inspection = system.inspection || {}
+      const hasError = INSPECTION_FIELDS.some(field => {
+        const item = inspection[field.key]
+        return item && item.status === 'error'
+      })
+      return hasError ? '异常' : '正常'
+    },
+    // 巡检指标样式类
+    systemInspectionClass(system) {
+      return this.systemInspectionStatus(system) === '异常' ? 'is-error' : ''
     },
     messageTone(item) {
       const level = this.normalizeLevel(item.apemMessageLevel)
@@ -770,6 +715,23 @@ export default {
         program: '自动'
       }
       return map[type] || type || '系统'
+    },
+    formatClockTime(date) {
+      const h = String(date.getHours()).padStart(2, '0')
+      const m = String(date.getMinutes()).padStart(2, '0')
+      const s = String(date.getSeconds()).padStart(2, '0')
+      return `${h}:${m}:${s}`
+    },
+    formatFullDateTime(date) {
+      const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+      const y = date.getFullYear()
+      const m = String(date.getMonth() + 1).padStart(2, '0')
+      const d = String(date.getDate()).padStart(2, '0')
+      const h = String(date.getHours()).padStart(2, '0')
+      const min = String(date.getMinutes()).padStart(2, '0')
+      const s = String(date.getSeconds()).padStart(2, '0')
+      const w = weekDays[date.getDay()]
+      return `${y}-${m}-${d} ${w} ${h}:${min}:${s}`
     },
     hexToRgba(hex, alpha) {
       const value = String(hex || '#22D3EE').replace('#', '')
@@ -889,19 +851,25 @@ export default {
     0 8px 18px rgba(15, 23, 42, 0.06);
 }
 
-.overview-page.theme-light .env-status-row.is-sweeping::before {
+.overview-page.theme-light .env-block.is-sweeping::before {
   opacity: 0.34;
 }
 
-.overview-page.theme-light .env-status-row::after {
+.overview-page.theme-light .env-block::after {
   width: 52%;
   background: linear-gradient(100deg, transparent 0%, rgba(6, 182, 212, 0.12) 22%, rgba(255, 255, 255, 0.68) 36%, var(--system-accent) 52%, rgba(6, 182, 212, 0.22) 68%, transparent 100%);
   filter: blur(6px) saturate(1.7);
   mix-blend-mode: normal;
 }
 
-.overview-page.theme-light .env-status-row.is-sweeping {
+.overview-page.theme-light .env-block.is-sweeping {
   box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.16), 0 0 16px rgba(6, 182, 212, 0.12);
+}
+
+.overview-page.theme-light .env-block {
+  --hover-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  --hover-bg: linear-gradient(145deg, var(--system-accent-soft), transparent 50%);
+  --hover-border: rgba(15, 23, 42, 0.07);
 }
 
 .overview-page.theme-light .system-card:hover {
@@ -1122,6 +1090,18 @@ export default {
   box-shadow: 0 0 16px rgba(0, 245, 160, 0.9);
 }
 
+.panel-live__sep {
+  opacity: 0.5;
+  font-weight: 400;
+}
+
+.panel-live__time {
+  display: inline;
+  margin-top: 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
 .execution-scroll,
 .message-panel__body {
   min-height: 0;
@@ -1151,16 +1131,14 @@ export default {
 .system-grid,
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 14px;
 }
 
 .system-card {
   position: relative;
   overflow: hidden;
-  height: 220px;
-  min-height: 220px;
-  padding: 20px;
+  padding: 18px;
   border-radius: 20px;
   background: var(--system-card-bg);
   transition: all 0.3s ease;
@@ -1183,139 +1161,56 @@ export default {
   box-shadow: 0 16px 42px rgba(0, 0, 0, 0.38), 0 0 24px var(--system-glow);
 }
 
-.system-info-trigger {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  color: var(--text-soft);
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  cursor: help;
-  outline: none;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transition: all 0.22s ease;
-}
+/* ---- 系统卡片身份区 ---- */
 
-.system-info-trigger .el-icon-info {
-  display: block;
-  font-size: 15px;
-  line-height: 1;
-}
-
-.system-info-trigger:hover,
-.system-info-trigger:focus-visible,
-.system-info-trigger[aria-expanded="true"] {
-  color: var(--system-accent);
-  background: var(--system-accent-soft);
-  border-color: var(--system-accent);
-  box-shadow: 0 0 18px var(--system-glow), inset 0 1px 0 rgba(255, 255, 255, 0.14);
-}
-
-.overview-page.theme-light .system-info-trigger {
-  color: #64748B;
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(15, 23, 42, 0.08);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.overview-page.theme-light .system-info-trigger:hover,
-.overview-page.theme-light .system-info-trigger:focus-visible,
-.overview-page.theme-light .system-info-trigger[aria-expanded="true"] {
-  color: var(--system-accent);
-  background: rgba(6, 182, 212, 0.1);
-  border-color: rgba(6, 182, 212, 0.34);
-  box-shadow: 0 12px 24px rgba(6, 182, 212, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.system-card__top,
-.env-status-list {
+.system-card__identity {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 12px;
 }
 
-.system-card__top {
-  display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
-  gap: 18px;
-  align-items: center;
+.system-identity__main {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
-.progress-ring {
-  position: relative;
-  width: 112px;
-  height: 112px;
-}
-
-.progress-ring svg {
-  width: 112px;
-  height: 112px;
-  transform: rotate(-90deg);
-}
-
-.ring-track,
-.ring-value {
-  fill: none;
-  stroke-width: 10;
-}
-
-.ring-track {
-  stroke: var(--ring-track);
-}
-
-.ring-value {
-  stroke: var(--system-accent);
-  stroke-dasharray: 263.89;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.6s ease;
-  filter: drop-shadow(0 0 14px var(--system-glow));
-}
-
-.progress-center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
+.system-identity__head {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
-  transform: translate(-50%, -50%);
+  gap: 10px;
 }
 
-.progress-ring strong {
+.system-identity__head h3 {
+  margin: 0;
+  overflow: hidden;
   color: var(--text-main);
-  font-family: Consolas, Monaco, monospace;
-  font-size: 40px;
+  font-size: 28px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.progress-ring span {
-  color: var(--system-accent);
-  font-family: Consolas, Monaco, monospace;
-  margin-left: 2px;
-  font-size: 14px;
-  line-height: 1;
-  opacity: 0.82;
-}
-
-.system-card__summary {
-  min-width: 0;
+.system-card__identity p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
 .system-status {
   display: inline-flex;
-  padding: 4px 9px;
+  align-items: center;
+  padding: 2px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
   line-height: 1;
+  flex: 0 0 auto;
 }
 
 .system-status.is-running {
@@ -1333,153 +1228,226 @@ export default {
   background: rgba(255, 184, 77, 0.1);
 }
 
-.system-card h3 {
-  overflow: hidden;
-  margin: 13px 0 8px;
-  color: var(--text-main);
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* ---- 系统指标胶囊 ---- */
+
+.system-identity__metrics {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 0 0 auto;
 }
 
-.system-card p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-.env-status-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.env-status-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(42px, 0.8fr) minmax(32px, 1fr) 30px;
+.system-metric {
+  display: inline-flex;
   align-items: center;
   gap: 5px;
-  min-height: 28px;
-  padding: 4px 5px;
-  overflow: hidden;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
   background: var(--muted-surface);
   border: 1px solid var(--panel-border);
-  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
-.env-status-row::before,
-.env-status-row::after {
+.system-metric__label {
+  color: var(--text-soft);
+}
+
+.system-metric__value {
+  font-weight: 650;
+  font-family: Consolas, Monaco, monospace;
+  color: var(--text-main);
+}
+
+.system-metric.is-warning {
+  border-color: rgba(255, 184, 77, 0.3);
+  background: rgba(255, 184, 77, 0.08);
+}
+
+.system-metric.is-warning .system-metric__value {
+  color: var(--waiting);
+}
+
+.system-metric.is-error {
+  border-color: rgba(255, 91, 121, 0.3);
+  background: rgba(255, 91, 121, 0.08);
+}
+
+.system-metric.is-error .system-metric__value {
+  color: var(--failed);
+}
+
+/* ---- 环境方块网格 ---- */
+
+.env-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(82px, 96px));
+  gap: 12px;
+}
+
+.env-block {
+  --env-tone: var(--accent);
+  --hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+  --hover-bg: linear-gradient(145deg, var(--system-accent-soft), transparent 55%);
+  --hover-border: rgba(255, 255, 255, 0.07);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 14px 10px 10px;
+  background: var(--muted-surface);
+  border: 1px solid var(--panel-border);
+  border-top: 2px solid transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(.2,.8,.2,1),
+              box-shadow 0.22s cubic-bezier(.2,.8,.2,1),
+              border-color 0.22s cubic-bezier(.2,.8,.2,1);
+}
+
+.env-block.is-active {
+  --env-tone: var(--success);
+  border-top-color: var(--success);
+}
+
+.env-block.is-done {
+  --env-tone: var(--accent);
+  border-top-color: var(--accent);
+}
+
+.env-block.is-idle {
+  --env-tone: var(--waiting);
+  border-top-color: var(--waiting);
+}
+
+.env-block::before,
+.env-block::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   opacity: 0;
+  border-radius: inherit;
+  z-index: 0;
 }
 
-.env-status-row::before {
+.env-block::before {
   background:
     linear-gradient(90deg, transparent, var(--system-accent-soft), transparent),
     radial-gradient(circle at 18% 50%, var(--system-accent-soft), transparent 34%);
 }
 
-.env-status-row::after {
+.env-block::after {
   width: 42%;
-  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.18) 30%, var(--system-accent) 50%, rgba(255, 255, 255, 0.18) 68%, transparent 100%);
-  filter: blur(10px);
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.12) 30%, var(--system-accent) 50%, rgba(255, 255, 255, 0.12) 68%, transparent 100%);
+  filter: blur(8px);
   mix-blend-mode: screen;
   transform: translateX(-145%);
 }
 
-.env-status-row.is-sweeping::before {
-  opacity: 0.34;
+.env-block.is-sweeping::before {
+  opacity: 0.32;
 }
 
-.env-status-row:hover {
-  background: rgba(34, 211, 238, 0.075);
-  border-color: rgba(34, 211, 238, 0.18);
+.env-block:hover,
+.env-block:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--hover-border);
+  border-top-color: var(--env-tone);
+  box-shadow: var(--hover-shadow);
+  background: var(--hover-bg), var(--muted-surface);
 }
 
-.env-status-row__main {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.env-block:focus-visible {
+  outline: none;
 }
 
-.env-dot {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 auto;
+.env-block.is-sweeping:hover::before {
+  opacity: 0.5;
+}
+
+.env-block__dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--waiting);
-  box-shadow: 0 0 12px rgba(255, 184, 77, 0.78);
+  box-shadow: 0 0 6px rgba(255, 184, 77, 0.78);
+  z-index: 1;
 }
 
-.env-status-row.is-running .env-dot {
+.env-block.is-active .env-block__dot {
   background: var(--success);
-  box-shadow: 0 0 14px rgba(0, 245, 160, 0.88);
+  box-shadow: 0 0 8px rgba(0, 245, 160, 0.88);
 }
 
-.env-status-row.is-complete .env-dot {
+.env-block.is-done .env-block__dot {
   background: var(--accent);
-  box-shadow: 0 0 14px rgba(34, 211, 238, 0.86);
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.86);
 }
 
-.env-name {
-  min-width: 0;
+.env-block__name {
+  position: relative;
+  z-index: 1;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
   overflow: hidden;
-  color: var(--text-muted);
-  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.env-progress {
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-  min-width: 32px;
-  height: 4px;
-  background: rgba(167, 185, 204, 0.18);
-  border-radius: 999px;
-}
-
-.env-progress i {
-  position: absolute;
-  inset: 0 auto 0 0;
   max-width: 100%;
-  background: linear-gradient(90deg, var(--system-accent), rgba(255, 255, 255, 0.78));
-  border-radius: inherit;
-  box-shadow: 0 0 12px var(--system-glow);
-  transition: width 0.45s ease;
 }
 
-.env-status-row.is-sweeping .env-progress::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 34%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.82), transparent);
-  border-radius: inherit;
-  transform: translateX(-120%);
-}
-
-.env-status-row strong {
+.env-block__percent {
   position: relative;
   z-index: 1;
-  display: block;
-  min-width: 30px;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
   color: var(--text-main);
   font-family: Consolas, Monaco, monospace;
-  font-size: 11px;
-  text-align: right;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.env-block__status {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  border-radius: 999px;
+  background: rgba(167, 185, 204, 0.08);
+}
+
+.env-block.is-active .env-block__status {
+  color: var(--success);
+  background: rgba(0, 245, 160, 0.08);
+}
+
+.env-block.is-done .env-block__status {
+  color: var(--accent);
+  background: rgba(34, 211, 238, 0.08);
 }
 
 .message-panel {
@@ -1507,6 +1475,34 @@ export default {
   border-radius: 999px;
   font-size: 12px;
   font-style: normal;
+}
+
+.message-panel__close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0;
+  color: var(--text-soft);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.message-panel__close:hover {
+  color: var(--text-main);
+  background: var(--button-bg);
+  border-color: var(--button-border);
+}
+
+.message-panel__close .svg-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .message-panel__body {
@@ -1853,8 +1849,7 @@ export default {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .env-status-row.is-sweeping::after,
-  .env-status-row.is-sweeping .env-progress::after {
+  .env-block.is-sweeping::after {
     animation: envEnergySweep 4.2s cubic-bezier(0.45, 0, 0.2, 1) infinite;
   }
 
@@ -1885,8 +1880,7 @@ export default {
     transition-duration: 0.01ms !important;
   }
 
-  .env-status-row.is-sweeping::after,
-  .env-status-row.is-sweeping .env-progress::after {
+  .env-block.is-sweeping::after {
     display: none;
   }
 }
@@ -2004,43 +1998,33 @@ export default {
   }
 
   .system-card {
-    height: auto;
-    min-height: 220px;
-    padding: 20px;
+    padding: 16px;
   }
 
-  .system-info-trigger {
-    top: 12px;
-    right: 12px;
+  .system-identity__head h3 {
+    font-size: 24px;
   }
 
-  .system-card__top {
-    grid-template-columns: 112px minmax(0, 1fr);
+  .env-grid {
+    grid-template-columns: repeat(auto-fit, minmax(72px, 92px));
+    gap: 8px;
   }
 
-  .progress-ring,
-  .progress-ring svg {
-    width: 112px;
-    height: 112px;
+  .env-block {
+    padding: 10px 6px 8px;
   }
 
-  .progress-ring strong {
-    font-size: 40px;
+  .env-block__name {
+    font-size: 11px;
   }
 
-  .progress-ring span {
+  .env-block__percent {
     font-size: 16px;
   }
 
-  .env-status-row {
-    grid-template-columns: minmax(52px, 0.72fr) minmax(48px, 1fr) 36px;
-    min-height: 34px;
-    padding: 6px 8px;
-  }
-
-  .env-status-list {
-    margin-top: 10px;
-    gap: 8px;
+  .env-block__status {
+    font-size: 9px;
+    padding: 1px 5px;
   }
 }
 
@@ -2049,12 +2033,17 @@ export default {
     flex-basis: 100%;
   }
 
-  .system-card__top {
-    grid-template-columns: 1fr;
+  .system-card__identity {
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .env-status-list {
-    grid-template-columns: 1fr;
+  .system-identity__metrics {
+    align-self: flex-start;
+  }
+
+  .env-grid {
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   }
 
   .message-panel__body {
