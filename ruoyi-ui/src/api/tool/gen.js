@@ -83,3 +83,30 @@ export function synchDb(tableName) {
     method: 'get'
   })
 }
+
+let res = {
+"code": 0,
+"data": {
+"affFunctionAsyncFunc": "",
+"affFunctionCallGaptime": 0,
+"affFunctionCallType": "0",
+"affFunctionDesc": "【开发:范鼎威】dns切换的结果查询函数(处置台执行流量切换后，切换结果的查询)",
+"affFunctionDoubleExecute": "N",
+"affFunctionHeaders": '{"Content-Type":"application/json"}',
+"affFunctionId": 89,
+"affFunctionMaxNum": 10,
+"affFunctionMethod": "POST",
+"affFunctionName": "func_dns_switch_verify",
+"affFunctionParams": '{"func_type":"func_oos_query","record_id":""}',
+"affFunctionType": "execFunc",
+"affFunctionUrl": "http://10.2.64.36:8121/api/func/verify",
+"afIsEnabled": "1",
+"afManualConfirm": "N",
+"afResConfirm": "N",
+"afSpecialMark": "{}",
+"createBy": "admin",
+"updateBy": "admin",
+"affFunctionChName": "123"
+},
+"msg": "成功"
+}

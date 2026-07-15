@@ -14,3 +14,17 @@ export function getOverviewMessages(params) {
     params
   })
 }
+
+export function getCicdImplementList() {
+  return request({
+    url: '/tool/overview/cicdImplement',
+    method: 'get'
+  })
+}
+
+export function getMaintenanceNoticeList() {
+  return request({
+    url: '/tool/overview/maintenanceNotice',
+    method: 'get'
+  })
+}

@@ -4,13 +4,19 @@
       <main class="overview-layout" :class="{ 'is-message-collapsed': messageCollapsed }">
         <section class="execution-panel panel-surface">
           <div class="panel-head">
-            <div class="panel-title">
-              <span class="panel-title__icon">
-                <svg-icon icon-class="monitor" />
-              </span>
-              <div>
-                <h2>系统执行态势</h2>
-                <span>{{ overviewStats.runningEnvs }} 个环境执行中</span>
+            <div class="panel-head__left">
+              <div class="panel-title">
+                <span class="panel-title__icon">
+                  <svg-icon icon-class="monitor" />
+                </span>
+                <div>
+                  <h2>系统执行态势</h2>
+                  <span>{{ overviewStats.runningEnvs }} 个变更计划执行中</span>
+                </div>
+              </div>
+              <div class="panel-live">
+                <i />
+                <span class="panel-live__time">{{ fullDateTime }}</span>
               </div>
             </div>
             <div class="execution-toolbar">
@@ -37,16 +43,15 @@
                 :key="action.key"
                 class="quick-action"
                 type="button"
+                :disabled="action.disabled"
+                @click="handleQuickAction(action)"
               >
                 <span class="tech-icon">
                   <svg-icon :icon-class="action.icon" />
                 </span>
                 {{ action.label }}
+                <span v-if="action.key === 'notice' && maintenanceNoticeTotal" class="quick-action__badge">{{ maintenanceNoticeTotal }}</span>
               </button>
-              <div class="panel-live">
-                <i />
-                <span class="panel-live__time">{{ fullDateTime }}</span>
-              </div>
             </div>
           </div>
 
@@ -60,7 +65,7 @@
             </div>
             <div v-else-if="!visibleSystems.length" class="state-panel">
               <strong>暂无执行中的系统</strong>
-              <span>当前没有可展示的环境进度。</span>
+              <span>当前没有可展示的变更计划进度。</span>
             </div>
             <div v-else class="system-grid">
               <article
@@ -78,16 +83,16 @@
                         {{ systemStatusText(system) }}
                       </span>
                     </div>
-                    <p>{{ system.envs.length }} 个环境，{{ systemActiveText(system) }}</p>
+                    <p>{{ system.envs.length }} 个变更计划，{{ systemActiveText(system) }}</p>
                   </div>
                   <div class="system-identity__metrics">
-                    <span class="system-metric" :class="systemAlertClass(system)">
+                    <span class="system-metric is-placeholder">
                       <span class="system-metric__label">告警</span>
-                      <span class="system-metric__value">{{ systemAlertCount(system) }}</span>
+                      <span class="system-metric__value">-</span>
                     </span>
-                    <span class="system-metric" :class="systemInspectionClass(system)">
+                    <span class="system-metric is-placeholder">
                       <span class="system-metric__label">巡检</span>
-                      <span class="system-metric__value">{{ systemInspectionStatus(system) }}</span>
+                      <span class="system-metric__value">-</span>
                     </span>
                   </div>
                 </div>
@@ -97,13 +102,14 @@
                     v-for="env in system.envs"
                     :key="system.name + '-' + env.key"
                     class="env-block"
-                    :class="[envBlockClass(env), { 'is-sweeping': env.percent < 100 }]"
+                    :class="[envBlockClass(env), envVisualClass(env)]"
                     tabindex="0"
+                    @click="jump2Execute(env)"
                   >
                     <span class="env-block__dot" />
                     <span class="env-block__name">{{ env.label }}</span>
                     <strong class="env-block__percent">{{ env.percent }}%</strong>
-                    <span class="env-block__status">{{ envActiveText(env) }}</span>
+                    <span class="env-block__status" :class="envActiveClass(env)">{{ envActiveText(env) }}</span>
                   </div>
                 </div>
               </article>
@@ -202,26 +208,234 @@
           消息
         </button>
       </main>
+
+      <el-dialog
+        :visible.sync="cicdDialogVisible"
+        title="CICD实施情况"
+        width="1100px"
+        top="6vh"
+        :close-on-click-modal="false"
+        append-to-body
+        :class="['cicd-dialog', 'cicd-dialog--' + resolvedTheme]"
+      >
+        <div class="cicd-toolbar">
+          <span v-if="cicdList.length" class="cicd-toolbar__count">共 {{ cicdList.length }} 条工单</span>
+          <button class="quick-action" type="button" @click="fetchCicdList">
+            刷新数据
+          </button>
+        </div>
+
+        <el-table
+          v-loading="cicdLoading"
+          :data="cicdList"
+          empty-text="暂无 CICD 实施工单"
+          row-key="order_id"
+          border
+          max-height="520"
+          class="cicd-table"
+        >
+          <el-table-column prop="order_id" label="工单号" min-width="160" />
+
+          <el-table-column
+            label="工单状态"
+            width="115"
+            column-key="order_status"
+            :filters="getCicdStatusFilters()"
+            :filter-method="filterCicdStatus"
+          >
+            <template slot-scope="{ row }">
+              <span class="cicd-status-tag" :class="cicdStatusClass(row.order_status)">
+                {{ row.order_status || '-' }}
+              </span>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="auto_total_atom" label="自动实施原子总数" width="150" align="center">
+            <template slot-scope="{ row }">
+              <el-popover placement="top" width="800" trigger="click" :popper-class="'cicd-atom-popover cicd-atom-popover--' + resolvedTheme">
+                <el-table :data="getAtomDetails(row, 'auto_atom_detail')" size="mini" border max-height="320" empty-text="暂无数据">
+                  <el-table-column prop="idc" label="机房" width="100" />
+                  <el-table-column prop="module" label="发布类型" min-width="140" show-overflow-tooltip />
+                  <el-table-column prop="key" label="关键词" min-width="200" show-overflow-tooltip />
+                  <el-table-column prop="systemDeployStatus" label="发布状态" width="120" />
+                </el-table>
+                <span slot="reference" class="cicd-link-num">{{ row.auto_total_atom }}</span>
+              </el-popover>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="auto_finish_atom" label="自动实施完成数" width="140" align="center" />
+
+          <el-table-column prop="total_atom" label="原子数量" width="110" align="center">
+            <template slot-scope="{ row }">
+              <el-popover placement="top" width="800" trigger="click" :popper-class="'cicd-atom-popover cicd-atom-popover--' + resolvedTheme">
+                <el-table :data="getAtomDetails(row, 'atom_detail')" size="mini" border max-height="320" empty-text="暂无数据">
+                  <el-table-column prop="idc" label="机房" width="100" />
+                  <el-table-column prop="module" label="发布类型" min-width="140" show-overflow-tooltip />
+                  <el-table-column prop="key" label="关键词" min-width="200" show-overflow-tooltip />
+                  <el-table-column prop="systemDeployStatus" label="发布状态" width="120" />
+                </el-table>
+                <span slot="reference" class="cicd-link-num">{{ row.total_atom }}</span>
+              </el-popover>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="success_atom" label="已发布原子" width="110" align="center" />
+
+          <el-table-column prop="executeUserName" label="当前实施人" width="130" />
+
+          <el-table-column label="操作" align="center" width="80">
+            <template slot-scope="scope">
+              <el-button
+                circle
+                type="primary"
+                size="mini"
+                plain
+                icon="el-icon-s-promotion"
+                title="去执行"
+                @click="toExecute(scope.row.order_id)"
+              ></el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div slot="footer" class="cicd-dialog__footer">
+          <el-button @click="cicdDialogVisible = false">关闭</el-button>
+        </div>
+      </el-dialog>
+
+      <el-dialog
+        :visible.sync="maintenanceNoticeVisible"
+        title="维护公告"
+        width="820px"
+        top="6vh"
+        :close-on-click-modal="false"
+        append-to-body
+        :class="['maintenance-notice-dialog', 'maintenance-notice-dialog--' + resolvedTheme]"
+      >
+        <div class="maintenance-notice__header">
+          <div class="maintenance-notice__header-info">
+            <span class="maintenance-notice__count">共 {{ maintenanceNoticeTotal }} 条公告</span>
+          </div>
+          <button class="quick-action" type="button" style="color:#409eff" @click="getMaintenanceNoticeList()">
+            刷新数据
+          </button>
+        </div>
+
+        <div class="maintenance-notice__body" v-loading="maintenanceNoticeLoading && maintenanceNoticeList.length > 0">
+          <div v-if="maintenanceNoticeLoading && !maintenanceNoticeList.length" class="maintenance-notice__loading">
+            <div v-for="i in 4" :key="i" class="maintenance-notice-skeleton" />
+          </div>
+          <div v-else-if="!maintenanceNoticeList.length" class="state-panel">
+            <strong>暂无维护公告</strong>
+            <span>当前没有维护公告记录。</span>
+          </div>
+          <div v-else class="maintenance-notice__list">
+            <div
+              v-for="row in maintenanceNoticeList"
+              :key="row.informId"
+              class="maintenance-notice-card"
+              :class="{ 'is-expanded': isNoticeExpanded(row) }"
+            >
+              <div class="notice-card__main" @click="toggleNotice(row)">
+                <div class="notice-card__left">
+                  <span class="notice-status-tag" :class="reviewStatusClass(row.reviewStatus)">
+                    {{ reviewStatusText(row.reviewStatus) }}
+                  </span>
+                </div>
+                <div class="notice-card__center">
+                  <h4 class="notice-card__title">{{ row.informTitle }}</h4>
+                  <p class="notice-card__content">{{ row.informContent || row.areaContent || '暂无内容' }}</p>
+                  <div class="notice-card__meta">
+                    <span class="notice-card__time">
+                      {{ formatNoticeTime(row.startTime) }} ~ {{ formatNoticeTime(row.endTime) }}
+                    </span>
+                    <span class="notice-card__contact">维护联系人：{{ row.contactBy }}</span>
+                  </div>
+                </div>
+                <div class="notice-card__right">
+                  <el-button
+                    type="primary"
+                    size="mini"
+                    plain
+                    @click.stop="handleViewNotice(row)"
+                  >查看</el-button>
+                  <i
+                    class="el-icon-arrow-down notice-card__expand-icon"
+                    :class="{ 'is-rotated': isNoticeExpanded(row) }"
+                  />
+                </div>
+              </div>
+
+              <transition name="notice-expand">
+                <div v-if="isNoticeExpanded(row)" class="notice-card__detail">
+                  <div class="notice-detail-grid">
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">影响范围</span>
+                      <span class="notice-detail__value">{{ row.areaContent || '-' }}</span>
+                    </div>
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">通知内容</span>
+                      <span class="notice-detail__value">{{ row.informContent || '-' }}</span>
+                    </div>
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">通知来源</span>
+                      <span class="notice-detail__value">{{ row.informContent || '-' }}</span>
+                    </div>
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">维护联系人</span>
+                      <span class="notice-detail__value">{{ row.contactBy }}</span>
+                    </div>
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">值班信息</span>
+                      <span class="notice-detail__value">{{ row.informDuty }}</span>
+                    </div>
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">审核人</span>
+                      <span class="notice-detail__value">{{ row.reviewer }}</span>
+                    </div>
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">审核意见</span>
+                      <span class="notice-detail__value">{{ row.reviewComment || '无' }}</span>
+                    </div>
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">创建时间</span>
+                      <span class="notice-detail__value">{{ row.createTime || '-' }}</span>
+                    </div>
+                    <div class="notice-detail-item">
+                      <span class="notice-detail__label">更新时间</span>
+                      <span class="notice-detail__value">{{ row.updateTime || '-' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </transition>
+            </div>
+          </div>
+        </div>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
-import { getOverviewExecutions, getOverviewMessages } from '@/api/tool/overview'
+import { getOverviewExecutions, getOverviewMessages, getCicdImplementList, getMaintenanceNoticeList } from '@/api/tool/overview'
 
 const ENV_CONFIG = [
   { key: 'prod', label: '生产' },
   { key: 'sandbox', label: '沙箱' },
-  { key: 'failover', label: '合肥' },
+  { key: 'failover', label: '灾备' },
   { key: 'ITSM', label: 'ITSM' }
 ]
 
+// 统一卡片背景色系：四张系统卡片采用一致的青绿色 glass 背景，
+// 保留浅色青绿氛围和柔和阴影，避免 ACT/DASP/PAY/BILLING 出现不同底色。
+// 卡片内状态色（执行中/告警/异常等）仍由 --success / --waiting / --failed 控制，不受影响。
 const SYSTEM_PALETTE = [
-  { color: '#22D3EE', lightColor: '#06B6D4', soft: 'rgba(34, 211, 238, 0.16)', lightSoft: 'rgba(6, 182, 212, 0.12)' },
-  { color: '#00F5A0', lightColor: '#10B981', soft: 'rgba(0, 245, 160, 0.14)', lightSoft: 'rgba(16, 185, 129, 0.12)' },
-  { color: '#8B5CF6', lightColor: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.15)', lightSoft: 'rgba(139, 92, 246, 0.12)' },
-  { color: '#FFB84D', lightColor: '#F59E0B', soft: 'rgba(255, 184, 77, 0.14)', lightSoft: 'rgba(245, 158, 11, 0.14)' },
-  { color: '#FF5B79', lightColor: '#F43F5E', soft: 'rgba(255, 91, 121, 0.14)', lightSoft: 'rgba(244, 63, 94, 0.12)' }
+  { color: '#22D3EE', lightColor: '#06B6D4', soft: 'rgba(34, 211, 238, 0.12)', lightSoft: 'rgba(6, 182, 212, 0.08)' },
+  { color: '#22D3EE', lightColor: '#06B6D4', soft: 'rgba(34, 211, 238, 0.12)', lightSoft: 'rgba(6, 182, 212, 0.08)' },
+  { color: '#22D3EE', lightColor: '#06B6D4', soft: 'rgba(34, 211, 238, 0.12)', lightSoft: 'rgba(6, 182, 212, 0.08)' },
+  { color: '#22D3EE', lightColor: '#06B6D4', soft: 'rgba(34, 211, 238, 0.12)', lightSoft: 'rgba(6, 182, 212, 0.08)' },
+  { color: '#22D3EE', lightColor: '#06B6D4', soft: 'rgba(34, 211, 238, 0.12)', lightSoft: 'rgba(6, 182, 212, 0.08)' }
 ]
 
 const THEME_STORAGE_KEY = 'overview-theme'
@@ -263,9 +477,24 @@ export default {
       messageRequestSeq: 0,
       now: Date.now(),
       clockTimer: null,
+      cicdDialogVisible: false,
+      cicdLoading: false,
+      cicdList: [],
+      cicdError: '',
+      maintenanceNoticeVisible: false,
+      maintenanceNoticeLoading: false,
+      maintenanceNoticeList: [],
+      maintenanceNoticeTotal: 0,
+      expandedNoticeId: null,
+      maintenanceNoticeReviewMap: {
+        '1': '已评审',
+        '0': '未评审',
+        '2': '评审拒绝'
+      },
+      url_pre: 'http://km.citiccard.com/pages/viewpage.action?pageId=',
       quickActions: [
         { key: 'cicd', label: 'CICD实施情况', icon: 'dashboard' },
-        { key: 'manual', label: '手动协同', icon: 'peoples' },
+        { key: 'manual', label: '手动协同', icon: 'peoples', disabled: true },
         { key: 'notice', label: '维护公告', icon: 'bell' },
         { key: 'timeline', label: '时序图', icon: 'chart' }
       ]
@@ -279,7 +508,7 @@ export default {
       return 'theme-' + this.resolvedTheme
     },
     visibleSystems() {
-      return Object.keys(this.executionMap).map(name => {
+      const list = Object.keys(this.executionMap).map(name => {
         const source = this.executionMap[name] || {}
         const envs = ENV_CONFIG.map(config => this.normalizeEnv(config, source[config.key])).filter(Boolean)
         const total = envs.reduce((sum, env) => sum + env.total, 0)
@@ -297,6 +526,17 @@ export default {
         const orderB = CORE_SYSTEM_ORDER.includes(b.name) ? CORE_SYSTEM_ORDER.indexOf(b.name) : CORE_SYSTEM_ORDER.length
         return orderA === orderB ? a.name.localeCompare(b.name) : orderA - orderB
       })
+      // 已完成沉底：非已完成保持原顺序在前，已完成排到末尾
+      const incomplete = []
+      const complete = []
+      list.forEach(s => {
+        if (!s.hasRunning && s.percent >= 100) {
+          complete.push(s)
+        } else {
+          incomplete.push(s)
+        }
+      })
+      return incomplete.concat(complete)
     },
     overviewStats() {
       const systems = this.visibleSystems
@@ -322,6 +562,7 @@ export default {
     this.initTheme()
     this.fetchExecutions()
     this.fetchMessages({ appendNew: false })
+    this.getMaintenanceNoticeList({ silent: true })
     this.executionTimer = window.setInterval(this.fetchExecutions, 12000)
     this.messageTimer = window.setInterval(() => this.fetchMessages({ appendNew: true }), 5000)
     this.clockTimer = window.setInterval(() => {
@@ -487,7 +728,12 @@ export default {
         finished,
         planId: env.planId,
         percent,
-        running: finished < total
+        running: finished < total,
+        activateOpr: env.activateOpr || '',
+        auditOpr: env.auditOpr || '',
+        checkOpr: env.checkOpr || '',
+        collectOpr: env.collectOpr || '',
+        nodeIds: env.nodeIds
       }
     },
     normalizeInspection(source) {
@@ -628,16 +874,44 @@ export default {
       }
       return env.percent >= 100 ? 'is-complete' : 'is-waiting'
     },
-    // 环境方块样式类
+    // 变更计划方块样式类
     envBlockClass(env) {
       if (env.running) {
         return 'is-active'
       }
       return env.percent >= 100 ? 'is-done' : 'is-idle'
     },
-    // 环境激活文案（后续可对接后端字段 env.activeStatus）
+    // 变更计划激活文案（使用接口返回的 activateOpr 字段，不再写死）
     envActiveText(env) {
-      return env.running || env.percent >= 100 ? '已激活' : '未激活'
+      return env.activateOpr || (env.running || env.percent >= 100 ? '已激活' : '未激活')
+    },
+    // 变更计划激活状态动态样式类
+    envActiveClass(env) {
+      const text = this.envActiveText(env)
+      if (text === '已激活') return 'is-activated'
+      if (text === '待激活') return 'is-pending'
+      return 'is-inactive'
+    },
+    // 是否已激活
+    isEnvActivated(env) {
+      return env && env.activateOpr === '已激活'
+    },
+    // 是否有异常节点
+    hasEnvNodeIds(env) {
+      const nodeIds = env && env.nodeIds
+      if (Array.isArray(nodeIds)) return nodeIds.length > 0
+      if (typeof nodeIds === 'string') return nodeIds.trim() !== ''
+      return !!nodeIds
+    },
+    // 变更计划方框视觉状态 class
+    envVisualClass(env) {
+      if (this.isEnvActivated(env) && this.hasEnvNodeIds(env)) {
+        return 'is-env-error'
+      }
+      if (this.isEnvActivated(env) && !this.hasEnvNodeIds(env)) {
+        return 'is-env-running'
+      }
+      return 'is-env-static'
     },
     // 告警数量（占位：从巡检数据 alert 字段派生）
     systemAlertCount(system) {
@@ -740,6 +1014,219 @@ export default {
       const g = (bigint >> 8) & 255
       const b = bigint & 255
       return `rgba(${r}, ${g}, ${b}, ${alpha})`
+    },
+
+    // ---- CICD 实施情况 ----
+
+    handleQuickAction(action) {
+      if (action.key === 'cicd') {
+        this.handleOpenCicdDialog()
+      } else if (action.key === 'notice') {
+        this.openMaintenanceNotice()
+      }
+    },
+
+    handleOpenCicdDialog() {
+      this.cicdDialogVisible = true
+      if (!this.cicdList.length) {
+        this.fetchCicdList({ silent: true })
+      }
+    },
+
+    fetchCicdList(options = {}) {
+      this.cicdLoading = true
+      this.cicdError = ''
+      return getCicdImplementList().then(res => {
+        this.cicdList = this.normalizeCicdRows(res.data || [])
+        if (!options.silent) {
+          this.$message && this.$message.success('刷新成功')
+        }
+      }).catch(() => {
+        this.cicdError = 'CICD 实施情况加载失败，请稍后重试'
+        this.$message && this.$message.error('CICD 实施情况加载失败')
+      }).finally(() => {
+        this.cicdLoading = false
+      })
+    },
+
+    normalizeCicdRows(rows) {
+      if (!Array.isArray(rows)) return []
+      return rows.map(row => ({
+        order_id: row.order_id || '-',
+        order_status: row.order_status || '-',
+        auto_total_atom: Number(row.auto_total_atom) || 0,
+        auto_finish_atom: Number(row.auto_finish_atom) || 0,
+        total_atom: Number(row.total_atom) || 0,
+        success_atom: Number(row.success_atom) || 0,
+        executeUserName: row.executeUserName || '-',
+        auto_atom_detail: Array.isArray(row.auto_atom_detail) ? row.auto_atom_detail : [],
+        atom_detail: Array.isArray(row.atom_detail) ? row.atom_detail : []
+      }))
+    },
+
+    getCicdStatusFilters() {
+      const STATUS_ORDER = [
+        '业务验证', '成功', '部分成功', '失败', '取消',
+        '待实施', '实施中', '预审', '草稿', '审批中',
+        '审批通过', '工单已确认', '审批不通过', '预审驳回'
+      ]
+      const orderMap = new Map(STATUS_ORDER.map((s, i) => [s, i]))
+      const statusSet = new Set()
+      this.cicdList.forEach(row => {
+        if (row.order_status) {
+          statusSet.add(row.order_status)
+        }
+      })
+      return Array.from(statusSet)
+        .sort((a, b) => {
+          const ai = orderMap.has(a) ? orderMap.get(a) : STATUS_ORDER.length
+          const bi = orderMap.has(b) ? orderMap.get(b) : STATUS_ORDER.length
+          return ai !== bi ? ai - bi : a.localeCompare(b)
+        })
+        .map(s => ({ text: s, value: s }))
+    },
+
+    filterCicdStatus(value, row) {
+      return row.order_status === value
+    },
+
+    getAtomDetails(row, field) {
+      const detail = row && row[field]
+      return Array.isArray(detail) ? detail : []
+    },
+
+    toExecute(id) {
+      setTimeout(() => {
+        if (id.includes('CHGU')) {
+          window.open('http://it/v2/changeOrder');
+        } else if (id.includes('CHG')) {
+          window.open(
+            'http://cicd.omp.eprod-kzx1.cncb/pom/#/maintainOrder/execute/' +
+              id
+          );
+        } else {
+          window.open(
+            'http://cicd.omp.eprod-kzx1.cncb/pom/#/deployOrder/execute/' +
+              id
+          );
+        }
+      });
+    },
+
+    jump2Execute(item) {
+      if (!item || !item.planId) {
+        this.$message && this.$message.warning('缺少变更计划ID')
+        return
+      }
+      const { href } = this.$router.resolve({
+        path: '/execute',
+        query: { aripExecPlanId: item.planId }
+      })
+      window.open(href, '_blank')
+    },
+
+    // ---- 维护公告 ----
+
+    openMaintenanceNotice() {
+      this.maintenanceNoticeVisible = true
+      this.getMaintenanceNoticeList({ silent: true })
+    },
+
+    getMaintenanceNoticeList(options = {}) {
+      this.maintenanceNoticeLoading = true
+      return getMaintenanceNoticeList().then(res => {
+        this.maintenanceNoticeList = this.normalizeMaintenanceRows(res.rows || [])
+        this.maintenanceNoticeTotal = res.total || this.maintenanceNoticeList.length
+        if (!options.silent) {
+          this.$message && this.$message.success('刷新成功')
+        }
+      }).catch(() => {
+        if (!options.silent) {
+          this.$message && this.$message.error('维护公告加载失败')
+        }
+      }).finally(() => {
+        this.maintenanceNoticeLoading = false
+      })
+    },
+
+    normalizeMaintenanceRows(rows) {
+      if (!Array.isArray(rows)) return []
+      return rows.map(row => ({
+        informId: row.informId,
+        informTitle: row.informTitle || '暂无标题',
+        areaContent: row.areaContent || '',
+        informContent: row.informContent || '',
+        contactBy: row.contactBy || '-',
+        informDuty: row.informDuty || '-',
+        informUrl: row.informUrl || '',
+        reviewStatus: String(row.reviewStatus || '0'),
+        reviewer: row.reviewer || '-',
+        reviewComment: row.reviewComment || '',
+        createBy: row.createBy || '-',
+        createTime: row.createTime || '',
+        updateTime: row.updateTime || '',
+        startTime: row.startTime || '',
+        endTime: row.endTime || ''
+      }))
+    },
+
+    jump2Km(url) {
+      if (!url) {
+        this.$message && this.$message.warning('暂无可查看链接')
+        return
+      }
+      window.open(this.url_pre + url, '_blank')
+    },
+
+    handleViewNotice(row) {
+      this.jump2Km(row.informUrl)
+    },
+
+    toggleNotice(row) {
+      this.expandedNoticeId = this.expandedNoticeId === row.informId ? null : row.informId
+    },
+
+    isNoticeExpanded(row) {
+      return this.expandedNoticeId === row.informId
+    },
+
+    reviewStatusText(status) {
+      return this.maintenanceNoticeReviewMap[status] || '未知'
+    },
+
+    reviewStatusClass(status) {
+      const map = {
+        '1': 'is-passed',
+        '0': 'is-unreviewed',
+        '2': 'is-rejected'
+      }
+      return map[status] || ''
+    },
+
+    formatNoticeTime(time) {
+      if (!time) return '-'
+      return String(time).slice(0, 16)
+    },
+
+    cicdStatusClass(status) {
+      const value = (status || '').trim()
+      const map = {
+        '业务验证': 'is-verify',
+        '成功': 'is-success',
+        '审批通过': 'is-success',
+        '工单已确认': 'is-success',
+        '部分成功': 'is-partial',
+        '失败': 'is-danger',
+        '审批不通过': 'is-danger',
+        '预审驳回': 'is-danger',
+        '取消': 'is-cancelled',
+        '待实施': 'is-pending',
+        '草稿': 'is-pending',
+        '实施中': 'is-running',
+        '预审': 'is-review',
+        '审批中': 'is-review'
+      }
+      return map[value] || 'is-unknown'
     }
   }
 }
@@ -773,6 +1260,8 @@ export default {
   --success: #00F5A0;
   --failed: #FF5B79;
   --waiting: #FFB84D;
+  --pending: #FACC15;
+  --pending-soft: rgba(250, 204, 21, 0.14);
   --radius: 18px;
   position: relative;
   height: calc(100vh - 84px);
@@ -830,6 +1319,8 @@ export default {
   --success: #10B981;
   --failed: #F43F5E;
   --waiting: #F59E0B;
+  --pending: #CA8A04;
+  --pending-soft: rgba(202, 138, 4, 0.12);
 }
 
 .overview-page.theme-dark {
@@ -851,25 +1342,43 @@ export default {
     0 8px 18px rgba(15, 23, 42, 0.06);
 }
 
-.overview-page.theme-light .env-block.is-sweeping::before {
+.overview-page.theme-light .env-block.is-env-running::before {
   opacity: 0.34;
 }
 
-.overview-page.theme-light .env-block::after {
+.overview-page.theme-light .env-block.is-env-running::after {
   width: 52%;
   background: linear-gradient(100deg, transparent 0%, rgba(6, 182, 212, 0.12) 22%, rgba(255, 255, 255, 0.68) 36%, var(--system-accent) 52%, rgba(6, 182, 212, 0.22) 68%, transparent 100%);
   filter: blur(6px) saturate(1.7);
   mix-blend-mode: normal;
 }
 
-.overview-page.theme-light .env-block.is-sweeping {
+.overview-page.theme-light .env-block.is-env-running {
   box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.16), 0 0 16px rgba(6, 182, 212, 0.12);
+}
+
+.overview-page.theme-light .env-block.is-env-error {
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.1), var(--muted-surface));
+  border-color: rgba(239, 68, 68, 0.2);
+  border-top-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.08), inset 0 0 12px rgba(239, 68, 68, 0.04);
+}
+
+.overview-page.theme-light .env-block.is-env-error::after {
+  width: 52%;
+  background: linear-gradient(100deg, transparent 0%, rgba(239, 68, 68, 0.15) 22%, rgba(248, 113, 113, 0.5) 36%, rgba(239, 68, 68, 0.35) 52%, rgba(239, 68, 68, 0.15) 68%, transparent 100%);
+  filter: blur(6px) saturate(1.7);
+  mix-blend-mode: normal;
 }
 
 .overview-page.theme-light .env-block {
   --hover-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
   --hover-bg: linear-gradient(145deg, var(--system-accent-soft), transparent 50%);
   --hover-border: rgba(15, 23, 42, 0.07);
+
+  &.is-done {
+    background: rgba(16, 185, 129, 0.08);
+  }
 }
 
 .overview-page.theme-light .system-card:hover {
@@ -976,6 +1485,13 @@ export default {
   background: var(--head-bg);
 }
 
+.panel-head__left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
 .panel-head h2 {
   margin: 0;
   color: var(--text-main);
@@ -1068,6 +1584,29 @@ export default {
   box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
 }
 
+.quick-action__badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--accent);
+  border-radius: 999px;
+  margin-left: 2px;
+}
+
+.quick-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .panel-live {
   display: inline-flex;
   align-items: center;
@@ -1131,8 +1670,9 @@ export default {
 .system-grid,
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(360px, 400px));
   gap: 14px;
+  justify-content: start;
 }
 
 .system-card {
@@ -1142,6 +1682,9 @@ export default {
   border-radius: 20px;
   background: var(--system-card-bg);
   transition: all 0.3s ease;
+  width: 100%;
+  max-width: 400px;
+  min-width: 0;
 }
 
 .system-card::before {
@@ -1281,14 +1824,19 @@ export default {
   color: var(--failed);
 }
 
-/* ---- 环境方块网格 ---- */
+.system-metric.is-placeholder {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ---- 变更计划方块网格 ---- */
 
 .env-grid {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(82px, 96px));
-  gap: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 
 .env-block {
@@ -1323,6 +1871,7 @@ export default {
 .env-block.is-done {
   --env-tone: var(--accent);
   border-top-color: var(--accent);
+  background: rgba(0, 245, 160, 0.06);
 }
 
 .env-block.is-idle {
@@ -1355,8 +1904,68 @@ export default {
   transform: translateX(-145%);
 }
 
-.env-block.is-sweeping::before {
+/* ---- 变更计划方框视觉状态 ---- */
+
+/* 执行中：正常光影流光 */
+.env-block.is-env-running::before {
   opacity: 0.32;
+}
+
+.env-block.is-env-running::after {
+  animation: envEnergySweep 4.2s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+.env-block.is-env-running:hover::before {
+  opacity: 0.5;
+}
+
+/* 异常：红色底色 + 红色光影流光 */
+.env-block.is-env-error {
+  --env-error-bg: rgba(248, 113, 113, 0.1);
+  --env-error-border: rgba(248, 113, 113, 0.35);
+  --env-error-glow: rgba(248, 113, 113, 0.2);
+  background: linear-gradient(145deg, rgba(248, 113, 113, 0.12), var(--muted-surface));
+  border-color: rgba(248, 113, 113, 0.25);
+  border-top-color: rgba(248, 113, 113, 0.55);
+  box-shadow: 0 0 18px rgba(248, 113, 113, 0.1), inset 0 0 16px rgba(248, 113, 113, 0.06);
+}
+
+.env-block.is-env-error::before {
+  opacity: 0.38;
+  background:
+    linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.14), transparent),
+    radial-gradient(circle at 18% 50%, rgba(248, 113, 113, 0.08), transparent 34%);
+}
+
+.env-block.is-env-error::after {
+  width: 42%;
+  background: linear-gradient(100deg, transparent 0%, rgba(248, 113, 113, 0.18) 30%, rgba(239, 68, 68, 0.45) 50%, rgba(248, 113, 113, 0.18) 68%, transparent 100%);
+  filter: blur(8px);
+  mix-blend-mode: screen;
+  animation: envErrorSweep 4.2s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+.env-block.is-env-error:hover::before {
+  opacity: 0.55;
+}
+
+.env-block.is-env-error:hover {
+  border-color: rgba(248, 113, 113, 0.45);
+  box-shadow: 0 0 28px rgba(248, 113, 113, 0.18), inset 0 0 20px rgba(248, 113, 113, 0.1);
+}
+
+/* 静态：无任何光影流光 */
+.env-block.is-env-static::before,
+.env-block.is-env-static::after {
+  opacity: 0;
+  animation: none;
+}
+
+/* 100% 完成态：绿色背景，无光影流光 */
+.env-block.is-done::before,
+.env-block.is-done::after {
+  opacity: 0 !important;
+  animation: none !important;
 }
 
 .env-block:hover,
@@ -1370,10 +1979,6 @@ export default {
 
 .env-block:focus-visible {
   outline: none;
-}
-
-.env-block.is-sweeping:hover::before {
-  opacity: 0.5;
 }
 
 .env-block__dot {
@@ -1396,6 +2001,11 @@ export default {
 .env-block.is-done .env-block__dot {
   background: var(--accent);
   box-shadow: 0 0 8px rgba(34, 211, 238, 0.86);
+}
+
+.env-block.is-env-error .env-block__dot {
+  background: var(--failed);
+  box-shadow: 0 0 8px rgba(255, 91, 121, 0.88);
 }
 
 .env-block__name {
@@ -1448,6 +2058,25 @@ export default {
 .env-block.is-done .env-block__status {
   color: var(--accent);
   background: rgba(34, 211, 238, 0.08);
+}
+
+/* 激活状态差异化样式 —— 提高优先级覆盖 .env-block.is-active/.is-done 的默认色 */
+.env-block .env-block__status.is-activated {
+  color: var(--success);
+  background: rgba(0, 245, 160, 0.12);
+  font-weight: 600;
+}
+
+.env-block .env-block__status.is-pending {
+  color: var(--pending);
+  background: var(--pending-soft);
+  font-weight: 600;
+}
+
+.env-block .env-block__status.is-inactive {
+  color: var(--failed);
+  background: rgba(255, 91, 121, 0.1);
+  font-weight: 500;
 }
 
 .message-panel {
@@ -1849,10 +2478,6 @@ export default {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .env-block.is-sweeping::after {
-    animation: envEnergySweep 4.2s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-  }
-
   .timeline-item.is-new .timeline-marker span {
     animation: latestMessagePulse 2.4s ease-out infinite;
   }
@@ -1880,11 +2505,13 @@ export default {
     transition-duration: 0.01ms !important;
   }
 
-  .env-block.is-sweeping::after {
+  .env-block.is-env-running::after,
+  .env-block.is-env-error::after {
     display: none;
   }
 }
 
+/* 正常绿色流光 */
 @keyframes envEnergySweep {
   0% {
     opacity: 0;
@@ -1895,6 +2522,26 @@ export default {
   }
   44% {
     opacity: 0.42;
+    transform: translateX(270%);
+  }
+  58%,
+  100% {
+    opacity: 0;
+    transform: translateX(270%);
+  }
+}
+
+/* 红色异常流光 */
+@keyframes envErrorSweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-145%);
+  }
+  12% {
+    opacity: 0.6;
+  }
+  44% {
+    opacity: 0.48;
     transform: translateX(270%);
   }
   58%,
@@ -1983,6 +2630,10 @@ export default {
     grid-template-columns: 1fr;
   }
 
+  .system-card {
+    max-width: none;
+  }
+
   .panel-head {
     align-items: flex-start;
     flex-direction: column;
@@ -2006,8 +2657,8 @@ export default {
   }
 
   .env-grid {
-    grid-template-columns: repeat(auto-fit, minmax(72px, 92px));
-    gap: 8px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
   }
 
   .env-block {
@@ -2043,13 +2694,904 @@ export default {
   }
 
   .env-grid {
-    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
   }
 
   .message-panel__body {
     padding-right: 4px;
   }
 }
+
+/* ---- CICD 实施情况弹窗 ---- */
+
+// Shared layout (no colors)
+.cicd-dialog {
+  ::v-deep .el-dialog {
+    border-radius: 18px;
+  }
+
+  ::v-deep .el-dialog__header {
+    padding: 20px 24px 14px;
+  }
+
+  ::v-deep .el-dialog__title {
+    font-size: 18px;
+    font-weight: 680;
+    letter-spacing: 0.02em;
+  }
+
+  ::v-deep .el-dialog__headerbtn {
+    top: 20px;
+    right: 24px;
+
+    .el-dialog__close {
+      font-size: 20px;
+      transition: color 0.22s ease;
+    }
+  }
+
+  ::v-deep .el-dialog__body {
+    padding: 16px 24px 24px;
+  }
+
+  .cicd-dialog__footer {
+    text-align: right;
+    padding-top: 4px;
+  }
+}
+
+// Light theme
+.cicd-dialog--light {
+  ::v-deep .el-dialog {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  }
+
+  ::v-deep .el-dialog__header {
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  ::v-deep .el-dialog__title {
+    color: #111827;
+  }
+
+  ::v-deep .el-dialog__headerbtn .el-dialog__close {
+    color: #94a3b8;
+
+    &:hover {
+      color: #06B6D4;
+    }
+  }
+
+  .cicd-toolbar__count {
+    color: #64748b;
+  }
+
+  // refresh button
+  .quick-action {
+    color: #475569;
+    background: #f1f5f9;
+    border-color: rgba(15, 23, 42, 0.08);
+
+    &:hover {
+      border-color: #06B6D4;
+      color: #06B6D4;
+    }
+  }
+
+  // el-table theming
+  ::v-deep .el-table {
+    background: #fff;
+    border-color: rgba(15, 23, 42, 0.06);
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      border-bottom-color: rgba(15, 23, 42, 0.06);
+    }
+
+    td {
+      color: #334155;
+      border-bottom-color: rgba(15, 23, 42, 0.05);
+    }
+
+    tr:hover > td {
+      background: #f1f5f9;
+    }
+
+    &::before {
+      background: rgba(15, 23, 42, 0.06);
+    }
+  }
+
+  ::v-deep .el-table--border {
+    border-color: rgba(15, 23, 42, 0.06);
+
+    th,
+    td {
+      border-right-color: rgba(15, 23, 42, 0.06);
+    }
+  }
+
+  ::v-deep .el-table__empty-text {
+    color: #94a3b8;
+  }
+
+  ::v-deep .el-loading-mask {
+    background: rgba(255, 255, 255, 0.65);
+  }
+
+  .cicd-link-num {
+    color: #06B6D4;
+    border-bottom-color: rgba(6, 182, 212, 0.4);
+
+    &:hover {
+      color: #10B981;
+      border-bottom-color: rgba(16, 185, 129, 0.5);
+      text-shadow: none;
+    }
+  }
+
+  .cicd-status-tag {
+    &.is-verify {
+      color: #0369a1;
+      background: rgba(14, 165, 233, 0.1);
+      border-color: rgba(14, 165, 233, 0.2);
+    }
+
+    &.is-success {
+      color: #047857;
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    &.is-partial {
+      color: #a16207;
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    &.is-danger {
+      color: #be123c;
+      background: rgba(244, 63, 94, 0.1);
+      border-color: rgba(244, 63, 94, 0.2);
+    }
+
+    &.is-cancelled {
+      color: #64748b;
+      background: rgba(100, 116, 139, 0.1);
+      border-color: rgba(100, 116, 139, 0.18);
+    }
+
+    &.is-pending {
+      color: #334155;
+      background: rgba(71, 85, 105, 0.08);
+      border-color: rgba(71, 85, 105, 0.16);
+    }
+
+    &.is-running {
+      color: #0e7490;
+      background: rgba(6, 182, 212, 0.1);
+      border-color: rgba(6, 182, 212, 0.2);
+    }
+
+    &.is-review {
+      color: #5b21b6;
+      background: rgba(139, 92, 246, 0.1);
+      border-color: rgba(139, 92, 246, 0.2);
+    }
+
+    &.is-unknown {
+      color: #94a3b8;
+      background: rgba(148, 163, 184, 0.08);
+      border-color: rgba(148, 163, 184, 0.15);
+    }
+  }
+
+  .cicd-error {
+    color: #be123c;
+    background: rgba(244, 63, 94, 0.06);
+    border-color: rgba(244, 63, 94, 0.15);
+  }
+}
+
+// Dark theme
+.cicd-dialog--dark {
+  ::v-deep .el-dialog {
+    background: linear-gradient(145deg, rgba(14, 25, 42, 0.98), rgba(9, 16, 28, 0.98));
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    box-shadow: 0 22px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(34, 211, 238, 0.08);
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+  }
+
+  ::v-deep .el-dialog__header {
+    border-bottom: 1px solid rgba(34, 211, 238, 0.12);
+  }
+
+  ::v-deep .el-dialog__title {
+    color: #EAF4FF;
+  }
+
+  ::v-deep .el-dialog__headerbtn .el-dialog__close {
+    color: #A7B9CC;
+
+    &:hover {
+      color: #22D3EE;
+    }
+  }
+
+  .cicd-toolbar__count {
+    color: #C8D7E6;
+  }
+
+  // refresh button
+  .quick-action {
+    color: #EAF4FF;
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(34, 211, 238, 0.15);
+
+    &:hover {
+      border-color: #22D3EE;
+    }
+  }
+
+  // el-table theming
+  ::v-deep .el-table {
+    background: transparent;
+    color: #EAF4FF;
+    border-color: rgba(34, 211, 238, 0.08);
+
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      color: #A7B9CC;
+      font-weight: 600;
+      border-bottom-color: rgba(34, 211, 238, 0.1);
+    }
+
+    td {
+      color: #C8D7E6;
+      border-bottom-color: rgba(34, 211, 238, 0.06);
+    }
+
+    tr:hover > td {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    &::before {
+      background: rgba(34, 211, 238, 0.08);
+    }
+  }
+
+  ::v-deep .el-table--border {
+    border-color: rgba(34, 211, 238, 0.08);
+
+    th,
+    td {
+      border-right-color: rgba(34, 211, 238, 0.08);
+    }
+  }
+
+  ::v-deep .el-table__empty-text {
+    color: #A7B9CC;
+  }
+
+  ::v-deep .el-loading-mask {
+    background: rgba(5, 11, 21, 0.6);
+  }
+
+  .cicd-link-num {
+    color: #22D3EE;
+    border-bottom-color: rgba(34, 211, 238, 0.4);
+
+    &:hover {
+      color: #00F5A0;
+      border-bottom-color: rgba(0, 245, 160, 0.6);
+      text-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+    }
+  }
+
+  .cicd-status-tag {
+    &.is-verify {
+      color: #38BDF8;
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.22);
+    }
+
+    &.is-success {
+      color: #00F5A0;
+      background: rgba(0, 245, 160, 0.1);
+      border-color: rgba(0, 245, 160, 0.2);
+    }
+
+    &.is-partial {
+      color: #FBBF24;
+      background: rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.2);
+    }
+
+    &.is-danger {
+      color: #FB7185;
+      background: rgba(251, 113, 133, 0.1);
+      border-color: rgba(251, 113, 133, 0.2);
+    }
+
+    &.is-cancelled {
+      color: #94A3B8;
+      background: rgba(148, 163, 184, 0.1);
+      border-color: rgba(148, 163, 184, 0.18);
+    }
+
+    &.is-pending {
+      color: #A7B9CC;
+      background: rgba(167, 185, 204, 0.08);
+      border-color: rgba(167, 185, 204, 0.16);
+    }
+
+    &.is-running {
+      color: #22D3EE;
+      background: rgba(34, 211, 238, 0.1);
+      border-color: rgba(34, 211, 238, 0.2);
+    }
+
+    &.is-review {
+      color: #A78BFA;
+      background: rgba(167, 139, 250, 0.12);
+      border-color: rgba(167, 139, 250, 0.22);
+    }
+
+    &.is-unknown {
+      color: #64748B;
+      background: rgba(100, 116, 139, 0.08);
+      border-color: rgba(100, 116, 139, 0.15);
+    }
+  }
+
+  .cicd-error {
+    color: #FF5B79;
+    background: rgba(255, 91, 121, 0.08);
+    border-color: rgba(255, 91, 121, 0.2);
+  }
+}
+
+// Shared internal layout (no colors)
+.cicd-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.cicd-toolbar__count {
+  font-size: 13px;
+}
+
+.cicd-link-num {
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  border-bottom: 1px dashed;
+}
+
+.cicd-status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid;
+}
+
+.cicd-error {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-align: center;
+  border: 1px solid;
+}
+
+/* ---- 维护公告弹窗 ---- */
+
+// 共享布局
+.maintenance-notice-dialog {
+  ::v-deep .el-dialog {
+    border-radius: 18px;
+  }
+
+  ::v-deep .el-dialog__header {
+    padding: 20px 24px 14px;
+  }
+
+  ::v-deep .el-dialog__title {
+    font-size: 18px;
+    font-weight: 680;
+    letter-spacing: 0.02em;
+  }
+
+  ::v-deep .el-dialog__headerbtn {
+    top: 20px;
+    right: 24px;
+
+    .el-dialog__close {
+      font-size: 20px;
+      transition: color 0.22s ease;
+    }
+  }
+
+  ::v-deep .el-dialog__body {
+    padding: 16px 24px 24px;
+  }
+}
+
+// Light 主题
+.maintenance-notice-dialog--light {
+  ::v-deep .el-dialog {
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  }
+
+  ::v-deep .el-dialog__header {
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  ::v-deep .el-dialog__title {
+    color: #111827;
+  }
+
+  ::v-deep .el-dialog__headerbtn .el-dialog__close {
+    color: #94a3b8;
+
+    &:hover {
+      color: #06B6D4;
+    }
+  }
+
+  .maintenance-notice__count {
+    color: #64748b;
+  }
+
+  .maintenance-notice__body {
+    &::-webkit-scrollbar-thumb {
+      background: rgba(15, 23, 42, 0.12);
+    }
+  }
+
+  .maintenance-notice-skeleton {
+    background: #f8fafc;
+    border-color: rgba(15, 23, 42, 0.06);
+
+    &::after {
+      background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.1), transparent);
+    }
+  }
+
+  .maintenance-notice-card {
+    background: #f8fafc;
+    border-color: rgba(15, 23, 42, 0.06);
+
+    &:hover {
+      border-color: rgba(6, 182, 212, 0.18);
+      background: #f1f5f9;
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+    }
+
+    &.is-expanded {
+      border-color: rgba(6, 182, 212, 0.22);
+      background: #f1f5f9;
+    }
+  }
+
+  .notice-card__title {
+    color: #111827;
+  }
+
+  .notice-card__content {
+    color: #64748b;
+  }
+
+  .notice-card__time,
+  .notice-card__contact {
+    color: #94a3b8;
+  }
+
+  .notice-card__expand-icon {
+    color: #94a3b8;
+  }
+
+  .notice-card__detail {
+    border-top-color: rgba(15, 23, 42, 0.06);
+  }
+
+  .notice-detail__label {
+    color: #94a3b8;
+  }
+
+  .notice-detail__value {
+    color: #334155;
+  }
+
+  .notice-status-tag {
+    &.is-passed {
+      color: #047857;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    &.is-unreviewed {
+      color: #a16207;
+      background: rgba(202, 138, 4, 0.1);
+      border: 1px solid rgba(202, 138, 4, 0.2);
+    }
+
+    &.is-rejected {
+      color: #be123c;
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.2);
+    }
+  }
+
+  .quick-action {
+    color: #475569;
+    background: #f1f5f9;
+    border-color: rgba(15, 23, 42, 0.08);
+
+    &:hover {
+      border-color: #06B6D4;
+      color: #06B6D4;
+    }
+  }
+}
+
+// Dark 主题
+.maintenance-notice-dialog--dark {
+  ::v-deep .el-dialog {
+    background: linear-gradient(145deg, rgba(14, 25, 42, 0.98), rgba(9, 16, 28, 0.98));
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    box-shadow: 0 22px 64px rgba(0, 0, 0, 0.5), 0 0 40px rgba(34, 211, 238, 0.08);
+  }
+
+  ::v-deep .el-dialog__header {
+    border-bottom: 1px solid rgba(34, 211, 238, 0.12);
+  }
+
+  ::v-deep .el-dialog__title {
+    color: #EAF4FF;
+  }
+
+  ::v-deep .el-dialog__headerbtn .el-dialog__close {
+    color: #A7B9CC;
+
+    &:hover {
+      color: #22D3EE;
+    }
+  }
+
+  .maintenance-notice__count {
+    color: #C8D7E6;
+  }
+
+  .maintenance-notice__body {
+    &::-webkit-scrollbar-thumb {
+      background: rgba(34, 211, 238, 0.18);
+    }
+  }
+
+  .maintenance-notice-skeleton {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(34, 211, 238, 0.06);
+
+    &::after {
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.08), transparent);
+    }
+  }
+
+  .maintenance-notice-card {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(34, 211, 238, 0.08);
+
+    &:hover {
+      border-color: rgba(34, 211, 238, 0.18);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    &.is-expanded {
+      border-color: rgba(34, 211, 238, 0.2);
+      background: rgba(255, 255, 255, 0.04);
+    }
+  }
+
+  .notice-card__title {
+    color: #EAF4FF;
+  }
+
+  .notice-card__content {
+    color: #C8D7E6;
+  }
+
+  .notice-card__time,
+  .notice-card__contact {
+    color: #A7B9CC;
+  }
+
+  .notice-card__expand-icon {
+    color: #A7B9CC;
+  }
+
+  .notice-card__detail {
+    border-top-color: rgba(34, 211, 238, 0.08);
+  }
+
+  .notice-detail__label {
+    color: #A7B9CC;
+  }
+
+  .notice-detail__value {
+    color: #EAF4FF;
+  }
+
+  .notice-status-tag {
+    &.is-passed {
+      color: #00F5A0;
+      background: rgba(0, 245, 160, 0.1);
+      border: 1px solid rgba(0, 245, 160, 0.2);
+    }
+
+    &.is-unreviewed {
+      color: #FACC15;
+      background: rgba(250, 204, 21, 0.1);
+      border: 1px solid rgba(250, 204, 21, 0.2);
+    }
+
+    &.is-rejected {
+      color: #FF5B79;
+      background: rgba(255, 91, 121, 0.1);
+      border: 1px solid rgba(255, 91, 121, 0.2);
+    }
+  }
+
+  .quick-action {
+    color: #EAF4FF;
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(34, 211, 238, 0.15);
+
+    &:hover {
+      border-color: #22D3EE;
+    }
+  }
+}
+
+// 通用内部布局（颜色无关）
+.maintenance-notice__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.maintenance-notice__header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.maintenance-notice__count {
+  font-size: 13px;
+}
+
+.maintenance-notice__body {
+  max-height: 60vh;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+  }
+}
+
+.maintenance-notice__loading {
+  display: grid;
+  gap: 10px;
+}
+
+.maintenance-notice-skeleton {
+  height: 82px;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    animation: skeletonSweep 1.5s ease-in-out infinite;
+  }
+}
+
+.maintenance-notice__list {
+  display: grid;
+  gap: 10px;
+}
+
+.maintenance-notice-card {
+  border-radius: 14px;
+  transition: all 0.26s ease;
+  overflow: hidden;
+  min-height: 82px;
+}
+
+.notice-card__main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.notice-card__left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notice-status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.notice-card__center {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.notice-card__title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notice-card__content {
+  margin: 0 0 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.notice-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.notice-card__time {
+  font-family: Consolas, Monaco, monospace;
+  font-size: 11px;
+}
+
+.notice-card__contact {
+  font-size: 11px;
+}
+
+.notice-card__right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice-card__expand-icon {
+  font-size: 14px;
+  transition: transform 0.26s ease;
+
+  &.is-rotated {
+    transform: rotate(180deg);
+  }
+}
+
+.notice-card__detail {
+  padding: 14px 16px;
+}
+
+.notice-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 18px;
+}
+
+.notice-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.notice-detail__label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.notice-detail__value {
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.notice-expand-enter-active,
+.notice-expand-leave-active {
+  transition: all 0.28s ease;
+  overflow: hidden;
+}
+
+.notice-expand-enter,
+.notice-expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.notice-expand-enter-to,
+.notice-expand-leave {
+  max-height: 300px;
+}
+
+@media (max-width: 768px) {
+  .maintenance-notice-dialog ::v-deep .el-dialog {
+    width: 92vw !important;
+  }
+
+  .notice-detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .notice-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .notice-card__main {
+    flex-wrap: wrap;
+  }
+
+  .notice-card__right {
+    margin-left: auto;
+  }
+}
+
 </style>
 
 <style lang="scss">
@@ -2263,4 +3805,56 @@ export default {
     gap: 12px;
   }
 }
+
+/* ---- CICD atom popover ---- */
+.cicd-atom-popover {
+  padding: 0;
+  border-radius: 14px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.cicd-atom-popover--light {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
+
+  .el-table {
+    background: #fff;
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      border-bottom-color: rgba(15, 23, 42, 0.06);
+    }
+
+    td {
+      color: #334155;
+      border-bottom-color: rgba(15, 23, 42, 0.05);
+    }
+  }
+}
+
+.cicd-atom-popover--dark {
+  background: rgba(14, 25, 42, 0.98);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  box-shadow: 0 22px 64px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(18px) saturate(130%);
+
+  .el-table {
+    background: transparent;
+    color: #C8D7E6;
+
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      color: #A7B9CC;
+      border-bottom-color: rgba(34, 211, 238, 0.1);
+    }
+
+    td {
+      color: #C8D7E6;
+      border-bottom-color: rgba(34, 211, 238, 0.06);
+    }
+  }
+}
+
 </style>

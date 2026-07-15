@@ -48,18 +48,26 @@ public class OverviewController
     public AjaxResult executions()
     {
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("ACT", system(env(0, 0, 7992), env(5, 5, 9511), env(2, 0, 9518), null,
+        data.put("ACT", system(env(0, 0, 7992), env(5, 5, 9511, "1001,1002"), env(2, 0, 9518), null,
                 status(STATUS_ERROR), status(STATUS_INSPECTED), status(STATUS_INSPECTED), status(STATUS_INSPECTED)));
-        data.put("AUTH", system(env(0, 0, 7985), null, null, null,
-                status(STATUS_INSPECTED), null, null, null));
+        data.put("AUTH", system(env(12, 8, 7985), env(7, 0, 7986), null, env(3, 3, 7987),
+                status(STATUS_INSPECTED), status(STATUS_INSPECTED), null, null));
         data.put("DASP", system(env(26, 0, 9413), null, env(4, 2, 9414), env(3, 1, 9415),
                 status(STATUS_INSPECTED), null, null, null));
         data.put("PAY", system(env(145, 0, 10848), env(18, 4, 10849), null, null,
                 status(STATUS_INSPECTED), null, null, null));
-        data.put("BILLING", system(env(62, 19, 11001), env(0, 0, 11002), null, env(5, 0, 11003),
+        data.put("BILLING", system(env(62, 19, 11001, "2001"), env(0, 0, 11002), null, env(5, 0, 11003),
                 status(STATUS_INSPECTED), null, null, null));
-        data.put("EMPTY", system(env(0, 0, 0), null, null, null,
+        data.put("SEC", system(env(38, 12, 30110), env(21, 21, 30111, "3001,3002,3003"), null, env(9, 0, 30112),
+                status(STATUS_INSPECTED), status(STATUS_INSPECTED), status(STATUS_ERROR), null));
+        data.put("AUDIT", system(env(8, 3, 40110), null, env(15, 5, 40111), null,
+                status(STATUS_INSPECTED), null, status(STATUS_INSPECTED), status(STATUS_INSPECTED)));
+        data.put("MONITOR", system(env(56, 30, 50110, "5001,5002"), env(22, 0, 50111), env(10, 8, 50112), env(4, 4, 50113),
+                status(STATUS_INSPECTED), status(STATUS_INSPECTED), status(STATUS_INSPECTED), status(STATUS_INSPECTED)));
+        data.put("GATEWAY", system(env(20, 20, 60110), null, env(0, 0, 60111), null,
                 status(STATUS_INSPECTED), null, null, null));
+        data.put("LOG", system(env(90, 40, 70110), env(14, 7, 70111), env(8, 5, 70112), env(6, 0, 70113),
+                status(STATUS_ERROR), status(STATUS_INSPECTED), null, null));
         return AjaxResult.success(data);
     }
 
@@ -186,11 +194,52 @@ public class OverviewController
 
     private Map<String, Object> env(int total, int finished, int planId)
     {
+        return env(total, finished, planId, null);
+    }
+
+    private Map<String, Object> env(int total, int finished, int planId, String nodeIds)
+    {
         Map<String, Object> item = new LinkedHashMap<>();
-        item.put("nodeIds", new ArrayList<Integer>());
+        if (nodeIds != null && !nodeIds.trim().isEmpty())
+        {
+            item.put("nodeIds", nodeIds);
+        }
+        else
+        {
+            item.put("nodeIds", new ArrayList<Integer>());
+        }
         item.put("total", total);
         item.put("finished", finished);
         item.put("planId", planId);
+        // 环境操作状态字段：根据 total / finished 区分激活状态
+        if (total == 0)
+        {
+            item.put("activateOpr", "未激活");
+            item.put("auditOpr", "待审核");
+            item.put("checkOpr", "待检查");
+            item.put("collectOpr", "待采集");
+        }
+        else if (finished == 0)
+        {
+            item.put("activateOpr", "待激活");
+            item.put("auditOpr", "待审核");
+            item.put("checkOpr", "待检查");
+            item.put("collectOpr", "待采集");
+        }
+        else if (finished < total)
+        {
+            item.put("activateOpr", "已激活");
+            item.put("auditOpr", "审核中");
+            item.put("checkOpr", "检查中");
+            item.put("collectOpr", "采集中");
+        }
+        else
+        {
+            item.put("activateOpr", "已激活");
+            item.put("auditOpr", "已审核");
+            item.put("checkOpr", "已检查");
+            item.put("collectOpr", "已采集");
+        }
         return item;
     }
 
@@ -248,6 +297,202 @@ public class OverviewController
         item.put("awiWorkflowInstanceId", 18527);
         item.put("awiWorkflowInstanceName", flowName);
         item.put("remark", "");
+        return item;
+    }
+
+    @PreAuthorize("@ss.hasPermi('tool:overview:list')")
+    @GetMapping("/cicdImplement")
+    public AjaxResult cicdImplement()
+    {
+        return AjaxResult.success(buildCicdMockData());
+    }
+
+    private List<Map<String, Object>> buildCicdMockData()
+    {
+        List<Map<String, Object>> list = new ArrayList<>();
+
+        list.add(cicdOrder("LMP-20260623-0001", "预审", 21, 0, 21, 0, "zhouke_kzx",
+                buildMultiDetail(
+                    cicdDetail("BJ-DB", "configQueueItemList", "lmp-group-sync-db_arm.yml", "未开始"),
+                    cicdDetail("BJ-DB", "configQueueItemList", "lmp-group-sync-cache.yml", "未开始"),
+                    cicdDetail("SH-IDC", "deployService", "app-deploy-base_v2.yml", "未开始"),
+                    cicdDetail("SH-IDC", "deployService", "app-deploy-web_v2.yml", "未开始"),
+                    cicdDetail("GZ-DC", "networkQueues", "lmp-network-sync.yml", "未开始"),
+                    cicdDetail("GZ-DC", "networkQueues", "lmp-network-backup.yml", "未开始"),
+                    cicdDetail("BJ-DB", "dbQueues", "db-migration-master.yml", "未开始"),
+                    cicdDetail("SH-IDC", "monitorQueues", "monitor-agent-config.yml", "未开始"),
+                    cicdDetail("GZ-DC", "cacheQueues", "redis-cluster-sync.yml", "未开始"),
+                    cicdDetail("BJ-DB", "resetModule", "reset-script-env.yml", "未开始")
+                ),
+                cicdAtomDetail("BJ-DB", "containerQueues", "lmp-label-explore", "0-待实施")));
+
+        list.add(cicdOrder("LMP-20260623-0002", "待实施", 35, 12, 35, 10, "wangwei_dev",
+                cicdAutoAtomDetail("SH-IDC", "deployService", "app-deploy-config_v2.yml", "进行中"),
+                cicdAtomDetail("SH-IDC", "networkQueues", "lmp-network-sync", "1-实施中")));
+
+        list.add(cicdOrder("LMP-20260623-0003", "待重置", 18, 18, 18, 15, "lisi_ops",
+                cicdAutoAtomDetail("GZ-DC", "resetModule", "reset-script_v1.yml", "已完成"),
+                cicdAtomDetail("GZ-DC", "dbQueues", "db-migration-tool", "2-已完成")));
+
+        list.add(cicdOrder("LMP-20260624-0004", "重置", 42, 30, 42, 28, "zhaoyun_admin",
+                new ArrayList<Map<String, Object>>(),
+                new ArrayList<Map<String, Object>>()));
+
+        list.add(cicdOrder("LMP-20260624-0005", "预审", 8, 0, 8, 0, "chenliu_test",
+                cicdAutoAtomDetail("BJ-DB", "checkModule", "pre-check-config.yml", "未开始"),
+                cicdAtomDetail("BJ-DB", "cacheQueues", "redis-refresh-script", "0-待实施")));
+
+        list.add(cicdOrder("LMP-20260625-0006", "待实施", 56, 22, 56, 20, "sunqi_release",
+                cicdAutoAtomDetail("SH-IDC", "releaseService", "release-pipeline_v3.yml", "进行中"),
+                cicdAtomDetail("SH-IDC", "monitorQueues", "monitor-agent-deploy", "1-实施中")));
+
+        return list;
+    }
+
+    private Map<String, Object> cicdOrder(String orderId, String orderStatus,
+            int autoTotalAtom, int autoFinishAtom, int totalAtom, int successAtom,
+            String executeUserName,
+            List<Map<String, Object>> autoAtomDetail,
+            List<Map<String, Object>> atomDetail)
+    {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("order_id", orderId);
+        item.put("order_status", orderStatus);
+        item.put("auto_total_atom", autoTotalAtom);
+        item.put("auto_finish_atom", autoFinishAtom);
+        item.put("total_atom", totalAtom);
+        item.put("success_atom", successAtom);
+        item.put("executeUserName", executeUserName);
+        item.put("auto_atom_detail", autoAtomDetail != null ? autoAtomDetail : new ArrayList<>());
+        item.put("atom_detail", atomDetail != null ? atomDetail : new ArrayList<>());
+        return item;
+    }
+
+    private Map<String, Object> cicdDetail(String idc, String module, String key, String status)
+    {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("idc", idc);
+        item.put("module", module);
+        item.put("key", key);
+        item.put("systemDeployStatus", status);
+        return item;
+    }
+
+    @SafeVarargs
+    private final List<Map<String, Object>> buildMultiDetail(Map<String, Object>... details)
+    {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (Map<String, Object> detail : details)
+        {
+            list.add(detail);
+        }
+        return list;
+    }
+
+    private List<Map<String, Object>> cicdAutoAtomDetail(String idc, String module, String key, String status)
+    {
+        List<Map<String, Object>> list = new ArrayList<>();
+        list.add(cicdDetail(idc, module, key, status));
+        return list;
+    }
+
+    private List<Map<String, Object>> cicdAtomDetail(String idc, String module, String key, String status)
+    {
+        return cicdAutoAtomDetail(idc, module, key, status);
+    }
+
+    @PreAuthorize("@ss.hasPermi('tool:overview:list')")
+    @GetMapping("/maintenanceNotice")
+    public TableDataInfo maintenanceNotice()
+    {
+        List<Map<String, Object>> rows = buildMaintenanceNoticeMockData();
+        TableDataInfo rspData = new TableDataInfo();
+        rspData.setCode(200);
+        rspData.setMsg("查询成功");
+        rspData.setRows(rows);
+        rspData.setTotal(rows.size());
+        return rspData;
+    }
+
+    private List<Map<String, Object>> buildMaintenanceNoticeMockData()
+    {
+        List<Map<String, Object>> list = new ArrayList<>();
+
+        list.add(maintenanceNotice(5158, "南去信息&南湾机房管理存储升级以及业务存储管理面升级",
+                "管理存储升级以及业务存储管理面升级对业务虚拟机/裸金属无影响",
+                "南去信息&南湾机房管理存储升级以及业务存储管理面升级",
+                "基础平台组值班",
+                "工作日晚班: 李宝华, 工作日白班: 苏琼市",
+                "144724872", "1", "谢华娇", "同意",
+                "tangwenjun_kzx",
+                "2026-06-17 16:07:04", "2026-06-22 17:10:04",
+                "2026-06-23 20:00:00", "2026-06-24 06:00:00"));
+
+        list.add(maintenanceNotice(5159, "上海张江机房核心交换机升级通知",
+                "张江机房核心交换机固件升级，升级期间业务流量自动切换至备用链路",
+                "上海张江机房核心交换机固件升级通知",
+                "网络运维组值班",
+                "工作日白班: 王建国, 工作日晚班: 陈小明",
+                "144724873", "1", "赵审核", "已通过",
+                "wangjianguo_ops",
+                "2026-06-18 09:00:00", "2026-06-22 14:00:00",
+                "2026-06-25 02:00:00", "2026-06-25 06:00:00"));
+
+        list.add(maintenanceNotice(5160, "深圳灾备中心数据库升级维护",
+                "灾备中心MySQL集群从5.7升级至8.0，升级期间灾备切换暂停",
+                "深圳灾备中心数据库集群升级维护通知",
+                "DBA团队值班",
+                "工作日晚班: 刘工, 周末白班: 张工",
+                "144724874", "0", "", "",
+                "liugong_dba",
+                "2026-06-19 11:30:00", "2026-06-20 08:00:00",
+                "2026-06-27 00:00:00", "2026-06-27 04:00:00"));
+
+        list.add(maintenanceNotice(5161, "北京亦庄机房电力维护通知",
+                "亦庄机房A路电力检修，影响A路供电设备，B路正常供电",
+                "北京亦庄机房A路电力检修通知",
+                "IDC运维组值班",
+                "工作日白班: 李运维, 工作日晚班: 张运维",
+                "144724875", "2", "周审核", "需补充影响范围说明",
+                "liyunwei_idc",
+                "2026-06-20 15:00:00", "2026-06-21 10:00:00",
+                "2026-06-28 22:00:00", "2026-06-29 02:00:00"));
+
+        list.add(maintenanceNotice(5162, "杭州金融云SSL证书更新",
+                "金融云平台SSL证书到期前更新，更新期间需短暂重启网关服务",
+                "杭州金融云SSL证书更新维护通知",
+                "安全运维组值班",
+                "工作日晚班: 钱安全, 工作日白班: 周安全",
+                "144724876", "1", "郑审核", "同意更新",
+                "qiananquan_sec",
+                "2026-06-21 08:00:00", "2026-06-21 16:00:00",
+                "2026-06-30 01:00:00", "2026-06-30 03:00:00"));
+
+        return list;
+    }
+
+    private Map<String, Object> maintenanceNotice(int informId, String informTitle, String areaContent,
+            String informContent, String contactBy, String informDuty, String informUrl,
+            String reviewStatus, String reviewer, String reviewComment,
+            String createBy, String createTime, String updateTime,
+            String startTime, String endTime)
+    {
+        Map<String, Object> item = new LinkedHashMap<>();
+        item.put("informId", informId);
+        item.put("informTitle", informTitle);
+        item.put("areaContent", areaContent);
+        item.put("informContent", informContent);
+        item.put("contactBy", contactBy);
+        item.put("informDuty", informDuty);
+        item.put("informUrl", informUrl);
+        item.put("reviewStatus", reviewStatus);
+        item.put("reviewer", reviewer);
+        item.put("reviewComment", reviewComment);
+        item.put("createBy", createBy);
+        item.put("createTime", createTime);
+        item.put("updateTime", updateTime);
+        item.put("startTime", startTime);
+        item.put("endTime", endTime);
         return item;
     }
 }
