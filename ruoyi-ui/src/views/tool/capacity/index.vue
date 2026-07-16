@@ -156,7 +156,7 @@
                   <!-- 操作列 -->
                   <el-table-column label="操作" align="center" width="80" fixed="right">
                     <template slot-scope="{ row }">
-                      <el-button type="text" size="mini" icon="el-icon-data-line" @click="handleMonitor(row)">调用</el-button>
+                      <el-button type="text" size="mini" icon="el-icon-data-line" @click="handleMonitor(row)">历史数据</el-button>
                     </template>
                   </el-table-column>
                   <!-- data 字段独立列，悬浮展示 JSON（暂时注释）
@@ -468,14 +468,14 @@ export default {
       this.monitorCharts = []
 
       getMonitorDetail({ hostname: row.hostname }).then((res) => {
-        if (res.retCode === 200 && res.data) {
-          this.monitorMeta = res.data.meta || {}
-          // 动态提取 data 中除 meta 外的所有 key 作为 tab
+        if (res.data && Array.isArray(res.data)) {
+          this.monitorMeta = res.meta || {}
+          // 每个 chart 的 title 作为一个 tab，tab 内只有一个图表
           const tabData = {}
-          Object.keys(res.data).forEach((key) => {
-            if (key !== 'meta' && Array.isArray(res.data[key])) {
-              tabData[key] = res.data[key]
-            }
+          res.data.forEach((chart) => {
+            const tabName = chart.title || '默认'
+            if (!tabData[tabName]) tabData[tabName] = []
+            tabData[tabName].push(chart)
           })
           this.monitorTabData = tabData
           this.monitorTabs = Object.keys(tabData)
@@ -526,13 +526,13 @@ export default {
               const p = params[0]
               return p.axisValue + '<br/>' +
                 '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + p.color + ';margin-right:6px;"></span>' +
-                chart.title + '：<b>' + p.value + '%</b>'
+                chart.title + '：<b>' + p.value + '</b>'
             }
           },
-          grid: { left: 46, right: 20, top: 36, bottom: 32 },
+          grid: { left: 46, right: 50, top: 36, bottom: 32 },
           xAxis: {
             type: 'category',
-            data: chart.time || [],
+            data: chart.timeline || [],
             boundaryGap: false,
             axisLine: { lineStyle: { color: '#DCDFE6' } },
             axisTick: { show: false },
@@ -540,13 +540,11 @@ export default {
           },
           yAxis: {
             type: 'value',
-            name: '%',
-            min: 0,
             splitLine: { lineStyle: { color: '#F2F3F5', type: 'dashed' } },
             axisLabel: { color: '#909399', fontSize: 11 }
           },
           series: [{
-            data: chart.max || [],
+            data: chart.data || [],
             type: 'line',
             smooth: true,
             symbol: 'circle',
@@ -558,7 +556,7 @@ export default {
               position: 'top',
               color: '#606266',
               fontSize: 10,
-              formatter: '{c}%'
+              formatter: '{c}'
             },
             areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: areaColor },
@@ -996,7 +994,7 @@ export default {
   margin-bottom: 6px;
   line-height: 1.5;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
 }
 
