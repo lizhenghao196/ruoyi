@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import monitorTestData, { resStr } from '@/views/tool/capacity/test.js'
+import monitorTestData, { resStr, res1, res2 } from '@/views/tool/capacity/test.js'
 
 // ==================== 生成大量实例组的 Mock 分类 ====================
 function generateLargeCategory() {
@@ -355,4 +355,26 @@ export function getConfigFile(params) {
   })
 }
 
-export default { getCapacityAnalysis, getMonitorDetail, getConfigFile }
+/**
+ * 获取服务器磁盘信息（Mock 模拟）
+ * @param {Object} params - { hostname: string }
+ * res1: 正常情况 - 物理盘 + 逻辑盘
+ * res2: 异常情况 - 仅支持物理机
+ *
+ * 通过 hostname 中是否包含 "greatdb" 来模拟异常情况，便于演示两种场景
+ */
+export function getServerInfo(params) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const hostname = (params && params.hostname) || ''
+      // 包含 greatdb 的返回异常情况(res2)，其他返回正常情况(res1)
+      if (/greatdb/i.test(hostname)) {
+        resolve({ code: 200, data: res2 })
+      } else {
+        resolve({ code: 200, data: res1 })
+      }
+    }, 300)
+  })
+}
+
+export default { getCapacityAnalysis, getMonitorDetail, getConfigFile, getServerInfo }

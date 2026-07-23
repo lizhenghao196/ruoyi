@@ -163,6 +163,7 @@
                           </el-button>
                           <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item command="config" icon="el-icon-document">配置文件</el-dropdown-item>
+                            <el-dropdown-item command="serverInfo" icon="el-icon-monitor">查看服务器信息</el-dropdown-item>
                           </el-dropdown-menu>
                         </el-dropdown>
                       </td>
@@ -258,11 +259,110 @@
         <div v-else-if="!configLoading" class="monitor-empty">暂无配置文件数据</div>
       </div>
     </el-dialog>
+
+    <!-- 服务器信息弹窗 -->
+    <el-dialog
+      :title="'服务器信息 - ' + serverInfoHostname"
+      :visible.sync="serverInfoVisible"
+      width="950px"
+      top="8vh"
+      :close-on-click-modal="false"
+      @closed="handleServerInfoClosed"
+    >
+      <div v-loading="serverInfoLoading" class="server-info-body">
+        <!-- 正常情况：显示物理盘和逻辑盘 -->
+        <template v-if="!serverInfoLoading && serverInfoData && !serverInfoError">
+          <!-- 物理盘 -->
+          <div class="disk-section">
+            <div class="disk-section__header">
+              <span class="disk-section__dot status-0" />
+              <strong>物理盘</strong>
+              <el-tag size="mini" effect="plain">{{ (serverInfoData['物理盘'] || []).length }} 块</el-tag>
+            </div>
+            <div class="disk-table-wrap">
+              <table v-if="serverInfoData['物理盘'] && serverInfoData['物理盘'].length" class="native-table">
+                <thead>
+                  <tr>
+                    <th>name</th>
+                    <th>bus</th>
+                    <th>media</th>
+                    <th>firmware</th>
+                    <th>serialnumber</th>
+                    <th>size</th>
+                  </tr>
+                </thead>
+              <tbody>
+                <tr v-for="(disk, di) in serverInfoData['物理盘']" :key="di">
+                  <td><strong>{{ disk.name }}</strong></td>
+                  <td>{{ disk.bus || '-' }}</td>
+                  <td>{{ disk.media || '-' }}</td>
+                  <td>{{ disk.firmware || '-' }}</td>
+                  <td><code class="serial-code">{{ disk.serialnumber || '-' }}</code></td>
+                  <td>{{ disk.size != null ? disk.size : '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+            <div v-if="!serverInfoData['物理盘'] || !serverInfoData['物理盘'].length" class="sub-empty">暂无物理盘数据</div>
+          </div>
+
+          <!-- 分隔 -->
+          <div style="height: 20px;" />
+
+          <!-- 逻辑盘 -->
+          <div class="disk-section">
+            <div class="disk-section__header">
+              <span class="disk-section__dot status-0" />
+              <strong>逻辑盘</strong>
+              <el-tag size="mini" effect="plain">{{ (serverInfoData['逻辑盘'] || []).length }} 个</el-tag>
+            </div>
+            <div class="disk-table-wrap">
+              <table v-if="serverInfoData['逻辑盘'] && serverInfoData['逻辑盘'].length" class="native-table">
+                <thead>
+                  <tr>
+                    <th>name</th>
+                    <th>raidLevel</th>
+                    <th>raidType</th>
+                    <th>controller</th>
+                    <th>disk</th>
+                    <th>size</th>
+                  </tr>
+                </thead>
+              <tbody>
+                <tr v-for="(disk, di) in serverInfoData['逻辑盘']" :key="di">
+                  <td><strong>{{ disk.name }}</strong></td>
+                  <td>
+                    <el-tag :type="disk.raidLevel === 'RAID 5' ? 'warning' : 'info'" size="small">{{ disk.raidLevel || '-' }}</el-tag>
+                  </td>
+                  <td>{{ disk.raidType || '-' }}</td>
+                  <td>{{ disk.controller || '-' }}</td>
+                  <td>{{ disk.disk || '-' }}</td>
+                  <td>{{ disk.size != null ? disk.size : '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+            <div v-if="!serverInfoData['逻辑盘'] || !serverInfoData['逻辑盘'].length" class="sub-empty">暂无逻辑盘数据</div>
+          </div>
+        </template>
+
+        <!-- 异常情况 -->
+        <template v-else-if="!serverInfoLoading && serverInfoError">
+          <div class="server-info-error">
+            <i class="el-icon-warning-outline server-info-error__icon" />
+            <span>{{ serverInfoError }}</span>
+          </div>
+        </template>
+
+        <!-- 空数据 -->
+        <div v-else-if="!serverInfoLoading" class="monitor-empty">暂无服务器信息数据</div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getCapacityAnalysis, getMonitorDetail, getConfigFile } from '@/api/tool/capacity'
+import { getCapacityAnalysis, getMonitorDetail, getConfigFile, getServerInfo } from '@/api/tool/capacity'
 import JsonViewer from 'vue-json-viewer'
 import 'vue-json-viewer/style.css'
 import echarts from 'echarts'
@@ -300,7 +400,13 @@ export default {
       configVisible: false,
       configLoading: false,
       configHostname: '',
-      configContent: ''
+      configContent: '',
+      // 服务器信息弹窗
+      serverInfoVisible: false,
+      serverInfoLoading: false,
+      serverInfoHostname: '',
+      serverInfoData: null,
+      serverInfoError: ''
     }
   },
 
@@ -661,6 +767,8 @@ export default {
     handleMoreCommand(cmd, row) {
       if (cmd === 'config') {
         this.openConfigDialog(row)
+      } else if (cmd === 'serverInfo') {
+        this.openServerInfoDialog(row)
       }
     },
 
@@ -698,6 +806,44 @@ export default {
         document.body.removeChild(ta)
         this.$message.success('已复制到剪贴板')
       })
+    },
+
+    // ========== 服务器信息弹窗 ==========
+
+    openServerInfoDialog(row) {
+      this.serverInfoVisible = true
+      this.serverInfoLoading = true
+      this.serverInfoHostname = row.hostname || ''
+      this.serverInfoData = null
+      this.serverInfoError = ''
+
+      getServerInfo({ hostname: row.hostname }).then((res) => {
+        if (res.code === 200 && res.data) {
+          if (res.data.message) {
+            // 异常情况：包含 message 字段
+            this.serverInfoError = res.data.message
+            this.serverInfoData = null
+          } else {
+            // 正常情况：包含 物理盘/逻辑盘
+            this.serverInfoData = res.data
+            this.serverInfoError = ''
+          }
+        } else {
+          this.serverInfoError = '数据格式异常'
+          this.serverInfoData = null
+        }
+      }).catch(() => {
+        this.$message.error('获取服务器信息失败')
+        this.serverInfoError = '请求失败，请稍后重试'
+        this.serverInfoData = null
+      }).finally(() => {
+        this.serverInfoLoading = false
+      })
+    },
+
+    handleServerInfoClosed() {
+      this.serverInfoData = null
+      this.serverInfoError = ''
     }
   },
 }
@@ -1247,6 +1393,82 @@ export default {
 
   ::v-deep .cfg-directive {
     color: #E6A23C;
+  }
+}
+
+// ==================== 服务器信息弹窗 ====================
+
+.server-info-body {
+  min-height: 280px;
+}
+
+.disk-section {
+  background: #fafafa;
+  border: 1px solid #EBEEF5;
+  border-radius: 6px;
+  padding: 16px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    strong {
+      font-size: 14px;
+      color: #303133;
+    }
+  }
+
+  &__dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    &.status-0 { background: #67C23A; box-shadow: 0 0 6px rgba(103,194,58,0.4); }
+    &.status-1 { background: #E6A23C; box-shadow: 0 0 6px rgba(230,162,60,0.4); }
+    &.status-2 { background: #F56C6C; box-shadow: 0 0 6px rgba(245,108,108,0.4); }
+  }
+}
+
+.disk-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  .native-table {
+    min-width: 680px;
+    width: 100%;
+  }
+}
+
+.serial-code {
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 11px;
+  background: #f5f7fa;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #606266;
+}
+
+// 异常状态
+.server-info-error {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 28px;
+  background: #fef0f0;
+  border: 1px solid #fde2e2;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.6;
+
+  &__icon {
+    flex-shrink: 0;
+    font-size: 22px;
+    color: #F56C6C;
   }
 }
 </style>
