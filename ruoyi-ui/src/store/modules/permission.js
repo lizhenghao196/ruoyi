@@ -58,6 +58,11 @@ function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = false) {
     if (type && route.children) {
       route.children = filterChildren(route.children)
     }
+    // 总览页面新 tab 打开
+    if (route.path && (route.path === '/tool/overview' || route.path === 'overview')) {
+      if (!route.meta) route.meta = {}
+      route.meta.openTab = true
+    }
     if (route.component) {
       // Layout ParentView 组件特殊处理
       if (route.component === 'Layout') {
@@ -84,6 +89,11 @@ function filterChildren(childrenMap, lastRouter = false) {
   var children = []
   childrenMap.forEach(el => {
     el.path = lastRouter ? lastRouter.path + '/' + el.path : el.path
+    // 总览页面新 tab 打开
+    if (el.path === '/tool/overview' || el.path === 'overview') {
+      if (!el.meta) el.meta = {}
+      el.meta.openTab = true
+    }
     if (el.children && el.children.length && el.component === 'ParentView') {
       children = children.concat(filterChildren(el.children, el))
     } else {

@@ -12,6 +12,10 @@ export default {
     to: {
       type: [String, Object],
       required: true
+    },
+    openTab: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -19,7 +23,7 @@ export default {
       return isExternal(this.to)
     },
     type() {
-      if (this.isExternal) {
+      if (this.isExternal || this.openTab) {
         return 'a'
       }
       return 'router-link'
@@ -30,6 +34,14 @@ export default {
       if (this.isExternal) {
         return {
           href: to,
+          target: '_blank',
+          rel: 'noopener'
+        }
+      }
+      if (this.openTab) {
+        const resolved = this.$router.resolve(to)
+        return {
+          href: resolved.href,
           target: '_blank',
           rel: 'noopener'
         }

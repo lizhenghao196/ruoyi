@@ -66,16 +66,16 @@
               </div>
             </div>
             <!-- 无溢出：直接展示全部标签 -->
-            <div v-if="!tagsDisplay(catName).overflow.length" class="category-header__right">
+            <div v-if="!safeTags(catName).overflow.length" class="category-header__right">
               <el-tag
-                v-for="entry in tagsDisplay(catName).visible"
+                v-for="entry in safeTags(catName).visible"
                 :key="entry.subName"
                 size="mini"
                 type="info"
               >{{ entry.subName }}: {{ entry.count }}台</el-tag>
             </div>
             <!-- 有溢出：整个区域悬浮展示全部标签 -->
-            <div v-if="tagsDisplay(catName).overflow.length" class="category-header__right has-overflow">
+            <div v-if="safeTags(catName).overflow.length" class="category-header__right has-overflow">
               <el-popover
                 placement="bottom"
                 trigger="hover"
@@ -84,7 +84,7 @@
               >
                 <div class="tags-popover-body">
                   <el-tag
-                    v-for="entry in tagsDisplay(catName).all"
+                    v-for="entry in safeTags(catName).all"
                     :key="entry.subName"
                     size="mini"
                     type="info"
@@ -93,20 +93,20 @@
                 </div>
                 <div slot="reference" class="tags-inline">
                   <el-tag
-                    v-for="entry in tagsDisplay(catName).visible"
+                    v-for="entry in safeTags(catName).visible"
                     :key="entry.subName"
                     size="mini"
                     type="info"
                   >{{ entry.subName }}: {{ entry.count }}台</el-tag>
-                  <span class="tags-more-badge">+{{ tagsDisplay(catName).overflow.length }}</span>
+                  <span class="tags-more-badge">+{{ safeTags(catName).overflow.length }}</span>
                 </div>
               </el-popover>
             </div>
           </div>
 
           <!-- 大类内容（子类 + 表格） -->
-          <transition name="collapse">
-            <div v-show="!collapsedCategories[catName]" class="category-body">
+          <transition name="fade">
+            <div v-if="!collapsedCategories[catName]" class="category-body">
               <div
                 v-for="(subItem, subName) in analysisResult[catName]"
                 :key="subName"
@@ -123,69 +123,52 @@
                   <span class="sub-header__desc" v-if="subItem.desc" :title="subItem.desc">{{ subItem.desc }}</span>
                 </div>
 
-                <!-- 子类表格 -->
-                <el-table
+                <!-- 子类表格（原生 table 替代 el-table，52 实例组场景性能提升明显） -->
+                <table
                   v-if="subItem.data && subItem.data.length"
-                  :data="subItem.data"
-                  border
-                  stripe
-                  size="small"
+                  class="native-table"
                   style="width: 100%"
-                  :row-class-name="tableRowClassName"
                 >
-                  <!-- 固定状态列 -->
-                  <el-table-column label="状态" align="center" width="72">
-                    <template slot-scope="{ row }">
-                      <span class="row-status-dot" :class="'status-' + (row.code != null ? row.code : 0)" />
-                    </template>
-                  </el-table-column>
-                  <el-table-column
-                    v-for="col in getTableColumns(subItem.data)"
-                    :key="col"
-                    :prop="col"
-                    :label="getColumnLabel(col)"
-                    :min-width="getColumnWidth(col)"
-                    show-overflow-tooltip
-                  >
-                    <template slot-scope="{ row }">
-                      <span :style="getCellStyle(col, row[col])">
-                        {{ formatCellValue(col, row[col]) }}
-                      </span>
-                    </template>
-                  </el-table-column>
-                  <!-- 操作列 -->
-                  <el-table-column label="操作" align="center" width="80" fixed="right">
-                    <template slot-scope="{ row }">
-                      <el-button type="text" size="mini" icon="el-icon-data-line" @click="handleMonitor(row)">历史数据</el-button>
-                    </template>
-                  </el-table-column>
-                  <!-- data 字段独立列，悬浮展示 JSON（暂时注释）
-                  <el-table-column label="指标数据" align="center" width="100">
-                    <template slot-scope="{ row }">
-                      <el-popover
-                        placement="left"
-                        width="520"
-                        trigger="hover"
-                        popper-class="capacity-json-popover"
-                      >
-                        <div class="json-popover-inner">
-                          <JsonViewer
-                            :value="row.data"
-                            :show-array-index="false"
-                            :expand-depth="2"
-                            copyable
-                          >
-                            <template v-slot:copy>复制</template>
-                          </JsonViewer>
-                        </div>
-                        <el-button slot="reference" type="text" size="mini">
-                          悬浮查看
-                        </el-button>
-                      </el-popover>
-                    </template>
-                  </el-table-column>
-                  -->
-                </el-table>
+                  <thead>
+                    <tr>
+                      <th class="col-status">状态</th>
+                      <th
+                        v-for="col in getTableColumns(subItem.data)"
+                        :key="col"
+                        :style="{ minWidth: getColumnWidth(col) + 'px' }"
+                      >{{ getColumnLabel(col) }}</th>
+                      <th class="col-action" style="width: 140px;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(row, ri) in subItem.data"
+                      :key="ri"
+                      :class="tableRowClassName({ row })"
+                    >
+                      <td class="col-status">
+                        <span class="row-status-dot" :class="'status-' + (row.code != null ? row.code : 0)" />
+                      </td>
+                      <td
+                        v-for="col in getTableColumns(subItem.data)"
+                        :key="col"
+                        :title="formatCellValue(col, row[col])"
+                      >{{ formatCellValue(col, row[col]) }}</td>
+                      <td class="col-action">
+                        <el-button type="text" size="mini" icon="el-icon-data-line" @click="handleMonitor(row)">历史数据</el-button>
+                        <span class="action-gap" />
+                        <el-dropdown trigger="hover" @command="(cmd) => handleMoreCommand(cmd, row)">
+                          <el-button type="text" size="mini">
+                            更多<i class="el-icon-arrow-down el-icon--right"></i>
+                          </el-button>
+                          <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item command="config" icon="el-icon-document">配置文件</el-dropdown-item>
+                          </el-dropdown-menu>
+                        </el-dropdown>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
                 <div v-else class="sub-empty">暂无数据</div>
               </div>
             </div>
@@ -250,11 +233,36 @@
         <div v-else-if="!monitorLoading" class="monitor-empty">暂无监控数据</div>
       </div>
     </el-dialog>
+
+    <!-- 配置文件弹窗 -->
+    <el-dialog
+      :title="'配置文件 - ' + configHostname"
+      :visible.sync="configVisible"
+      width="1100px"
+      top="8vh"
+      :close-on-click-modal="false"
+    >
+      <div v-loading="configLoading" class="config-dialog-body">
+        <template v-if="!configLoading && configContent">
+          <div class="config-toolbar">
+            <span class="config-server">{{ configServerIp }}</span>
+            <el-button type="text" size="mini" icon="el-icon-document-copy" @click="copyConfig">复制内容</el-button>
+          </div>
+          <div class="config-code-wrapper">
+            <div class="config-line-numbers">
+              <span v-for="i in configLines.length" :key="i">{{ i }}</span>
+            </div>
+            <pre class="config-code"><code v-html="configHighlighted"></code></pre>
+          </div>
+        </template>
+        <div v-else-if="!configLoading" class="monitor-empty">暂无配置文件数据</div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getCapacityAnalysis, getMonitorDetail } from '@/api/tool/capacity'
+import { getCapacityAnalysis, getMonitorDetail, getConfigFile } from '@/api/tool/capacity'
 import JsonViewer from 'vue-json-viewer'
 import 'vue-json-viewer/style.css'
 import echarts from 'echarts'
@@ -279,6 +287,7 @@ export default {
       collapsedCategories: {},
       defaultCollapsed: true,
       allExpanded: false,
+      tagsCache: {},
       // 监控弹窗
       monitorVisible: false,
       monitorLoading: false,
@@ -286,7 +295,12 @@ export default {
       monitorMeta: {},
       monitorTabData: {},
       monitorTabs: [],
-      monitorActiveTab: ''
+      monitorActiveTab: '',
+      // 配置文件弹窗
+      configVisible: false,
+      configLoading: false,
+      configHostname: '',
+      configContent: ''
     }
   },
 
@@ -302,6 +316,33 @@ export default {
         if (aCount !== bCount) return bCount - aCount
         return a.localeCompare(b)
       })
+    },
+
+    configLines() {
+      return this.configContent ? this.configContent.split('\n') : []
+    },
+    configServerIp() {
+      const firstLine = this.configLines[0] || ''
+      const match = firstLine.match(/^(\S+)/)
+      return match ? match[1] : ''
+    },
+    configHighlighted() {
+      return this.configLines.slice(1).map((line) => {
+        let escaped = line
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+        if (/^\s*#/.test(escaped)) {
+          return '<span class="cfg-comment">' + escaped + '</span>'
+        }
+        escaped = escaped.replace(/\b(server|upstream|location|if|stream|http|events)\b/g,
+          '<span class="cfg-keyword">$1</span>')
+        escaped = escaped.replace(/^(\s*)([\w_]+)(\s)/, (m, space, directive, after) => {
+          return space + '<span class="cfg-directive">' + directive + '</span>' + after
+        })
+        return escaped
+      }).join('\n')
     }
   },
 
@@ -316,6 +357,7 @@ export default {
           this.analysisResult = res.data.analysis_result || {}
           this.metadata = res.data.metadata || {}
           this.initCollapsed()
+          this.buildTagsCache()
         })
         .catch(() => {
           this.$message.error('查询失败，请稍后重试')
@@ -388,6 +430,18 @@ export default {
         summary[subName] = rows.length
       })
       return summary
+    },
+
+    safeTags(catName) {
+      return this.tagsCache[catName] || { all: [], visible: [], overflow: [] }
+    },
+
+    buildTagsCache() {
+      const cache = {}
+      this.displayCategories.forEach((catName) => {
+        cache[catName] = this.tagsDisplay(catName)
+      })
+      this.tagsCache = cache
     },
 
     tagsDisplay(catName) {
@@ -600,9 +654,54 @@ export default {
       if (Array.isArray(val)) return val.join(', ')
       if (val === null || val === undefined) return '-'
       return val
+    },
+
+    // ========== 配置文件弹窗 ==========
+
+    handleMoreCommand(cmd, row) {
+      if (cmd === 'config') {
+        this.openConfigDialog(row)
+      }
+    },
+
+    openConfigDialog(row) {
+      this.configVisible = true
+      this.configLoading = true
+      this.configHostname = row.hostname || ''
+      this.configContent = ''
+
+      getConfigFile({ hostname: row.hostname }).then((res) => {
+        if (res.retCode === 200 && res.data) {
+          this.configContent = res.data
+        }
+      }).catch(() => {
+        this.$message.error('获取配置文件失败')
+      }).finally(() => {
+        this.configLoading = false
+      })
+    },
+
+    copyConfig() {
+      const text = this.configContent
+      if (!text) return
+      navigator.clipboard.writeText(text).then(() => {
+        this.$message.success('已复制到剪贴板')
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea')
+        ta.value = text
+        ta.style.position = 'fixed'
+        ta.style.left = '-9999px'
+        document.body.appendChild(ta)
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
+        this.$message.success('已复制到剪贴板')
+      })
     }
-  }
+  },
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -749,25 +848,15 @@ export default {
   padding: 12px 16px 16px;
 }
 
-// 折叠动画
-.collapse-enter-active,
-.collapse-leave-active {
-  transition: all 0.35s ease;
-  overflow: hidden;
+// 折叠动画（仅淡入淡出，避免 max-height 过渡触发大量 DOM 重排）
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
 }
 
-.collapse-enter,
-.collapse-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.collapse-enter-to,
-.collapse-leave {
-  opacity: 1;
-  max-height: 8000px;
 }
 
 // 子类区域
@@ -836,6 +925,77 @@ export default {
   font-size: 13px;
 }
 
+// 原生表格（替代 el-table）
+.native-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  color: #606266;
+  table-layout: auto;
+
+  thead {
+    background: #f5f7fa;
+  }
+
+  th {
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #909399;
+    border: 1px solid #EBEEF5;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 6px 10px;
+    border: 1px solid #EBEEF5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+
+  tbody tr {
+    transition: background 0.15s;
+
+    &:hover {
+      background: #f5f7fa;
+    }
+
+    // 斑马纹
+    &:nth-child(even) {
+      background: #fafafa;
+
+      &:hover {
+        background: #f5f7fa;
+      }
+    }
+
+    // 状态行背景
+    &.row-status-warning td {
+      background-color: #fdf6ec;
+    }
+    &.row-status-error td {
+      background-color: #fef0f0;
+    }
+  }
+
+  .col-status {
+    width: 72px;
+    text-align: center;
+  }
+
+  .col-action {
+    width: 140px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .action-gap {
+    display: inline-block;
+    width: 8px;
+  }
+}
+
 // 表格行状态色点
 .row-status-dot {
   display: inline-block;
@@ -847,16 +1007,6 @@ export default {
   &.status-0 { background: #67C23A; box-shadow: 0 0 5px rgba(103,194,58,0.45); }
   &.status-1 { background: #E6A23C; box-shadow: 0 0 5px rgba(230,162,60,0.45); }
   &.status-2 { background: #F56C6C; box-shadow: 0 0 5px rgba(245,108,108,0.45); }
-}
-
-// 表格行背景色提示
-::v-deep .el-table {
-  .row-status-warning td {
-    background-color: #fdf6ec !important;
-  }
-  .row-status-error td {
-    background-color: #fef0f0 !important;
-  }
 }
 
 // JsonViewer popover 内层样式
@@ -1011,6 +1161,94 @@ export default {
   color: #C0C4CC;
   font-size: 14px;
 }
+
+// ==================== 配置文件弹窗 ====================
+
+.config-dialog-body {
+  min-height: 360px;
+}
+
+.config-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  margin-bottom: 10px;
+  background: #f5f7fa;
+  border-radius: 6px;
+}
+
+.config-server {
+  font-size: 13px;
+  color: #606266;
+  font-weight: 600;
+
+  &::before {
+    content: '服务器 ';
+    font-weight: 400;
+    color: #909399;
+  }
+}
+
+.config-code-wrapper {
+  display: flex;
+  border: 1px solid #EBEEF5;
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 560px;
+}
+
+.config-line-numbers {
+  flex-shrink: 0;
+  width: 48px;
+  padding: 14px 0;
+  background: #fafafa;
+  border-right: 1px solid #EBEEF5;
+  text-align: center;
+  user-select: none;
+  position: sticky;
+  left: 0;
+
+  span {
+    display: block;
+    font-size: 12px;
+    line-height: 22px;
+    color: #C0C4CC;
+    font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+  }
+}
+
+.config-code {
+  flex: 1;
+  margin: 0;
+  padding: 14px 16px;
+  overflow: visible;
+  background: #fff;
+  font-size: 12px;
+  line-height: 22px;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', monospace;
+  tab-size: 4;
+  white-space: pre;
+  color: #303133;
+
+  code {
+    font-family: inherit;
+  }
+
+  ::v-deep .cfg-comment {
+    color: #A0A4A8;
+    font-style: italic;
+  }
+
+  ::v-deep .cfg-keyword {
+    color: #409EFF;
+    font-weight: 600;
+  }
+
+  ::v-deep .cfg-directive {
+    color: #E6A23C;
+  }
+}
 </style>
 
 <style lang="scss">
@@ -1033,7 +1271,10 @@ export default {
   .tags-popover-body {
     display: flex;
     flex-wrap: wrap;
+    align-content: flex-start;
     gap: 2px;
+    max-height: 240px;
+    overflow-y: auto;
   }
 }
 </style>

@@ -1,5 +1,33 @@
 import request from '@/utils/request'
-import monitorTestData from '@/views/tool/capacity/test.js'
+import monitorTestData, { resStr } from '@/views/tool/capacity/test.js'
+
+// ==================== 生成大量实例组的 Mock 分类 ====================
+function generateLargeCategory() {
+  const cat = {}
+  const idcs = ['BJ-DB', 'BJ-YZ', 'BJ-LH', 'BJ-YF', 'BJ-DX', 'BJ-HD', 'BJ-CY', 'BJ-FT', 'BJ-SY', 'BJ-TZ', 'BJ-MT', 'BJ-PG', 'BJ-HR']
+  for (let i = 1; i <= 52; i++) {
+    const pad = String(i).padStart(3, '0')
+    const idcIdx = i % idcs.length
+    const code = i <= 30 ? 0 : (i <= 44 ? 1 : 2)
+    const desc = code === 2 ? '资源使用率过高，需紧急处理' : (code === 1 ? '部分指标接近阈值，建议关注' : '运行状态正常')
+    const rowCount = (i % 3) + 2 // 每组 2-4 条记录
+    const rows = []
+    for (let j = 0; j < rowCount; j++) {
+      const rpad = String(j + 1).padStart(2, '0')
+      rows.push({
+        code: (i + j) % 5 === 0 ? 2 : ((i + j) % 3 === 0 ? 1 : 0),
+        cpu: String((i % 8) + 2),
+        memory: String([4, 8, 16, 32, 64][(i + j) % 5]),
+        hostname: `bja-dsi-k8s-node-${pad}-${rpad}-kzx`,
+        ip: `25.${129 + (i % 7)}.${i}.${10 + j}`,
+        idc: idcs[idcIdx],
+        os: ['Red.Hat.Enterprise.Linux.7.9', 'Red.Hat.Enterprise.Linux.8.6', 'CentOS.7.9', 'Kylin.Linux.Advanced.Server.V10'][j % 4]
+      })
+    }
+    cat[`bja-dsi-k8s-cluster-${pad}`] = { code, desc, data: rows }
+  }
+  return cat
+}
 
 // ==================== Mock 数据 ====================
 const MOCK_RESPONSE = {
@@ -10,6 +38,7 @@ const MOCK_RESPONSE = {
       system: ''
     },
     analysis_result: {
+      'K8S集群(52实例组模拟)': generateLargeCategory(),
       GREATDB: {
         'bja-dsi-greatdb-1': {
           code: 0, // code: 0=正常(绿), 1=警告(黄), 2=异常(红)
@@ -314,4 +343,16 @@ export function getMonitorDetail(params) {
   })
 }
 
-export default { getCapacityAnalysis, getMonitorDetail }
+/**
+ * 获取配置文件内容（Mock 模拟）
+ * @param {Object} params - { hostname: string }
+ */
+export function getConfigFile(params) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ retCode: 200, data: resStr })
+    }, 400)
+  })
+}
+
+export default { getCapacityAnalysis, getMonitorDetail, getConfigFile }
