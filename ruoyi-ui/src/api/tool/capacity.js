@@ -14,7 +14,7 @@ function generateLargeCategory() {
     const rows = []
     for (let j = 0; j < rowCount; j++) {
       const rpad = String(j + 1).padStart(2, '0')
-      rows.push({
+      const baseRow = {
         code: (i + j) % 5 === 0 ? 2 : ((i + j) % 3 === 0 ? 1 : 0),
         cpu: String((i % 8) + 2),
         memory: String([4, 8, 16, 32, 64][(i + j) % 5]),
@@ -22,7 +22,21 @@ function generateLargeCategory() {
         ip: `25.${129 + (i % 7)}.${i}.${10 + j}`,
         idc: idcs[idcIdx],
         os: ['Red.Hat.Enterprise.Linux.7.9', 'Red.Hat.Enterprise.Linux.8.6', 'CentOS.7.9', 'Kylin.Linux.Advanced.Server.V10'][j % 4]
-      })
+      }
+      // 前 3 个实例组添加额外列，模拟列多导致操作被遮挡的场景
+      if (i <= 3) {
+        Object.assign(baseRow, {
+          disk_usage: String(45 + ((i + j) * 7) % 40) + '%',
+          network_in: String(120 + (i * 31) % 500) + 'MB/s',
+          network_out: String(80 + (j * 47) % 300) + 'MB/s',
+          iops_read: String(1500 + (i * 200) % 3000),
+          iops_write: String(800 + (j * 300) % 2000),
+          connections: String(320 + (i + j) * 50),
+          qps: String(1200 + (i * j) * 100),
+          avg_latency: (2.3 + (i * 0.5) + (j * 0.3)).toFixed(1) + 'ms',
+        })
+      }
+      rows.push(baseRow)
     }
     cat[`bja-dsi-k8s-cluster-${pad}`] = { code, desc, data: rows }
   }
@@ -291,7 +305,13 @@ const MOCK_RESPONSE = {
       active_connections: '活跃连接数',
       requests_per_sec: '请求数/秒',
       used_memory: '已用内存(MB)',
-      max_memory: '最大内存(MB)'
+      max_memory: '最大内存(MB)',
+      disk_usage: '磁盘使用率',
+      network_in: '入站流量',
+      network_out: '出站流量',
+      iops_read: '读IOPS',
+      iops_write: '写IOPS',
+      avg_latency: '平均延迟'
     }
   }
 }
@@ -350,7 +370,13 @@ export function getMonitorDetail(params) {
 export function getConfigFile(params) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve({ retCode: 200, data: resStr })
+      const hostname = (params && params.hostname) || ''
+      // 包含 greatdb 的返回异常情况(res2)，其他返回正常配置(resStr)
+      if (/greatdb/i.test(hostname)) {
+        resolve({ retCode: 500, data: null, message: res2.message })
+      } else {
+        resolve({ retCode: 200, data: resStr })
+      }
     }, 400)
   })
 }

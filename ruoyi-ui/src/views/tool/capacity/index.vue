@@ -123,21 +123,20 @@
                   <span class="sub-header__desc" v-if="subItem.desc" :title="subItem.desc">{{ subItem.desc }}</span>
                 </div>
 
-                <!-- 子类表格（原生 table 替代 el-table，52 实例组场景性能提升明显） -->
+                <!-- 子类表格（原生 table，状态列和操作列 sticky 固定） -->
+                <div v-if="subItem.data && subItem.data.length" class="table-scroll-wrap">
                 <table
-                  v-if="subItem.data && subItem.data.length"
                   class="native-table"
-                  style="width: 100%"
                 >
                   <thead>
                     <tr>
-                      <th class="col-status">状态</th>
+                      <th class="col-status is-sticky-left">状态</th>
                       <th
                         v-for="col in getTableColumns(subItem.data)"
                         :key="col"
                         :style="{ minWidth: getColumnWidth(col) + 'px' }"
                       >{{ getColumnLabel(col) }}</th>
-                      <th class="col-action" style="width: 140px;">操作</th>
+                      <th class="col-action is-sticky-right">操作</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -146,7 +145,7 @@
                       :key="ri"
                       :class="tableRowClassName({ row })"
                     >
-                      <td class="col-status">
+                      <td class="col-status is-sticky-left">
                         <span class="row-status-dot" :class="'status-' + (row.code != null ? row.code : 0)" />
                       </td>
                       <td
@@ -154,7 +153,7 @@
                         :key="col"
                         :title="formatCellValue(col, row[col])"
                       >{{ formatCellValue(col, row[col]) }}</td>
-                      <td class="col-action">
+                      <td class="col-action is-sticky-right">
                         <el-button type="text" size="mini" icon="el-icon-data-line" @click="handleMonitor(row)">历史数据</el-button>
                         <span class="action-gap" />
                         <el-dropdown trigger="hover" @command="(cmd) => handleMoreCommand(cmd, row)">
@@ -170,6 +169,7 @@
                     </tr>
                   </tbody>
                 </table>
+                </div>
                 <div v-else class="sub-empty">暂无数据</div>
               </div>
             </div>
@@ -254,6 +254,12 @@
               <span v-for="i in configLines.length" :key="i">{{ i }}</span>
             </div>
             <pre class="config-code"><code v-html="configHighlighted"></code></pre>
+          </div>
+        </template>
+        <template v-else-if="!configLoading && configError">
+          <div class="server-info-error">
+            <i class="el-icon-warning-outline server-info-error__icon" />
+            <span>{{ configError }}</span>
           </div>
         </template>
         <div v-else-if="!configLoading" class="monitor-empty">暂无配置文件数据</div>
@@ -401,6 +407,7 @@ export default {
       configLoading: false,
       configHostname: '',
       configContent: '',
+      configError: '',
       // 服务器信息弹窗
       serverInfoVisible: false,
       serverInfoLoading: false,
@@ -777,13 +784,19 @@ export default {
       this.configLoading = true
       this.configHostname = row.hostname || ''
       this.configContent = ''
+      this.configError = ''
 
       getConfigFile({ hostname: row.hostname }).then((res) => {
         if (res.retCode === 200 && res.data) {
           this.configContent = res.data
+          this.configError = ''
+        } else {
+          this.configContent = ''
+          this.configError = res.message || '获取配置文件失败'
         }
       }).catch(() => {
-        this.$message.error('获取配置文件失败')
+        this.configContent = ''
+        this.configError = '请求失败，请稍后重试'
       }).finally(() => {
         this.configLoading = false
       })
@@ -1139,6 +1152,88 @@ export default {
   .action-gap {
     display: inline-block;
     width: 8px;
+  }
+}
+
+// 表格滚动容器
+.table-scroll-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+
+  .native-table {
+    // 表格宽度自适应：列少时 100% 撑满容器，列多时由内容撑开触发滚动
+    width: 100%;
+    table-layout: auto;
+    // border-collapse: collapse 与 position: sticky 在部分浏览器有兼容问题，
+    // 改用 separate 模拟 collapse 效果
+    border-collapse: separate;
+    border-spacing: 0;
+
+    th, td {
+      // sticky 单元格需要不透明白背景，防止滚动时下方内容透出
+      &.is-sticky-left,
+      &.is-sticky-right {
+        position: sticky;
+        background: #fff;
+      }
+    }
+
+    thead th {
+      &.is-sticky-left {
+        left: 0;
+        z-index: 4;
+        background: #f5f7fa;
+      }
+      &.is-sticky-right {
+        right: 0;
+        z-index: 4;
+        background: #f5f7fa;
+      }
+    }
+
+    tbody td {
+      &.is-sticky-left {
+        left: 0;
+        z-index: 1;
+      }
+      &.is-sticky-right {
+        right: 0;
+        z-index: 1;
+      }
+
+      &.col-status.is-sticky-left {
+        width: 72px;
+        text-align: center;
+      }
+
+      &.col-action.is-sticky-right {
+        width: 140px;
+        text-align: center;
+        white-space: nowrap;
+      }
+    }
+
+    // 斑马行 & 状态行 sticky 背景跟随
+    tbody tr:nth-child(even) td.is-sticky-left,
+    tbody tr:nth-child(even) td.is-sticky-right {
+      background: #fafafa;
+    }
+
+    tbody tr.row-status-warning td.is-sticky-left,
+    tbody tr.row-status-warning td.is-sticky-right {
+      background-color: #fdf6ec;
+    }
+    tbody tr.row-status-error td.is-sticky-left,
+    tbody tr.row-status-error td.is-sticky-right {
+      background-color: #fef0f0;
+    }
+
+    // hover 时 sticky 背景
+    tbody tr:hover td.is-sticky-left,
+    tbody tr:hover td.is-sticky-right {
+      background: #f5f7fa;
+    }
   }
 }
 
