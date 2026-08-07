@@ -311,7 +311,7 @@ public class OverviewController
     {
         List<Map<String, Object>> list = new ArrayList<>();
 
-        list.add(cicdOrder("LMP-20260623-0001", "预审", 21, 0, 21, 0, "zhouke_kzx",
+        list.add(cicdOrder("LMP", "LMP-20260623-0001", "预审", 21, 0, 21, 0, "zhouke_kzx",
                 buildMultiDetail(
                     cicdDetail("BJ-DB", "configQueueItemList", "lmp-group-sync-db_arm.yml", "未开始"),
                     cicdDetail("BJ-DB", "configQueueItemList", "lmp-group-sync-cache.yml", "未开始"),
@@ -326,36 +326,37 @@ public class OverviewController
                 ),
                 cicdAtomDetail("BJ-DB", "containerQueues", "lmp-label-explore", "0-待实施")));
 
-        list.add(cicdOrder("LMP-20260623-0002", "待实施", 35, 12, 35, 10, "wangwei_dev",
+        list.add(cicdOrder("LMP", "LMP-20260623-0002", "待实施", 35, 12, 35, 10, "wangwei_dev",
                 cicdAutoAtomDetail("SH-IDC", "deployService", "app-deploy-config_v2.yml", "进行中"),
                 cicdAtomDetail("SH-IDC", "networkQueues", "lmp-network-sync", "1-实施中")));
 
-        list.add(cicdOrder("LMP-20260623-0003", "待重置", 18, 18, 18, 15, "lisi_ops",
+        list.add(cicdOrder("LMP", "LMP-20260623-0003", "待重置", 18, 18, 18, 15, "lisi_ops",
                 cicdAutoAtomDetail("GZ-DC", "resetModule", "reset-script_v1.yml", "已完成"),
                 cicdAtomDetail("GZ-DC", "dbQueues", "db-migration-tool", "2-已完成")));
 
-        list.add(cicdOrder("LMP-20260624-0004", "重置", 42, 30, 42, 28, "zhaoyun_admin",
+        list.add(cicdOrder("DASP", "LMP-20260624-0004", "重置", 42, 30, 42, 28, "zhaoyun_admin",
                 new ArrayList<Map<String, Object>>(),
                 new ArrayList<Map<String, Object>>()));
 
-        list.add(cicdOrder("LMP-20260624-0005", "预审", 8, 0, 8, 0, "chenliu_test",
+        list.add(cicdOrder("PAY", "LMP-20260624-0005", "预审", 8, 0, 8, 0, "chenliu_test",
                 cicdAutoAtomDetail("BJ-DB", "checkModule", "pre-check-config.yml", "未开始"),
                 cicdAtomDetail("BJ-DB", "cacheQueues", "redis-refresh-script", "0-待实施")));
 
-        list.add(cicdOrder("LMP-20260625-0006", "待实施", 56, 22, 56, 20, "sunqi_release",
+        list.add(cicdOrder("BILLING", "LMP-20260625-0006", "待实施", 56, 22, 56, 20, "sunqi_release",
                 cicdAutoAtomDetail("SH-IDC", "releaseService", "release-pipeline_v3.yml", "进行中"),
                 cicdAtomDetail("SH-IDC", "monitorQueues", "monitor-agent-deploy", "1-实施中")));
 
         return list;
     }
 
-    private Map<String, Object> cicdOrder(String orderId, String orderStatus,
+    private Map<String, Object> cicdOrder(String systemId, String orderId, String orderStatus,
             int autoTotalAtom, int autoFinishAtom, int totalAtom, int successAtom,
             String executeUserName,
             List<Map<String, Object>> autoAtomDetail,
             List<Map<String, Object>> atomDetail)
     {
         Map<String, Object> item = new LinkedHashMap<>();
+        item.put("system_id", systemId);
         item.put("order_id", orderId);
         item.put("order_status", orderStatus);
         item.put("auto_total_atom", autoTotalAtom);

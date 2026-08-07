@@ -234,6 +234,18 @@
           max-height="520"
           class="cicd-table"
         >
+          <el-table-column
+            label="系统"
+            width="100"
+            column-key="system_id"
+            :filters="getCicdSystemFilters()"
+            :filter-method="filterCicdSystem"
+          >
+            <template slot-scope="{ row }">
+              <span>{{ row.system_id || '-' }}</span>
+            </template>
+          </el-table-column>
+
           <el-table-column prop="order_id" label="工单号" min-width="160" />
 
           <el-table-column
@@ -1052,6 +1064,7 @@ export default {
     normalizeCicdRows(rows) {
       if (!Array.isArray(rows)) return []
       return rows.map(row => ({
+        system_id: row.system_id || '-',
         order_id: row.order_id || '-',
         order_status: row.order_status || '-',
         auto_total_atom: Number(row.auto_total_atom) || 0,
@@ -1088,6 +1101,22 @@ export default {
 
     filterCicdStatus(value, row) {
       return row.order_status === value
+    },
+
+    getCicdSystemFilters() {
+      const systemSet = new Set()
+      this.cicdList.forEach(row => {
+        if (row.system_id) {
+          systemSet.add(row.system_id)
+        }
+      })
+      return Array.from(systemSet)
+        .sort((a, b) => a.localeCompare(b))
+        .map(s => ({ text: s, value: s }))
+    },
+
+    filterCicdSystem(value, row) {
+      return row.system_id === value
     },
 
     getAtomDetails(row, field) {
