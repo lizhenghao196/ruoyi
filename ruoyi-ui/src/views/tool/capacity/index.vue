@@ -21,6 +21,13 @@
           @click="toggleAll"
         >{{ allExpanded ? '一键收起' : '一键展开' }}</el-button>
       </el-form-item>
+      <el-form-item class="report-btn-item">
+        <el-button
+          v-if="hasSearched && reportList.length"
+          icon="el-icon-document"
+          @click="openReportDialog"
+        >报告</el-button>
+      </el-form-item>
     </el-form>
 
     <!-- 结果展示区域 -->
@@ -364,6 +371,51 @@
         <div v-else-if="!serverInfoLoading" class="monitor-empty">暂无服务器信息数据</div>
       </div>
     </el-dialog>
+
+    <!-- 报告弹窗 -->
+    <el-dialog
+      :visible.sync="reportVisible"
+      width="900px"
+      top="6vh"
+      :close-on-click-modal="false"
+      @closed="handleReportClosed"
+    >
+      <template slot="title">
+        <div class="report-dialog-header">
+          <span>性能容量分析报告</span>
+          <el-button
+            v-if="reportList.length"
+            size="mini"
+            :icon="reportAllExpanded ? 'el-icon-fold' : 'el-icon-unfold'"
+            @click="toggleAllReports"
+          >{{ reportAllExpanded ? '一键收起' : '一键展开' }}</el-button>
+        </div>
+      </template>
+
+      <div class="report-dialog-body">
+        <!-- 报告列表（默认全部展开直接展示 content） -->
+        <div v-if="reportList.length" class="report-list">
+          <div
+            v-for="(item, idx) in reportList"
+            :key="idx"
+            class="report-item"
+            :class="{ 'is-collapsed': reportCollapsed[idx] }"
+          >
+            <div class="report-item__header" @click="toggleReport(idx)">
+              <i
+                class="el-icon-arrow-right report-item__arrow"
+                :class="{ 'is-expanded': !reportCollapsed[idx] }"
+              />
+              <span class="report-item__title">{{ item.title }}</span>
+            </div>
+            <transition name="fade">
+              <div v-if="!reportCollapsed[idx]" class="report-item__content">{{ item.content }}</div>
+            </transition>
+          </div>
+        </div>
+        <div v-else class="sub-empty">暂无报告数据</div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -413,7 +465,12 @@ export default {
       serverInfoLoading: false,
       serverInfoHostname: '',
       serverInfoData: null,
-      serverInfoError: ''
+      serverInfoError: '',
+      // 报告弹窗
+      reportVisible: false,
+      reportList: [],
+      reportCollapsed: {},
+      reportAllExpanded: true
     }
   },
 
@@ -469,6 +526,7 @@ export default {
         .then((res) => {
           this.analysisResult = res.data.analysis_result || {}
           this.metadata = res.data.metadata || {}
+          this.reportList = res.data.report || []
           this.initCollapsed()
           this.buildTagsCache()
         })
@@ -857,6 +915,45 @@ export default {
     handleServerInfoClosed() {
       this.serverInfoData = null
       this.serverInfoError = ''
+    },
+
+    // ========== 报告弹窗 ==========
+
+    openReportDialog() {
+      this.reportVisible = true
+      this.initReportCollapsed()
+    },
+
+    initReportCollapsed() {
+      // 默认全部展开，直接展示 content
+      const state = {}
+      this.reportList.forEach((_, idx) => {
+        state[idx] = false
+      })
+      this.reportCollapsed = state
+      this.reportAllExpanded = true
+    },
+
+    toggleReport(idx) {
+      const newVal = !this.reportCollapsed[idx]
+      this.$set(this.reportCollapsed, idx, newVal)
+      // 同步「一键展开」状态
+      this.reportAllExpanded = Object.values(this.reportCollapsed).every(v => !v)
+    },
+
+    toggleAllReports() {
+      const expand = !this.reportAllExpanded
+      const state = {}
+      this.reportList.forEach((_, idx) => {
+        state[idx] = !expand
+      })
+      this.reportCollapsed = state
+      this.reportAllExpanded = expand
+    },
+
+    handleReportClosed() {
+      this.reportCollapsed = {}
+      this.reportAllExpanded = true
     }
   },
 }
@@ -865,7 +962,14 @@ export default {
 
 <style lang="scss" scoped>
 .search-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   margin-bottom: 16px;
+
+  .report-btn-item {
+    margin-left: auto;
+  }
 }
 
 // 状态占位
@@ -1565,6 +1669,92 @@ export default {
     font-size: 22px;
     color: #F56C6C;
   }
+}
+
+// ==================== 报告弹窗 ====================
+
+.report-dialog-body {
+  height: 62vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.report-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 44px;
+
+  > span {
+    font-size: 18px;
+    font-weight: 600;
+    color: #303133;
+    line-height: 24px;
+  }
+}
+
+.report-list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.report-item {
+  flex-shrink: 0;
+  border: 1px solid #EBEEF5;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+
+  &.is-collapsed {
+    background: #fafafa;
+  }
+}
+
+.report-item__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  background: #fafafa;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f0f2f5;
+  }
+}
+
+.report-item__arrow {
+  font-size: 12px;
+  color: #909399;
+  transition: transform 0.3s ease;
+  flex: 0 0 auto;
+
+  &.is-expanded {
+    transform: rotate(90deg);
+  }
+}
+
+.report-item__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.report-item__content {
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #606266;
+  border-top: 1px solid #EBEEF5;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 </style>
 
