@@ -212,7 +212,7 @@
       <el-dialog
         :visible.sync="cicdDialogVisible"
         title="CICD实施情况"
-        width="1100px"
+        width="1300px"
         top="6vh"
         :close-on-click-modal="false"
         append-to-body
@@ -246,7 +246,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column prop="order_id" label="工单号" min-width="160" />
+          <el-table-column prop="order_id" label="工单号" width="230" />
 
           <el-table-column
             label="工单状态"
@@ -2970,12 +2970,14 @@ export default {
 
   // el-table theming
   ::v-deep .el-table {
-    background: transparent;
+    background: transparent !important;
+    background-color: transparent !important;
     color: #EAF4FF;
     border-color: rgba(34, 211, 238, 0.08);
 
     th {
       background: rgba(255, 255, 255, 0.04);
+      background-color: rgba(255, 255, 255, 0.04);
       color: #A7B9CC;
       font-weight: 600;
       border-bottom-color: rgba(34, 211, 238, 0.1);
@@ -2986,13 +2988,26 @@ export default {
       border-bottom-color: rgba(34, 211, 238, 0.06);
     }
 
+    tr {
+      background-color: transparent !important;
+    }
+
     tr:hover > td {
       background: rgba(255, 255, 255, 0.04);
+      background-color: rgba(255, 255, 255, 0.04);
     }
 
     &::before {
       background: rgba(34, 211, 238, 0.08);
     }
+  }
+
+  ::v-deep .el-table__header-wrapper {
+    background-color: transparent !important;
+  }
+
+  ::v-deep .el-table__body-wrapper {
+    background-color: transparent !important;
   }
 
   ::v-deep .el-table--border {
@@ -3006,6 +3021,10 @@ export default {
 
   ::v-deep .el-table__empty-text {
     color: #A7B9CC;
+  }
+
+  ::v-deep .el-table__empty-block {
+    background-color: transparent !important;
   }
 
   ::v-deep .el-loading-mask {
@@ -3870,11 +3889,13 @@ export default {
   backdrop-filter: blur(18px) saturate(130%);
 
   .el-table {
-    background: transparent;
+    background: transparent !important;
+    background-color: transparent !important;
     color: #C8D7E6;
 
     th {
       background: rgba(255, 255, 255, 0.04);
+      background-color: rgba(255, 255, 255, 0.04);
       color: #A7B9CC;
       border-bottom-color: rgba(34, 211, 238, 0.1);
     }
@@ -3883,6 +3904,22 @@ export default {
       color: #C8D7E6;
       border-bottom-color: rgba(34, 211, 238, 0.06);
     }
+
+    tr {
+      background-color: transparent !important;
+    }
+
+    tr:hover > td {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+  }
+
+  .el-table__header-wrapper {
+    background-color: transparent !important;
+  }
+
+  .el-table__body-wrapper {
+    background-color: transparent !important;
   }
 }
 

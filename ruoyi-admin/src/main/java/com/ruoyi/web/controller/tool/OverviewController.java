@@ -334,7 +334,7 @@ public class OverviewController
                 cicdAutoAtomDetail("GZ-DC", "resetModule", "reset-script_v1.yml", "已完成"),
                 cicdAtomDetail("GZ-DC", "dbQueues", "db-migration-tool", "2-已完成")));
 
-        list.add(cicdOrder("DASP", "LMP-20260624-0004", "重置", 42, 30, 42, 28, "zhaoyun_admin",
+        list.add(cicdOrder("DASP", "DASP-CHG-20260804-0002", "重置", 42, 30, 42, 28, "zhaoyun_admin",
                 new ArrayList<Map<String, Object>>(),
                 new ArrayList<Map<String, Object>>()));
 
@@ -342,7 +342,7 @@ public class OverviewController
                 cicdAutoAtomDetail("BJ-DB", "checkModule", "pre-check-config.yml", "未开始"),
                 cicdAtomDetail("BJ-DB", "cacheQueues", "redis-refresh-script", "0-待实施")));
 
-        list.add(cicdOrder("BILLING", "LMP-20260625-0006", "待实施", 56, 22, 56, 20, "sunqi_release",
+        list.add(cicdOrder("BILLING", "BILLING-CHG-20260807-0006", "待实施", 56, 22, 56, 20, "sunqi_release",
                 cicdAutoAtomDetail("SH-IDC", "releaseService", "release-pipeline_v3.yml", "进行中"),
                 cicdAtomDetail("SH-IDC", "monitorQueues", "monitor-agent-deploy", "1-实施中")));
 
