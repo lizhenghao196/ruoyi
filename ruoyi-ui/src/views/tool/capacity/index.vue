@@ -158,8 +158,28 @@
                       <td
                         v-for="col in getTableColumns(subItem.data)"
                         :key="col"
-                        :title="formatCellValue(col, row[col])"
-                      >{{ formatCellValue(col, row[col]) }}</td>
+                        :title="isJsonValue(row[col]) ? '' : formatCellValue(col, row[col])"
+                      >
+                        <el-popover
+                          v-if="isJsonValue(row[col])"
+                          placement="top"
+                          width="600"
+                          trigger="hover"
+                          :open-delay="100"
+                          popper-class="capacity-json-popover"
+                        >
+                          <div class="json-popover-inner">
+                            <json-viewer
+                              :value="toJsonValue(row[col])"
+                              :show-array-index="false"
+                              :expand-depth="2"
+                              copyable
+                            />
+                          </div>
+                          <el-button slot="reference" type="text" size="mini" icon="el-icon-view">查看</el-button>
+                        </el-popover>
+                        <template v-else>{{ formatCellValue(col, row[col]) }}</template>
+                      </td>
                       <td class="col-action is-sticky-right">
                         <el-button type="text" size="mini" icon="el-icon-data-line" @click="handleMonitor(row)">历史数据</el-button>
                         <span class="action-gap" />
@@ -633,8 +653,8 @@ export default {
       const keySet = new Set()
       rows.forEach((row) => {
         Object.keys(row).forEach((k) => {
-          // 只取顶层字段，排除 code 和嵌套的 data
-          if (k !== 'code' && k !== 'data') keySet.add(k)
+          // 只取顶层字段，排除 code（状态列单独渲染）
+          if (k !== 'code') keySet.add(k)
         })
       })
       const ordered = []
@@ -664,6 +684,33 @@ export default {
       if (value === null || value === undefined) return '-'
       if (typeof value === 'boolean') return value ? '是' : '否'
       return value
+    },
+
+    // 判断单元格值是否为 JSON（对象/数组，或 JSON 字符串）
+    isJsonValue(value) {
+      if (value !== null && typeof value === 'object') return true
+      if (typeof value === 'string') {
+        const s = value.trim()
+        if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'))) {
+          try {
+            JSON.parse(s)
+            return true
+          } catch (e) {
+            return false
+          }
+        }
+      }
+      return false
+    },
+
+    // 将单元格值转为 JsonViewer 可展示的对象/数组
+    toJsonValue(value) {
+      if (value !== null && typeof value === 'object') return value
+      try {
+        return JSON.parse(value)
+      } catch (e) {
+        return {}
+      }
     },
 
     statusText(code) {

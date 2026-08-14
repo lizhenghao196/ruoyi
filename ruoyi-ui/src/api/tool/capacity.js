@@ -58,8 +58,8 @@ const MOCK_RESPONSE = {
           code: 0, // code: 0=正常(绿), 1=警告(黄), 2=异常(红)
           desc: '主集群运行稳定，CPU与内存使用率均在合理范围',
           data: [
-            { code: 0, cpu: '8', memory: '32', hostname: 'bja-dsi-greatdb-010-kzx', ip: '25.129.2.110', idc: 'BJ-DB', os: 'Red.Hat.Enterprise.Linux.7.9' },
-            { code: 0, cpu: '8', memory: '32', hostname: 'bja-dsi-greatdb-011-kzx', ip: '25.129.2.111', idc: 'BJ-DB', os: 'Red.Hat.Enterprise.Linux.7.9' },
+            { code: 0, cpu: '8', memory: '32', hostname: 'bja-dsi-greatdb-010-kzx', ip: '25.129.2.110', idc: 'BJ-DB', os: 'Red.Hat.Enterprise.Linux.7.9' ,test:{a:1,b:'1'},data:{aaa:1}},
+            { code: 0, cpu: '8', memory: '32', hostname: 'bja-dsi-greatdb-011-kzx', ip: '25.129.2.111', idc: 'BJ-DB', os: 'Red.Hat.Enterprise.Linux.7.9' ,test:{a:1,b:'1'}},
             { code: 1, cpu: '8', memory: '64', hostname: 'bja-dsi-greatdb-012-kzx', ip: '25.129.2.112', idc: 'BJ-DB', os: 'Red.Hat.Enterprise.Linux.8.6' }
           ]
         },
