@@ -44,3 +44,774 @@ let billRes = {
     },
   ],
 };
+
+let systemProfileRes = {
+  基础信息: {
+    主机房: "北京东坝机房",
+    数据中心: [
+      "合肥灾备机房",
+      "北京东坝机房",
+      "合肥库房",
+      "北京南法信机房",
+      "深圳南湾机房",
+      "深圳五联机房",
+    ],
+    系统名: "s新核心_数据&应用服务",
+    系统简介:
+      "提供以查询处理和文件处理等为核心的交易驱动型业务系统，主要包括产品服务、营销支撑、运营支撑、发卡与用卡、消息服务、账单查询与计算服务、风险服务、数据采集等十几个子模块",
+    系统重要性级别: "A+",
+  },
+  组件拓扑: {
+    CANAL: {
+      "bjb-dasp-canal-kzx": [
+        {
+          component: "dasp-plat-canal-server",
+          cpu: "32",
+          hostname: "bjb-dasp-canal-kzx-0064",
+          idc: "BJ-NFX",
+          ip: "26.131.162.64",
+          memory: 64,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-canal-kzx": [
+        {
+          component: "dasp-plat-canal-server",
+          cpu: "32",
+          hostname: "bjc-dasp-canal-kzx-0065",
+          idc: "BJ-DB",
+          ip: "26.131.162.65",
+          memory: 64,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-canal-kzx": [
+        {
+          component: "dasp-plat-canal-server",
+          cpu: "32",
+          hostname: "hfa-dasp-canal-kzx-0066",
+          idc: "HF",
+          ip: "10.45.12.66",
+          memory: 64,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    ES: {
+      "bjb-dasp-es-kzx": [
+        {
+          component: "dasp-plat-es-node",
+          cpu: "16",
+          hostname: "bjb-dasp-es-kzx-0101",
+          idc: "BJ-NFX",
+          ip: "26.131.163.101",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+        {
+          component: "dasp-plat-es-node",
+          cpu: "16",
+          hostname: "bjb-dasp-es-kzx-0102",
+          idc: "BJ-NFX",
+          ip: "26.131.163.102",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-es-kzx": [
+        {
+          component: "dasp-plat-es-node",
+          cpu: "16",
+          hostname: "bjc-dasp-es-kzx-0103",
+          idc: "BJ-DB",
+          ip: "26.131.163.103",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-es-kzx": [
+        {
+          component: "dasp-plat-es-node",
+          cpu: "16",
+          hostname: "hfa-dasp-es-kzx-0104",
+          idc: "HF",
+          ip: "10.45.13.104",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    GREATDB: {
+      "bjb-dasp-greatdb-kzx": [
+        {
+          component: "dasp-plat-greatdb-node",
+          cpu: "64",
+          hostname: "bjb-dasp-greatdb-kzx-0201",
+          idc: "BJ-NFX",
+          ip: "26.131.164.201",
+          memory: 256,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-greatdb-kzx": [
+        {
+          component: "dasp-plat-greatdb-node",
+          cpu: "64",
+          hostname: "bjc-dasp-greatdb-kzx-0202",
+          idc: "BJ-DB",
+          ip: "26.131.164.202",
+          memory: 256,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-greatdb-kzx": [
+        {
+          component: "dasp-plat-greatdb-node",
+          cpu: "64",
+          hostname: "hfa-dasp-greatdb-kzx-0203",
+          idc: "HF",
+          ip: "10.45.14.203",
+          memory: 256,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    HADOOP: {
+      "bjb-dasp-hadoop-kzx": [
+        {
+          component: "dasp-plat-hadoop-datanode",
+          cpu: "32",
+          hostname: "bjb-dasp-hadoop-kzx-0301",
+          idc: "BJ-NFX",
+          ip: "26.131.165.301",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+        {
+          component: "dasp-plat-hadoop-namenode",
+          cpu: "32",
+          hostname: "bjb-dasp-hadoop-kzx-0302",
+          idc: "BJ-NFX",
+          ip: "26.131.165.302",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-hadoop-kzx": [
+        {
+          component: "dasp-plat-hadoop-datanode",
+          cpu: "32",
+          hostname: "hfa-dasp-hadoop-kzx-0303",
+          idc: "HF",
+          ip: "10.45.15.303",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    HAPROXY: {
+      dasp_ht_haproxy_4: [
+        {
+          component: "dasp-plat-haproxy",
+          cpu: "8",
+          hostname: "dasp-ht-haproxy-4",
+          idc: "BJ-NFX",
+          ip: "26.131.170.4",
+          memory: 16,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      dasp_ht_haproxy_5: [
+        {
+          component: "dasp-plat-haproxy",
+          cpu: "8",
+          hostname: "dasp-ht-haproxy-5",
+          idc: "BJ-NFX",
+          ip: "26.131.170.5",
+          memory: 16,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      dasp_cym_haproxy_4: [
+        {
+          component: "dasp-plat-haproxy",
+          cpu: "8",
+          hostname: "dasp-cym-haproxy-4",
+          idc: "BJ-DB",
+          ip: "26.131.170.6",
+          memory: 16,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      dasp_cym_haproxy_8: [
+        {
+          component: "dasp-plat-haproxy",
+          cpu: "8",
+          hostname: "dasp-cym-haproxy-8",
+          idc: "BJ-DB",
+          ip: "26.131.170.7",
+          memory: 16,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    KAFKA: {
+      "bjb-dasp-kafka-kzx": [
+        {
+          component: "dasp-plat-kafka-broker",
+          cpu: "16",
+          hostname: "bjb-dasp-kafka-kzx-0401",
+          idc: "BJ-NFX",
+          ip: "26.131.166.401",
+          memory: 64,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+        {
+          component: "dasp-plat-kafka-broker",
+          cpu: "16",
+          hostname: "bjb-dasp-kafka-kzx-0402",
+          idc: "BJ-NFX",
+          ip: "26.131.166.402",
+          memory: 64,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-kafka-kzx": [
+        {
+          component: "dasp-plat-kafka-broker",
+          cpu: "16",
+          hostname: "bjc-dasp-kafka-kzx-0403",
+          idc: "BJ-DB",
+          ip: "26.131.166.403",
+          memory: 64,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-kafka-kzx": [
+        {
+          component: "dasp-plat-kafka-broker",
+          cpu: "16",
+          hostname: "hfa-dasp-kafka-kzx-0404",
+          idc: "HF",
+          ip: "10.45.16.404",
+          memory: 64,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    MYSQL: {
+      "bjb-dasp-mysql-kzx": [
+        {
+          component: "dasp-plat-mysql-master",
+          cpu: "64",
+          hostname: "bjb-dasp-mysql-kzx-0501",
+          idc: "BJ-NFX",
+          ip: "26.131.167.501",
+          memory: 256,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+        {
+          component: "dasp-plat-mysql-slave",
+          cpu: "64",
+          hostname: "bjb-dasp-mysql-kzx-0502",
+          idc: "BJ-NFX",
+          ip: "26.131.167.502",
+          memory: 256,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-mysql-kzx": [
+        {
+          component: "dasp-plat-mysql-master",
+          cpu: "64",
+          hostname: "bjc-dasp-mysql-kzx-0503",
+          idc: "BJ-DB",
+          ip: "26.131.167.503",
+          memory: 256,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-mysql-kzx": [
+        {
+          component: "dasp-plat-mysql-slave",
+          cpu: "64",
+          hostname: "hfa-dasp-mysql-kzx-0504",
+          idc: "HF",
+          ip: "10.45.17.504",
+          memory: 256,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    NGINX: {
+      "bjb-dasp-nginx-kzx": [
+        {
+          component: "dasp-plat-nginx",
+          cpu: "8",
+          hostname: "bjb-dasp-nginx-kzx-0601",
+          idc: "BJ-NFX",
+          ip: "26.131.168.601",
+          memory: 16,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-nginx-kzx": [
+        {
+          component: "dasp-plat-nginx",
+          cpu: "8",
+          hostname: "bjc-dasp-nginx-kzx-0602",
+          idc: "BJ-DB",
+          ip: "26.131.168.602",
+          memory: 16,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-nginx-kzx": [
+        {
+          component: "dasp-plat-nginx",
+          cpu: "8",
+          hostname: "hfa-dasp-nginx-kzx-0603",
+          idc: "HF",
+          ip: "10.45.18.603",
+          memory: 16,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    ZOOKEEPER: {
+      "bjb-dasp-zk-kzx": [
+        {
+          component: "dasp-plat-zookeeper",
+          cpu: "8",
+          hostname: "bjb-dasp-zk-kzx-0701",
+          idc: "BJ-NFX",
+          ip: "26.131.169.701",
+          memory: 32,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-zk-kzx": [
+        {
+          component: "dasp-plat-zookeeper",
+          cpu: "8",
+          hostname: "bjc-dasp-zk-kzx-0702",
+          idc: "BJ-DB",
+          ip: "26.131.169.702",
+          memory: 32,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-zk-kzx": [
+        {
+          component: "dasp-plat-zookeeper",
+          cpu: "8",
+          hostname: "hfa-dasp-zk-kzx-0703",
+          idc: "HF",
+          ip: "10.45.19.703",
+          memory: 32,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    容器云: {
+      "bjb-dasp-k8s-kzx": [
+        {
+          component: "dasp-plat-k8s-master",
+          cpu: "32",
+          hostname: "bjb-dasp-k8s-kzx-master01",
+          idc: "BJ-NFX",
+          ip: "26.131.160.101",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+        {
+          component: "dasp-plat-k8s-node",
+          cpu: "32",
+          hostname: "bjb-dasp-k8s-kzx-node01",
+          idc: "BJ-NFX",
+          ip: "26.131.160.102",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+        {
+          component: "dasp-plat-k8s-node",
+          cpu: "32",
+          hostname: "bjb-dasp-k8s-kzx-node02",
+          idc: "BJ-NFX",
+          ip: "26.131.160.103",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-k8s-kzx": [
+        {
+          component: "dasp-plat-k8s-master",
+          cpu: "32",
+          hostname: "bjc-dasp-k8s-kzx-master01",
+          idc: "BJ-DB",
+          ip: "26.131.160.201",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+        {
+          component: "dasp-plat-k8s-node",
+          cpu: "32",
+          hostname: "bjc-dasp-k8s-kzx-node01",
+          idc: "BJ-DB",
+          ip: "26.131.160.202",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "hfa-dasp-k8s-kzx": [
+        {
+          component: "dasp-plat-k8s-node",
+          cpu: "32",
+          hostname: "hfa-dasp-k8s-kzx-node01",
+          idc: "HF",
+          ip: "10.45.20.301",
+          memory: 128,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+    应用: {
+      "dasp-azkaban-mgr-4d86": [
+        {
+          component: "dasp-app-azkaban-mgr",
+          cpu: "16",
+          hostname: "dasp-azkaban-mgr-4d86",
+          idc: "BJ-NFX",
+          ip: "26.131.171.101",
+          memory: 32,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "dasp-app-mgr-d5c7": [
+        {
+          component: "dasp-app-mgr",
+          cpu: "16",
+          hostname: "dasp-app-mgr-d5c7",
+          idc: "BJ-NFX",
+          ip: "26.131.171.102",
+          memory: 32,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-mgr-7384": [
+        {
+          component: "dasp-app-mgr",
+          cpu: "16",
+          hostname: "bjc-dasp-mgr-7384",
+          idc: "BJ-DB",
+          ip: "26.131.171.103",
+          memory: 32,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+      "bjc-dasp-mgr-3174": [
+        {
+          component: "dasp-app-mgr",
+          cpu: "16",
+          hostname: "bjc-dasp-mgr-3174",
+          idc: "BJ-DB",
+          ip: "26.131.171.104",
+          memory: 32,
+          mtype: "V",
+          os: "Kylin Linux Advanced Server release V10 (Tercel)",
+        },
+      ],
+    },
+  },
+  链路: [
+    {
+      fnode: "dasp_ht_haproxy_4",
+      snode: "dasp-azkaban-mgr-4d86",
+    },
+    {
+      fnode: "dasp_ht_haproxy_5",
+      snode: "dasp-app-mgr-d5c7",
+    },
+    {
+      fnode: "dasp_cym_haproxy_4",
+      snode: "bjc-dasp-mgr-7384",
+    },
+    {
+      fnode: "dasp_cym_haproxy_8",
+      snode: "bjc-dasp-mgr-3174",
+    },
+    {
+      fnode: "dasp_ht_haproxy_4",
+      snode: "dasp_ht_haproxy_5",
+    },
+    {
+      fnode: "dasp_cym_haproxy_4",
+      snode: "dasp_cym_haproxy_8",
+    },
+    {
+      fnode: "dasp-azkaban-mgr-4d86",
+      snode: "bjb-dasp-mysql-kzx",
+    },
+    {
+      fnode: "dasp-app-mgr-d5c7",
+      snode: "bjb-dasp-mysql-kzx",
+    },
+    {
+      fnode: "bjc-dasp-mgr-7384",
+      snode: "bjc-dasp-mysql-kzx",
+    },
+    {
+      fnode: "bjc-dasp-mgr-3174",
+      snode: "bjc-dasp-mysql-kzx",
+    },
+    {
+      fnode: "bjb-dasp-mysql-kzx",
+      snode: "bjb-dasp-canal-kzx",
+    },
+    {
+      fnode: "bjc-dasp-mysql-kzx",
+      snode: "bjc-dasp-canal-kzx",
+    },
+    {
+      fnode: "hfa-dasp-mysql-kzx",
+      snode: "hfa-dasp-canal-kzx",
+    },
+    {
+      fnode: "bjb-dasp-canal-kzx",
+      snode: "bjb-dasp-kafka-kzx",
+    },
+    {
+      fnode: "bjc-dasp-canal-kzx",
+      snode: "bjc-dasp-kafka-kzx",
+    },
+    {
+      fnode: "hfa-dasp-canal-kzx",
+      snode: "hfa-dasp-kafka-kzx",
+    },
+    {
+      fnode: "bjb-dasp-kafka-kzx",
+      snode: "bjb-dasp-es-kzx",
+    },
+    {
+      fnode: "bjc-dasp-kafka-kzx",
+      snode: "bjc-dasp-es-kzx",
+    },
+    {
+      fnode: "hfa-dasp-kafka-kzx",
+      snode: "hfa-dasp-es-kzx",
+    },
+    {
+      fnode: "bjb-dasp-kafka-kzx",
+      snode: "bjb-dasp-greatdb-kzx",
+    },
+    {
+      fnode: "bjc-dasp-kafka-kzx",
+      snode: "bjc-dasp-greatdb-kzx",
+    },
+    {
+      fnode: "hfa-dasp-kafka-kzx",
+      snode: "hfa-dasp-greatdb-kzx",
+    },
+    {
+      fnode: "bjb-dasp-kafka-kzx",
+      snode: "bjb-dasp-hadoop-kzx",
+    },
+    {
+      fnode: "bjc-dasp-kafka-kzx",
+      snode: "hfa-dasp-hadoop-kzx",
+    },
+    {
+      fnode: "bjb-dasp-zk-kzx",
+      snode: "bjb-dasp-kafka-kzx",
+    },
+    {
+      fnode: "bjc-dasp-zk-kzx",
+      snode: "bjc-dasp-kafka-kzx",
+    },
+    {
+      fnode: "hfa-dasp-zk-kzx",
+      snode: "hfa-dasp-kafka-kzx",
+    },
+    {
+      fnode: "bjb-dasp-nginx-kzx",
+      snode: "dasp_ht_haproxy_4",
+    },
+    {
+      fnode: "bjc-dasp-nginx-kzx",
+      snode: "dasp_cym_haproxy_4",
+    },
+    {
+      fnode: "hfa-dasp-nginx-kzx",
+      snode: "dasp_ht_haproxy_5",
+    },
+    {
+      fnode: "bjb-dasp-k8s-kzx",
+      snode: "dasp-app-mgr-d5c7",
+    },
+    {
+      fnode: "bjc-dasp-k8s-kzx",
+      snode: "bjc-dasp-mgr-7384",
+    },
+    {
+      fnode: "bjb-dasp-mysql-kzx",
+      snode: "hfa-dasp-mysql-kzx",
+    },
+    {
+      fnode: "bjc-dasp-mysql-kzx",
+      snode: "hfa-dasp-mysql-kzx",
+    },
+    {
+      fnode: "bjb-dasp-es-kzx",
+      snode: "bjc-dasp-es-kzx",
+    },
+    {
+      fnode: "bjc-dasp-es-kzx",
+      snode: "hfa-dasp-es-kzx",
+    },
+  ],
+  集群关系: {
+    CANAL: [
+      {
+        clusterName: "dasp-canal-kzx",
+        nodes: [
+          "bjb-dasp-canal-kzx",
+          "bjc-dasp-canal-kzx",
+          "hfa-dasp-canal-kzx",
+        ],
+      },
+    ],
+    ES: [
+      {
+        clusterName: "dasp-es-kzx",
+        nodes: ["bjb-dasp-es-kzx", "bjc-dasp-es-kzx", "hfa-dasp-es-kzx"],
+      },
+    ],
+    GREATDB: [
+      {
+        clusterName: "dasp-greatdb-kzx",
+        nodes: [
+          "bjb-dasp-greatdb-kzx",
+          "bjc-dasp-greatdb-kzx",
+          "hfa-dasp-greatdb-kzx",
+        ],
+      },
+    ],
+    HADOOP: [
+      {
+        clusterName: "dasp-hadoop-kzx",
+        nodes: ["bjb-dasp-hadoop-kzx", "hfa-dasp-hadoop-kzx"],
+      },
+    ],
+    HAPROXY: [
+      {
+        clusterName: "dasp-haproxy-ht",
+        nodes: ["dasp_ht_haproxy_4", "dasp_ht_haproxy_5"],
+      },
+      {
+        clusterName: "dasp-haproxy-cym",
+        nodes: ["dasp_cym_haproxy_4", "dasp_cym_haproxy_8"],
+      },
+    ],
+    KAFKA: [
+      {
+        clusterName: "dasp-kafka-kzx",
+        nodes: [
+          "bjb-dasp-kafka-kzx",
+          "bjc-dasp-kafka-kzx",
+          "hfa-dasp-kafka-kzx",
+        ],
+      },
+    ],
+    MYSQL: [
+      {
+        clusterName: "dasp-mysql-kzx",
+        nodes: [
+          "bjb-dasp-mysql-kzx",
+          "bjc-dasp-mysql-kzx",
+          "hfa-dasp-mysql-kzx",
+        ],
+      },
+    ],
+    NGINX: [
+      {
+        clusterName: "dasp-nginx-kzx",
+        nodes: [
+          "bjb-dasp-nginx-kzx",
+          "bjc-dasp-nginx-kzx",
+          "hfa-dasp-nginx-kzx",
+        ],
+      },
+    ],
+    ZOOKEEPER: [
+      {
+        clusterName: "dasp-zk-kzx",
+        nodes: ["bjb-dasp-zk-kzx", "bjc-dasp-zk-kzx", "hfa-dasp-zk-kzx"],
+      },
+    ],
+    RSYNC: [
+      {
+        clusterName: "dasp-rsync-kzx",
+        nodes: ["bjb-dasp-rsync-kzx", "bjc-dasp-rsync-kzx"],
+      },
+    ],
+    容器云: [
+      {
+        clusterName: "dasp-k8s-kzx",
+        nodes: ["bjb-dasp-k8s-kzx", "bjc-dasp-k8s-kzx", "hfa-dasp-k8s-kzx"],
+      },
+    ],
+    应用: [
+      {
+        clusterName: "dasp-app-mgr-cluster",
+        nodes: [
+          "dasp-azkaban-mgr-4d86",
+          "dasp-app-mgr-d5c7",
+          "bjc-dasp-mgr-7384",
+          "bjc-dasp-mgr-3174",
+        ],
+      },
+    ],
+  },
+};
+
+export { billRes, systemProfileRes }
