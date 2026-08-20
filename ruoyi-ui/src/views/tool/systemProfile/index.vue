@@ -1,65 +1,61 @@
 <template>
   <div class="profile-page">
-    <!-- 顶部操作行：左侧搜索框 + 查询按钮，右侧统计卡片（搜索成功后显示） -->
-    <section class="profile-topbar">
-      <div class="profile-topbar__search">
+    <!-- 空状态：居中的搜索入口（未查询前只显示这里） -->
+    <div v-if="!searched" class="profile-empty">
+      <i class="el-icon-monitor profile-empty__icon" />
+      <h2 class="profile-empty__title">系统画像</h2>
+      <p class="profile-empty__hint">请输入系统英文名称查询系统画像</p>
+      <div class="profile-empty__search">
         <el-input
           :value="systemQuery"
           size="medium"
           clearable
           placeholder="请输入系统英文名称"
           prefix-icon="el-icon-search"
-          class="profile-topbar__input"
+          class="profile-empty__input"
           @input="onSystemInput"
           @keyup.enter.native="searchSystem"
         />
         <el-button type="primary" size="medium" @click="searchSystem">查询</el-button>
       </div>
-      <div v-if="searched" class="profile-stats-row">
-        <div
-          v-for="s in stats"
-          :key="s.key"
-          class="profile-stat"
-          :class="'is-' + s.key"
-        >
-          <i :class="s.icon" />
-          <div class="profile-stat__meta">
-            <span class="profile-stat__value">{{ s.value }}</span>
-            <span class="profile-stat__label">{{ s.label }}</span>
-          </div>
-          <span v-if="s.reserved" class="profile-stat__badge">预留</span>
-        </div>
-      </div>
-    </section>
+    </div>
 
     <!-- 加载中 -->
-    <div v-if="loading" class="profile-state">
+    <div v-else-if="loading" class="profile-state">
       <i class="el-icon-loading profile-state__icon" />
       <p>正在加载系统画像...</p>
     </div>
 
-    <!-- 未查询 / 查询无数据 -->
-    <div v-else-if="!searched || !profileData" class="profile-state">
+    <!-- 查询无数据 -->
+    <div v-else-if="!profileData" class="profile-state">
       <i class="el-icon-document profile-state__icon" />
-      <p>{{ !searched ? '暂无内容' : '暂无系统画像数据' }}</p>
-      <p v-if="!searched" class="profile-state__hint">请输入系统英文名称进行查询</p>
+      <p>暂无系统画像数据</p>
     </div>
 
     <template v-else>
-      <!-- ============ 基础信息栏（互换后第二行，约 56px） ============ -->
+      <!-- ============ 顶部信息栏（单行）：系统信息 | 机房 | 简介 | 行内统计 ============ -->
       <section class="profile-info">
-        <span class="profile-info__name" :title="basic.系统名">{{ basic.系统名 }}</span>
-        <span class="profile-info__level">{{ basic.系统重要性级别 }}</span>
+        <!-- 系统名称：视觉权重最高，可点击切换系统 -->
+        <button
+          type="button"
+          class="profile-info__switch"
+          :title="'点击切换系统（当前：' + basic.系统名 + '）'"
+          @click="openSystemSwitch"
+        >
+          <span class="profile-info__name">{{ basic.系统名 }}</span>
+          <span class="profile-info__level">{{ basic.系统重要性级别 }}</span>
+          <span class="profile-info__switch-hint"><i class="el-icon-refresh" /> 切换</span>
+        </button>
+
         <span class="profile-info__divider" />
 
-        <span class="profile-info__room">
-          <i class="el-icon-location-outline" />
-          <span class="profile-info__room-label">主机房</span>
-          <span class="profile-info__room-value">{{ basic.主机房 }}</span>
-        </span>
-
-        <!-- 数据中心标签：可横向滚动 -->
-        <div class="profile-info__dcs">
+        <!-- 机房/数据中心：可压缩省略，不换行 -->
+        <div class="profile-info__rooms">
+          <span class="profile-info__room">
+            <i class="el-icon-location-outline" />
+            <span class="profile-info__room-label">主机房</span>
+            <span class="profile-info__room-value">{{ basic.主机房 }}</span>
+          </span>
           <el-tag
             v-for="dc in basic.数据中心"
             :key="dc"
@@ -69,11 +65,30 @@
           >{{ dc }}</el-tag>
         </div>
 
-        <!-- 简介：一行省略，悬停显示全部 -->
+        <span class="profile-info__divider" />
+
+        <!-- 简介：最主要的可压缩区，单行省略，悬停显示全部 -->
         <p class="profile-info__desc" :title="basic.系统简介">
           <span class="profile-info__desc-label">简介</span>
           <span class="profile-info__desc-text">{{ basic.系统简介 }}</span>
         </p>
+
+        <span class="profile-info__divider" />
+
+        <!-- 行内紧凑统计：不再使用大卡片 -->
+        <div class="profile-stats-inline">
+          <span
+            v-for="s in stats"
+            :key="s.key"
+            class="profile-stat-inline"
+            :class="'is-' + s.key"
+          >
+            <i :class="s.icon" />
+            <span class="profile-stat-inline__value">{{ s.value }}</span>
+            <span class="profile-stat-inline__label">{{ s.label }}</span>
+            <span v-if="s.reserved" class="profile-stat-inline__badge">预留</span>
+          </span>
+        </div>
       </section>
 
       <!-- ============ 组件拓扑区域（约 90px）：左侧紧凑标签 + 右侧集群关系 ============ -->
@@ -212,6 +227,31 @@
         </section>
       </div>
     </template>
+
+    <!-- 系统切换弹窗：点击系统名称后出现，复用现有搜索/查询逻辑 -->
+    <el-dialog
+      title="切换系统"
+      :visible.sync="switchDialogVisible"
+      width="480px"
+      append-to-body
+      :close-on-click-modal="false"
+    >
+      <div class="profile-switch">
+        <p class="profile-switch__hint">输入系统英文名称，查询后切换当前系统画像</p>
+        <div class="profile-switch__row">
+          <el-input
+            :value="switchQuery"
+            size="medium"
+            clearable
+            placeholder="请输入系统英文名称"
+            prefix-icon="el-icon-search"
+            @input="onSwitchInput"
+            @keyup.enter.native="searchSystemFromDialog"
+          />
+          <el-button type="primary" size="medium" @click="searchSystemFromDialog">查询</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -233,7 +273,9 @@ export default {
       searchQuery: '',
       openClusters: [], // 展开的集群（非手风琴，默认展开第一个）
       systemQuery: '', // 系统英文名称搜索框
-      searched: false // 是否已执行查询（未查询前仅显示搜索框与空状态）
+      searched: false, // 是否已执行查询（未查询前仅显示居中的搜索入口）
+      switchDialogVisible: false, // 系统切换弹窗
+      switchQuery: '' // 切换弹窗内的查询输入（与主搜索框独立）
     }
   },
 
@@ -264,7 +306,7 @@ export default {
         return sum + Object.values(topo[comp]).reduce((s, hosts) => s + hosts.length, 0)
       }, 0)
       return [
-        { key: 'component', label: '组件类型', value: componentCount, icon: 'el-icon-menu' },
+        { key: 'component', label: '组件', value: componentCount, icon: 'el-icon-menu' },
         { key: 'cluster', label: '集群', value: clusterCount, icon: 'el-icon-office-building' },
         { key: 'host', label: '主机', value: hostCount, icon: 'el-icon-monitor' },
         { key: 'link', label: '链路', value: this.links.length, icon: 'el-icon-connection', reserved: true }
@@ -336,15 +378,37 @@ export default {
       this.systemQuery = (val || '').replace(/[^a-zA-Z]/g, '').toUpperCase()
     },
 
+    // 打开系统切换弹窗（预填当前查询词，回车/点查询后重新查询）
+    openSystemSwitch() {
+      this.switchQuery = this.systemQuery
+      this.switchDialogVisible = true
+    },
+
+    // 切换弹窗输入框：同样只允许英文并转大写
+    onSwitchInput(val) {
+      this.switchQuery = (val || '').replace(/[^a-zA-Z]/g, '').toUpperCase()
+    },
+
     // 查询系统画像：输入系统英文名称后回车或点查询按钮触发
     searchSystem() {
-      const q = this.systemQuery.trim()
-      if (!q) {
+      this.doSearch(this.systemQuery)
+    },
+
+    // 切换弹窗内查询：复用同一查询逻辑，成功后自动关闭弹窗
+    searchSystemFromDialog() {
+      this.doSearch(this.switchQuery)
+    },
+
+    // 统一查询逻辑（空值校验 → 请求 → 更新状态）
+    doSearch(q) {
+      const name = (q || '').trim()
+      if (!name) {
         this.$message.warning('请输入系统英文名称')
         return
       }
+      this.systemQuery = name
       this.loading = true
-      getSystemProfile({ systemName: q })
+      getSystemProfile({ systemName: name })
         .then(res => {
           this.profileData = res.data
           this.prepareData()
@@ -361,6 +425,7 @@ export default {
         })
         .finally(() => {
           this.loading = false
+          this.switchDialogVisible = false
         })
     },
 
@@ -424,11 +489,51 @@ $stat-colors: (
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   background: $profile-bg;
 }
 
-/* ============ 加载/空状态 ============ */
+/* ============ 空状态：居中的搜索入口（未查询前展示） ============ */
+.profile-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  &__icon {
+    font-size: 44px;
+    color: #c0c4cc;
+    margin-bottom: 10px;
+  }
+
+  &__title {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #303133;
+    letter-spacing: 2px;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: 12.5px;
+    color: #909399;
+  }
+
+  &__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  &__input {
+    width: 460px;
+  }
+}
+
+/* ============ 加载/无数据状态 ============ */
 .profile-state {
   flex: 1;
   display: flex;
@@ -446,39 +551,75 @@ $stat-colors: (
     margin: 0;
     font-size: 13px;
   }
+}
 
-  /* 空状态辅助提示（未查询时） */
+/* ============ 系统切换弹窗 ============ */
+.profile-switch {
   &__hint {
-    margin-top: 6px;
-    font-size: 12px;
-    color: #c0c4cc;
+    margin: 0 0 12px;
+    font-size: 12.5px;
+    color: #909399;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .el-input {
+      flex: 1;
+    }
   }
 }
 
-/* ============ 顶部基础信息栏 ============ */
+/* ============ 顶部信息栏（单行）：系统信息 | 机房 | 简介 | 行内统计 ============ */
 .profile-info {
   flex-shrink: 0;
-  height: 56px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 0 20px;
-  overflow: hidden;
+  padding: 10px 20px;
   background: $profile-card-bg;
   border: 1px solid $profile-card-border;
   border-radius: $profile-card-radius;
   box-shadow: $profile-card-shadow;
 
-  &__name {
+  /* 竖分隔线（分组：系统信息 / 机房 / 简介 / 统计） */
+  &__divider {
     flex-shrink: 0;
-    max-width: 320px;
+    width: 1px;
+    height: 20px;
+    background: $profile-card-border;
+  }
+
+  /* 系统名称整体：可点击的切换入口，视觉权重最高 */
+  &__switch {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    min-width: 0;
+  }
+
+  &__name {
+    max-width: 380px;
     font-size: 16px;
     font-weight: 700;
     color: #303133;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: color 0.15s ease;
+  }
+
+  /* 悬停/聚焦时名称变主题蓝，提示可点击 */
+  &__switch:hover .profile-info__name {
+    color: $profile-accent;
   }
 
   /* 重要性级别：橙金色徽标 */
@@ -496,11 +637,33 @@ $stat-colors: (
     font-weight: 700;
   }
 
-  &__divider {
-    flex-shrink: 0;
-    width: 1px;
-    height: 20px;
-    background: $profile-card-border;
+  /* “切换”小提示 */
+  &__switch-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+    color: #909399;
+    background: $profile-stat-bg;
+    border-radius: 6px;
+    padding: 1px 6px;
+    line-height: 16px;
+
+    i {
+      font-size: 11px;
+    }
+  }
+
+  /* 机房/数据中心：可压缩省略（空间不足时优先于简介收缩） */
+  &__rooms {
+    flex: 0 1 auto;
+    max-width: 340px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   &__room {
@@ -526,31 +689,14 @@ $stat-colors: (
     font-size: 13px;
   }
 
-  /* 数据中心标签：弹性占位优先完整展示，多时横向滚动（隐藏滚动条） */
-  &__dcs {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
   &__dc {
     flex-shrink: 0;
   }
 
-  /* 简介：动态宽度（跟随内容伸缩，不抢数据中心空间）；过长省略，悬停 title 显示全部 */
+  /* 简介：最主要的可压缩区，单行省略，悬停 title 显示全部 */
   &__desc {
-    flex: 0 1 auto;
-    min-width: 0;
-    max-width: 40%;
+    flex: 1 1 auto;
+    min-width: 100px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -565,114 +711,63 @@ $stat-colors: (
   }
 
   &__desc-text {
+    flex: 1;
+    min-width: 0;
     color: #606266;
     font-size: 12.5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-}
 
-/* ============ 顶部操作行（第一行）：左侧搜索 + 右侧统计卡片 ============ */
-.profile-topbar {
-  flex-shrink: 0;
-  height: 72px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-
-  &__search {
-    flex-shrink: 0;
+  /* 行内紧凑统计：图标 + 数字 + 短标签，不再使用大卡片 */
+  .profile-stats-inline {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 14px;
+    margin-left: 4px;
   }
 
-  &__input {
-    width: 300px;
-  }
-}
-
-/* ============ 统计卡片行（顶部操作行右侧，搜索成功后显示） ============ */
-.profile-stats-row {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.profile-stat {
-  position: relative;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: $profile-card-radius;
-  background: $profile-card-bg;
-  border: 1px solid $profile-card-border;
-  box-shadow: $profile-card-shadow;
-  overflow: hidden;
-
-  /* 图标：圆角小色块，带淡色底与主题色 */
-  i {
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
+  .profile-stat-inline {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    font-size: 17px;
-    color: #909399;
-    background: $profile-stat-bg;
-  }
+    align-items: baseline;
+    gap: 5px;
 
-  /* 按统计项 key 区分：左色条 + 微渐变背景 + 图标主题色 */
-  @each $key, $color in $stat-colors {
-    &.is-#{$key} {
-      border-left: 3px solid $color;
-      background: linear-gradient(135deg, mix($color, #fff, 10%), #fff 70%);
+    i {
+      font-size: 14px;
+      color: #909399;
+      align-self: center;
+    }
 
-      i {
+    &__value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #303133;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &__label {
+      font-size: 11.5px;
+      color: #909399;
+    }
+
+    &__badge {
+      font-size: 10px;
+      color: #909399;
+      background: $profile-stat-bg;
+      border-radius: 6px;
+      padding: 0 4px;
+      line-height: 14px;
+      align-self: center;
+    }
+
+    /* 指标图标沿用原统计颜色体系 */
+    @each $key, $color in $stat-colors {
+      &.is-#{$key} i {
         color: $color;
-        background: mix($color, #fff, 14%);
       }
     }
-  }
-
-  &__meta {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-    min-width: 0;
-  }
-
-  /* 数字大且突出，标签字号较小 */
-  &__value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #303133;
-    font-variant-numeric: tabular-nums;
-  }
-
-  &__label {
-    font-size: 11.5px;
-    color: #909399;
-  }
-
-  &__badge {
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    font-size: 10px;
-    color: #909399;
-    background: $profile-stat-bg;
-    padding: 0 6px;
-    border-radius: 6px;
-    line-height: 16px;
   }
 }
 
