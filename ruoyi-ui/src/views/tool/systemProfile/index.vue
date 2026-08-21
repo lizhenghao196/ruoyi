@@ -103,7 +103,7 @@
               :key="c.name"
               class="profile-topo__tag"
               :class="['is-' + c.name, { 'is-active': c.name === activeComponent }]"
-              :title="c.clusterCount + ' 个集群 · ' + c.hostCount + ' 台主机'"
+              :title="c.clusterCount + ' 个集群 · ' + c.hostCount + (c.isStandard ? ' 台主机' : ' 条记录')"
               type="button"
               @click="selectComponent(c.name)"
             >
@@ -166,40 +166,55 @@
                 <template slot="title">
                   <i class="profile-cluster__dot" />
                   <span class="profile-cluster__title">{{ cluster.name }}</span>
-                  <span class="profile-cluster__count">{{ cluster.hostCount }} 台主机</span>
+                  <span class="profile-cluster__count">
+                    {{ cluster.hostCount }} {{ cluster.columns.standard ? '台主机' : '条记录' }}
+                  </span>
                 </template>
                 <!-- max-height：数据多（80+ 条）时表内滚动，表头固定；
                      列宽固定总和 680px < 表格可用 ~693px（1920 全屏），
                      主机名（最长 22 字符 ≈ 200px 含图标与内边距）完整展示且不出现横向滚动条 -->
                 <el-table :data="cluster.hosts" size="mini" border max-height="320">
-                  <el-table-column label="主机名" width="190" show-overflow-tooltip>
-                    <template slot-scope="scope">
-                      <span class="profile-host">
-                        <i class="el-icon-monitor profile-host__icon" />
-                        <span class="profile-host__name">{{ scope.row.hostname }}</span>
-                      </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column prop="ip" label="IP" width="108" />
-                  <el-table-column label="机房" width="80">
-                    <template slot-scope="scope">
-                      <span class="profile-idc">{{ scope.row.idc }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="类型" width="56">
-                    <template slot-scope="scope">
-                      <span class="profile-mtype" :class="scope.row.mtype === 'P' ? 'is-p' : 'is-v'">
-                        {{ machineType(scope.row.mtype) }}
-                      </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="CPU" width="60">
-                    <template slot-scope="scope">{{ scope.row.cpu }}C</template>
-                  </el-table-column>
-                  <el-table-column label="内存" width="60">
-                    <template slot-scope="scope">{{ scope.row.memory }}G</template>
-                  </el-table-column>
-                  <el-table-column prop="os" label="操作系统" show-overflow-tooltip />
+                  <!-- 标准主机结构（hostname+ip）：固定友好列 -->
+                  <template v-if="cluster.columns.standard">
+                    <el-table-column label="主机名" width="190" show-overflow-tooltip>
+                      <template slot-scope="scope">
+                        <span class="profile-host">
+                          <i class="el-icon-monitor profile-host__icon" />
+                          <span class="profile-host__name">{{ scope.row.hostname }}</span>
+                        </span>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="ip" label="IP" width="108" />
+                    <el-table-column label="机房" width="80">
+                      <template slot-scope="scope">
+                        <span class="profile-idc">{{ scope.row.idc }}</span>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="类型" width="56">
+                      <template slot-scope="scope">
+                        <span class="profile-mtype" :class="scope.row.mtype === 'P' ? 'is-p' : 'is-v'">
+                          {{ machineType(scope.row.mtype) }}
+                        </span>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="CPU" width="60">
+                      <template slot-scope="scope">{{ scope.row.cpu }}C</template>
+                    </el-table-column>
+                    <el-table-column label="内存" width="60">
+                      <template slot-scope="scope">{{ scope.row.memory }}G</template>
+                    </el-table-column>
+                    <el-table-column prop="os" label="操作系统" show-overflow-tooltip />
+                  </template>
+                  <!-- 其他结构（微服务/未来新增组件类型）：表头用字段 key 动态渲染，字段变化不影响展示 -->
+                  <template v-else>
+                    <el-table-column
+                      v-for="col in cluster.columns.items"
+                      :key="col.prop"
+                      :prop="col.prop"
+                      :label="col.label"
+                      show-overflow-tooltip
+                    />
+                  </template>
                 </el-table>
               </el-collapse-item>
             </el-collapse>
@@ -255,12 +270,12 @@
     <el-dialog
       :title="'集群关系 - ' + activeComponent"
       :visible.sync="relationDialogVisible"
-      width="680px"
+      width="880px"
       append-to-body
       :close-on-click-modal="true"
     >
       <el-table :data="relationGroups" size="mini" border max-height="420">
-        <el-table-column label="集群名称" width="210" show-overflow-tooltip>
+        <el-table-column label="集群名称" width="140" show-overflow-tooltip>
           <template slot-scope="scope">{{ scope.row.clusterName }}</template>
         </el-table-column>
         <el-table-column label="集群节点" show-overflow-tooltip>
@@ -346,11 +361,14 @@ export default {
           const clusters = Object.keys(clusterMap)
             .map(cname => ({ name: cname, hosts: clusterMap[cname] }))
             .sort((a, b) => a.name.localeCompare(b.name))
+          // isStandard：首条记录含 hostname+ip 视为标准主机结构，用于文案（台主机/条记录）
+          const firstHost = clusters[0] && clusters[0].hosts[0]
           return {
             name,
             clusters,
             clusterCount: clusters.length,
-            hostCount: clusters.reduce((s, c) => s + c.hosts.length, 0)
+            hostCount: clusters.reduce((s, c) => s + c.hosts.length, 0),
+            isStandard: !!(firstHost && firstHost.hostname && firstHost.ip)
           }
         })
         .sort((a, b) => {
@@ -379,15 +397,27 @@ export default {
       const clusters = comp ? comp.clusters : []
       const q = this.searchQuery.trim().toLowerCase()
       if (!q) {
-        return clusters.map(g => ({ ...g, hostCount: g.hosts.length }))
+        return clusters.map(g => ({
+          ...g,
+          hostCount: g.hosts.length,
+          columns: this.buildColumns(g.hosts)
+        }))
       }
       return clusters
         .map(g => {
+          // 匹配记录中任意字段：标准主机搜主机名/IP，微服务等结构搜 serviceName 等任意字段
           const hosts = g.hosts.filter(h => {
-            return (h.hostname || '').toLowerCase().includes(q) ||
-              (h.ip || '').toLowerCase().includes(q)
+            return Object.keys(h).some(k => {
+              const v = h[k]
+              return String(v == null ? '' : v).toLowerCase().includes(q)
+            })
           })
-          return { ...g, hosts, hostCount: hosts.length }
+          return {
+            ...g,
+            hosts,
+            hostCount: hosts.length,
+            columns: this.buildColumns(hosts)
+          }
         })
         .filter(g => g.hosts.length > 0)
     },
@@ -482,6 +512,19 @@ export default {
     // 打开集群关系弹窗（数据来自 relationGroups computed）
     openRelationDialog() {
       this.relationDialogVisible = true
+    },
+
+    // 判断集群记录结构：首条含 hostname+ip 视为标准主机（固定友好列）；
+    // 其他结构（微服务/未来新增组件类型）按字段 key 动态生成列，保证新增字段也能正常展示
+    buildColumns(hosts) {
+      const first = hosts && hosts[0]
+      if (first && first.hostname && first.ip) {
+        return { standard: true, items: [] }
+      }
+      return {
+        standard: false,
+        items: Object.keys(first || {}).map(k => ({ prop: k, label: k }))
+      }
     },
 
     machineType(mtype) {
