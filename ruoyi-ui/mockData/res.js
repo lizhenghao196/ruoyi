@@ -55,6 +55,9 @@ let systemProfileRes = {
       "北京南法信机房",
       "深圳南湾机房",
       "深圳五联机房",
+      "深圳五联机房1",
+      "深圳五联机房2",
+      "深圳五联机房3",
     ],
     系统名: "s新核心_数据&应用服务",
     系统简介:
@@ -1508,14 +1511,24 @@ let systemProfileRes = {
           "bjc-dasp-canal-kzx",
           "hfa-dasp-canal-kzx",
         ],
+        desc: "Canal集群用于数据同步，支持MySQL、Oracle等数据库的binlog解析和数据传输。",
+      },
+      {
+        clusterName: "dasp-canal-kzx",
+        nodes: [
+          "bjb-dasp-canal-kzx",
+          "bjc-dasp-canal-kzx",
+          "hfa-dasp-canal-kzx",
+        ],
+        desc: "Canal集群用于数据同步，支持MySQL、Oracle等数据库的binlog解析和数据传输。",
       },
     ],
-    // ES: [
-    //   {
-    //     clusterName: "dasp-es-kzx",
-    //     nodes: ["bjb-dasp-es-kzx", "bjc-dasp-es-kzx", "hfa-dasp-es-kzx"],
-    //   },
-    // ],
+    ES: [
+      {
+        clusterName: "dasp-es-kzx",
+        nodes: ["bjb-dasp-es-kzx", "bjc-dasp-es-kzx", "hfa-dasp-es-kzx"],
+      },
+    ],
     // GREATDB: [
     //   {
     //     clusterName: "dasp-greatdb-kzx",

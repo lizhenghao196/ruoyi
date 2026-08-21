@@ -33,27 +33,27 @@
     </div>
 
     <template v-else>
-      <!-- ============ 顶部信息栏（单行）：系统信息 | 机房 | 简介 | 行内统计 ============ -->
+      <!-- ============ 顶部信息栏（单行）：系统信息 | 机房 | 统计 | 简介 ============ -->
       <section class="profile-info">
-        <!-- 系统名称：视觉权重最高，可点击切换系统 -->
+        <!-- 系统名称：视觉权重最高，可点击切换系统（i 图标定位在名称左上方，不占布局空间） -->
         <button
           type="button"
           class="profile-info__switch"
           :title="'点击切换系统（当前：' + basic.系统名 + '）'"
           @click="openSystemSwitch"
         >
+          <i class="el-icon-info profile-info__info-icon" />
           <span class="profile-info__name">{{ basic.系统名 }}</span>
           <span class="profile-info__level">{{ basic.系统重要性级别 }}</span>
-          <span class="profile-info__switch-hint"><i class="el-icon-refresh" /> 切换</span>
         </button>
 
         <span class="profile-info__divider" />
 
-        <!-- 机房/数据中心：可压缩省略，不换行 -->
+        <!-- 机房/数据中心：优先完整展示 -->
         <div class="profile-info__rooms">
           <span class="profile-info__room">
             <i class="el-icon-location-outline" />
-            <span class="profile-info__room-label">主机房</span>
+            <span class="profile-info__room-label">主</span>
             <span class="profile-info__room-value">{{ basic.主机房 }}</span>
           </span>
           <el-tag
@@ -67,15 +67,7 @@
 
         <span class="profile-info__divider" />
 
-        <!-- 简介：最主要的可压缩区，单行省略，悬停显示全部 -->
-        <p class="profile-info__desc" :title="basic.系统简介">
-          <span class="profile-info__desc-label">简介</span>
-          <span class="profile-info__desc-text">{{ basic.系统简介 }}</span>
-        </p>
-
-        <span class="profile-info__divider" />
-
-        <!-- 行内紧凑统计：不再使用大卡片 -->
+        <!-- 行内紧凑统计 -->
         <div class="profile-stats-inline">
           <span
             v-for="s in stats"
@@ -86,9 +78,16 @@
             <i :class="s.icon" />
             <span class="profile-stat-inline__value">{{ s.value }}</span>
             <span class="profile-stat-inline__label">{{ s.label }}</span>
-            <span v-if="s.reserved" class="profile-stat-inline__badge">预留</span>
           </span>
         </div>
+
+        <span class="profile-info__divider" />
+
+        <!-- 简介：放最后，最主要的可压缩区，单行省略，悬停显示全部 -->
+        <p class="profile-info__desc" :title="basic.系统简介">
+          <span class="profile-info__desc-label">简介</span>
+          <span class="profile-info__desc-text">{{ basic.系统简介 }}</span>
+        </p>
       </section>
 
       <!-- ============ 组件拓扑区域（约 90px）：左侧紧凑标签 + 右侧集群关系 ============ -->
@@ -114,22 +113,20 @@
           </div>
         </div>
 
-        <!-- 集群关系：选中组件的 key 在“集群关系”中存在时展示，否则显示空态
+        <!-- 集群关系：选中组件的 key 在“集群关系”中存在时展示文字按钮，点击弹窗查看明细；否则显示空态
              （用 div 而非 aside：全局 index.scss 对 aside 有 margin/背景/内边距默认样式） -->
         <div class="profile-topo__relation">
           <template v-if="relationGroups">
             <span class="profile-topo__relation-title">集群关系</span>
-            <div class="profile-topo__relation-list">
-              <div
-                v-for="g in relationGroups"
-                :key="g.clusterName"
-                class="profile-topo__relation-item"
-                :title="(g.nodes || []).join('、')"
-              >
-                <span class="profile-topo__relation-name">{{ g.clusterName }}</span>
-                <span class="profile-topo__relation-nodes">{{ (g.nodes || []).join('、') }}</span>
-              </div>
-            </div>
+            <button
+              type="button"
+              class="profile-topo__relation-btn"
+              title="点击查看集群关系明细"
+              @click="openRelationDialog"
+            >
+              <i class="el-icon-view" />
+              点击查看集群关系
+            </button>
           </template>
           <span v-else class="profile-topo__relation-empty">
             <i class="el-icon-warning-outline" /> 暂无集群关系
@@ -252,6 +249,33 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 集群关系弹窗：点击“点击查看集群关系”后出现，表格展示集群名称/节点/描述；
+         标题带组件名称，点击遮罩（mask）可直接关闭 -->
+    <el-dialog
+      :title="'集群关系 - ' + activeComponent"
+      :visible.sync="relationDialogVisible"
+      width="680px"
+      append-to-body
+      :close-on-click-modal="true"
+    >
+      <el-table :data="relationGroups" size="mini" border max-height="420">
+        <el-table-column label="集群名称" width="210" show-overflow-tooltip>
+          <template slot-scope="scope">{{ scope.row.clusterName }}</template>
+        </el-table-column>
+        <el-table-column label="集群节点" show-overflow-tooltip>
+          <template slot-scope="scope">{{ (scope.row.nodes || []).join('、') }}</template>
+        </el-table-column>
+        <el-table-column label="集群描述" width="240" show-overflow-tooltip>
+          <template slot-scope="scope">
+            <!-- desc 字段兼容：旧数据没有 desc 时显示 - -->
+            <span :class="{ 'profile-relation-desc--empty': !scope.row.desc }">
+              {{ scope.row.desc || '-' }}
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -275,7 +299,8 @@ export default {
       systemQuery: '', // 系统英文名称搜索框
       searched: false, // 是否已执行查询（未查询前仅显示居中的搜索入口）
       switchDialogVisible: false, // 系统切换弹窗
-      switchQuery: '' // 切换弹窗内的查询输入（与主搜索框独立）
+      switchQuery: '', // 切换弹窗内的查询输入（与主搜索框独立）
+      relationDialogVisible: false // 集群关系弹窗
     }
   },
 
@@ -408,9 +433,9 @@ export default {
       }
       this.systemQuery = name
       this.loading = true
-      getSystemProfile({ systemName: name })
+      getSystemProfile({ systemId: name })
         .then(res => {
-          this.profileData = res.data
+          this.profileData = res.data || res
           this.prepareData()
           this.searched = true
           // 默认选中第一个组件（按数据顺序），并展开其第一个集群
@@ -452,6 +477,11 @@ export default {
     // 展开/收起集群（非手风琴，value 为展开的集群名数组）
     onClusterToggle(val) {
       this.openClusters = val || []
+    },
+
+    // 打开集群关系弹窗（数据来自 relationGroups computed）
+    openRelationDialog() {
+      this.relationDialogVisible = true
     },
 
     machineType(mtype) {
@@ -578,8 +608,8 @@ $stat-colors: (
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 10px 20px;
+  gap: 12px;
+  padding: 10px 16px;
   background: $profile-card-bg;
   border: 1px solid $profile-card-border;
   border-radius: $profile-card-radius;
@@ -595,6 +625,7 @@ $stat-colors: (
 
   /* 系统名称整体：可点击的切换入口，视觉权重最高 */
   &__switch {
+    position: relative;
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
@@ -604,6 +635,15 @@ $stat-colors: (
     background: none;
     cursor: pointer;
     min-width: 0;
+  }
+
+  /* i 图标：绝对定位在名称左上方，不占布局空间 */
+  &__info-icon {
+    position: absolute;
+    top: -2px;
+    left: -16px;
+    font-size: 12px;
+    color: #909399;
   }
 
   &__name {
@@ -637,28 +677,10 @@ $stat-colors: (
     font-weight: 700;
   }
 
-  /* “切换”小提示 */
-  &__switch-hint {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    font-size: 11px;
-    color: #909399;
-    background: $profile-stat-bg;
-    border-radius: 6px;
-    padding: 1px 6px;
-    line-height: 16px;
-
-    i {
-      font-size: 11px;
-    }
-  }
-
-  /* 机房/数据中心：可压缩省略（空间不足时优先于简介收缩） */
+  /* 机房/数据中心：宽度 = 内容宽度（随机房个数自适应），不参与压缩，压缩空间全部由简介提供 */
   &__rooms {
-    flex: 0 1 auto;
-    max-width: 340px;
-    min-width: 0;
+    flex: 0 0 auto;
+    max-width: 960px; /* 极端兜底：机房过多时裁切，不撑爆信息栏 */
     display: flex;
     align-items: center;
     gap: 6px;
@@ -693,10 +715,10 @@ $stat-colors: (
     flex-shrink: 0;
   }
 
-  /* 简介：最主要的可压缩区，单行省略，悬停 title 显示全部 */
+  /* 简介：最主要的可压缩区（可压至 60px 极限），单行省略，悬停 title 显示全部 */
   &__desc {
     flex: 1 1 auto;
-    min-width: 100px;
+    min-width: 60px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -725,23 +747,22 @@ $stat-colors: (
     flex: 0 0 auto;
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-left: 4px;
+    gap: 6px;
   }
 
   .profile-stat-inline {
     display: inline-flex;
     align-items: baseline;
-    gap: 5px;
+    gap: 3px;
 
     i {
-      font-size: 14px;
+      font-size: 12px;
       color: #909399;
       align-self: center;
     }
 
     &__value {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       color: #303133;
       font-variant-numeric: tabular-nums;
@@ -750,16 +771,6 @@ $stat-colors: (
     &__label {
       font-size: 11.5px;
       color: #909399;
-    }
-
-    &__badge {
-      font-size: 10px;
-      color: #909399;
-      background: $profile-stat-bg;
-      border-radius: 6px;
-      padding: 0 4px;
-      line-height: 14px;
-      align-self: center;
     }
 
     /* 指标图标沿用原统计颜色体系 */
@@ -837,40 +848,29 @@ $stat-colors: (
       color: #909399;
     }
 
-    &-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 42px; /* 90px 行内最多两行集群，多余省略 */
-      overflow: hidden;
-      min-width: 0;
-    }
-
-    &-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-      line-height: 19px;
-    }
-
-    /* title：集群名（加粗，不省略） */
-    &-name {
+    /* 文字按钮：点击后弹窗用表格展示集群关系明细 */
+    &-btn {
       flex-shrink: 0;
-      font-size: 12px;
-      font-weight: 600;
-      color: #303133;
-    }
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0;
+      border: none;
+      background: none;
+      font-size: 12.5px;
+      color: $profile-accent;
+      cursor: pointer;
+      transition: color 0.15s ease;
 
-    /* nodes：节点列表（省略时悬停 title 看全部） */
-    &-nodes {
-      flex: 1;
-      min-width: 0;
-      font-size: 11.5px;
-      color: #909399;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      i {
+        font-size: 12px;
+      }
+
+      &:hover {
+        color: #2f8be8;
+        text-decoration: underline;
+      }
     }
 
     &-empty {
@@ -885,6 +885,11 @@ $stat-colors: (
       }
     }
   }
+}
+
+/* 集群关系弹窗内：desc 缺失时占位符 - 弱化显示 */
+.profile-relation-desc--empty {
+  color: #c0c4cc;
 }
 
 /* 组件标签：紧凑胶囊 + 数量角标；未选中统一灰白，选中态主题蓝 */
