@@ -484,12 +484,19 @@ export default {
         })
     },
 
-    // 链路去重（用于统计），防御后端出现重复数据
+    // 链路去重（用于统计），防御后端出现重复数据；
+    // 兼容两种后端格式：
+    //   1. 链路直接是数组：[{ fnode, snode }, ...]
+    //   2. 链路是对象且 arrow 字段为数组：{ ..., arrow: [{ fnode, snode }, ...] }
     prepareData() {
-      const rawLinks = this.profileData['链路'] || []
+      const raw = this.profileData['链路']
+      const rawLinks = Array.isArray(raw)
+        ? raw
+        : (raw && Array.isArray(raw.arrow) ? raw.arrow : [])
       const seen = new Set()
       this.links = []
       rawLinks.forEach(l => {
+        if (!l || !l.fnode || !l.snode) return // 防御缺字段的脏数据
         const key = `${l.fnode}|${l.snode}`
         if (seen.has(key)) return
         seen.add(key)

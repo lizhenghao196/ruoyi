@@ -1355,6 +1355,48 @@ let systemProfileRes = {
         },
       ],
     },
+    微服务: {
+      "BJ-DB@auth-adapt-mcd": [
+        {
+          limitCPU: 4,
+          limitMemory: 8.192,
+          replica: 2,
+          serviceName: "auth-adapt-mcd",
+        },
+      ],
+      "BJ-DB@auth-service-pay": [
+        {
+          limitCPU: 4,
+          limitMemory: 8.192,
+          replica: 3,
+          serviceName: "auth-service-pay020",
+        },
+      ],
+      "BJ-DB@auth-service-switchadapt": [
+        {
+          limitCPU: 4,
+          limitMemory: 8.192,
+          replica: 3,
+          serviceName: "auth-service-switchadapt",
+        },
+      ],
+    },
+    测试: {
+      测试一: [
+        {
+          a: 1,
+          b: 2,
+        },
+        {
+          a: 3,
+          b: 4,
+        },
+        {
+          a: 5,
+          b: 6,
+        },
+      ],
+    },
   },
   链路: [
     {
