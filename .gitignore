@@ -49,3 +49,5 @@ nbdist/
 ######################################################################
 # Claude skills secrets
 .claude/skills/glm-vision/config.json
+
+node_modules

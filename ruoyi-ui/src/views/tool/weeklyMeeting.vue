@@ -89,26 +89,19 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="auto" label="ITSM变更智能化率%" min-width="220">
+      <el-table-column prop="auto" label="ITSM变更智能化率%">
         <template slot="header" slot-scope="scope">
           <div class="flx-div">
             ITSM变更智能化率%
             <el-tooltip
               class="item"
               effect="dark"
-              content="近6个月ITSM编排使用率"
+              content="近2个月ITSM编排使用率"
               placement="top"
             >
               <i class="el-icon-info"></i>
             </el-tooltip>
           </div>
-        </template>
-        <template slot-scope="scope">
-          <spark-line
-            v-if="scope.row.auto && scope.row.auto.length"
-            :data="scope.row.auto"
-          />
-          <span v-else>—</span>
         </template>
       </el-table-column>
       <el-table-column prop="capacity" label="智能场景个数"> </el-table-column>
@@ -147,38 +140,35 @@
 </template>
 
 <script>
-import SparkLine from "./SparkLine";
-
 export default {
-  components: { SparkLine },
   data() {
     return {
       tableData: [
         {
-          system: "DASP",
-          emergency: "",
-          tool: "",
-          autoTool: "",
+          system: "系统A",
+          emergency: 80,
+          tool: 70,
+          autoTool: 60,
           repeat: [1, 2, 3],
-          exact: "",
-          cover: "71.69%",
-          auto: [0, 13.46, 51.28, 54.55, 55.17, 70.18],
-          capacity: "",
-          itsmAuto: "15.25%",
-          itsmTemplate: "42",
+          exact: 90,
+          cover: 85,
+          auto: 75,
+          capacity: 10,
+          itsmAuto: 65,
+          itsmTemplate: 5,
         },
         {
-          system: "ACT",
-          emergency: "",
-          tool: "",
-          autoTool: "",
+          system: "系统B",
+          emergency: 85,
+          tool: 75,
+          autoTool: 65,
           repeat: [4, 5],
-          exact: "",
-          cover: "71.96%",
-          auto: [0, 16.67, 66.67, 42.86, 45.45, 92.86],
-          capacity: "",
-          itsmAuto: "25.00%",
-          itsmTemplate: "3",
+          exact: 92,
+          cover: 88,
+          auto: 78,
+          capacity: 12,
+          itsmAuto: 70,
+          itsmTemplate: 6,
         },
       ],
     };

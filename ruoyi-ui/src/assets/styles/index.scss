@@ -176,3 +176,23 @@ aside {
     margin-bottom: 10px;
   }
 }
+
+/* 全局细滚动条：必须全局生效且早于任何 el-table 实例化，
+   否则 element-ui 缓存的 scrollbar 宽度(17px)与实际(6px)不一致，
+   会导致表格表头/表体横向滚动错位 */
+::-webkit-scrollbar {
+  /* 纵向宽度保持 6px（element-ui 缓存的滚动条宽度按此测量，改大会重新错位） */
+  width: 6px;
+  /* 横向高度调大，方便鼠标抓取 */
+  height: 20px;
+}
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #c0c0c0;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #909399;
+}

@@ -16,7 +16,9 @@
           @input="onSystemInput"
           @keyup.enter.native="searchSystem"
         />
-        <el-button type="primary" size="medium" @click="searchSystem">查询</el-button>
+        <el-button type="primary" size="medium" @click="searchSystem"
+          >查询</el-button
+        >
       </div>
     </div>
 
@@ -62,7 +64,8 @@
             size="mini"
             effect="plain"
             class="profile-info__dc"
-          >{{ dc }}</el-tag>
+            >{{ dc }}</el-tag
+          >
         </div>
 
         <span class="profile-info__divider" />
@@ -95,15 +98,25 @@
         <div class="profile-topo__main">
           <header class="profile-topo__head">
             <span class="profile-topo__title">组件拓扑</span>
-            <span class="profile-topo__hint">点击组件类型，筛选左侧主机列表</span>
+            <span class="profile-topo__hint"
+              >点击组件类型，筛选左侧主机列表</span
+            >
           </header>
           <div class="profile-topo__tags">
             <button
               v-for="c in componentList"
               :key="c.name"
               class="profile-topo__tag"
-              :class="['is-' + c.name, { 'is-active': c.name === activeComponent }]"
-              :title="c.clusterCount + ' 个集群 · ' + c.hostCount + (c.isStandard ? ' 台主机' : ' 条记录')"
+              :class="[
+                'is-' + c.name,
+                { 'is-active': c.name === activeComponent },
+              ]"
+              :title="
+                c.clusterCount +
+                ' 个集群 · ' +
+                c.hostCount +
+                (c.isStandard ? ' 台主机' : ' 条记录')
+              "
               type="button"
               @click="selectComponent(c.name)"
             >
@@ -140,7 +153,9 @@
         <section class="profile-hosts">
           <header class="profile-hosts__head">
             <span class="profile-hosts__title">主机列表</span>
-            <span class="profile-hosts__count">{{ filteredTotal }} / {{ activeHostTotal }} 台</span>
+            <span class="profile-hosts__count"
+              >{{ filteredTotal }} / {{ activeHostTotal }} 台</span
+            >
             <el-input
               v-model="searchQuery"
               size="mini"
@@ -167,20 +182,32 @@
                   <i class="profile-cluster__dot" />
                   <span class="profile-cluster__title">{{ cluster.name }}</span>
                   <span class="profile-cluster__count">
-                    {{ cluster.hostCount }} {{ cluster.columns.standard ? '台主机' : '条记录' }}
+                    {{ cluster.hostCount }}
+                    {{ cluster.columns.standard ? "台主机" : "条记录" }}
                   </span>
                 </template>
                 <!-- max-height：数据多（80+ 条）时表内滚动，表头固定；
                      列宽固定总和 680px < 表格可用 ~693px（1920 全屏），
                      主机名（最长 22 字符 ≈ 200px 含图标与内边距）完整展示且不出现横向滚动条 -->
-                <el-table :data="cluster.hosts" size="mini" border max-height="320">
+                <el-table
+                  :data="cluster.hosts"
+                  size="mini"
+                  border
+                  max-height="320"
+                >
                   <!-- 标准主机结构（hostname+ip）：固定友好列 -->
                   <template v-if="cluster.columns.standard">
-                    <el-table-column label="主机名" width="190" show-overflow-tooltip>
+                    <el-table-column
+                      label="主机名"
+                      width="190"
+                      show-overflow-tooltip
+                    >
                       <template slot-scope="scope">
                         <span class="profile-host">
                           <i class="el-icon-monitor profile-host__icon" />
-                          <span class="profile-host__name">{{ scope.row.hostname }}</span>
+                          <span class="profile-host__name">{{
+                            scope.row.hostname
+                          }}</span>
                         </span>
                       </template>
                     </el-table-column>
@@ -192,18 +219,29 @@
                     </el-table-column>
                     <el-table-column label="类型" width="56">
                       <template slot-scope="scope">
-                        <span class="profile-mtype" :class="scope.row.mtype === 'P' ? 'is-p' : 'is-v'">
+                        <span
+                          class="profile-mtype"
+                          :class="scope.row.mtype === 'P' ? 'is-p' : 'is-v'"
+                        >
                           {{ machineType(scope.row.mtype) }}
                         </span>
                       </template>
                     </el-table-column>
                     <el-table-column label="CPU" width="60">
-                      <template slot-scope="scope">{{ scope.row.cpu }}C</template>
+                      <template slot-scope="scope"
+                        >{{ scope.row.cpu }}C</template
+                      >
                     </el-table-column>
                     <el-table-column label="内存" width="60">
-                      <template slot-scope="scope">{{ scope.row.memory }}G</template>
+                      <template slot-scope="scope"
+                        >{{ scope.row.memory }}G</template
+                      >
                     </el-table-column>
-                    <el-table-column prop="os" label="操作系统" show-overflow-tooltip />
+                    <el-table-column
+                      prop="os"
+                      label="操作系统"
+                      show-overflow-tooltip
+                    />
                   </template>
                   <!-- 其他结构（微服务/未来新增组件类型）：表头用字段 key 动态渲染，字段变化不影响展示 -->
                   <template v-else>
@@ -234,7 +272,9 @@
           <div class="profile-link__placeholder">
             <i class="el-icon-connection profile-link__icon" />
             <p class="profile-link__text">链路关系图区域</p>
-            <p class="profile-link__hint">后续接入 ECharts 拓扑关系图（共 {{ links.length }} 条链路）</p>
+            <p class="profile-link__hint">
+              后续接入 ECharts 拓扑关系图（共 {{ links.length }} 条链路）
+            </p>
           </div>
         </section>
       </div>
@@ -249,7 +289,9 @@
       :close-on-click-modal="false"
     >
       <div class="profile-switch">
-        <p class="profile-switch__hint">输入系统英文名称，查询后切换当前系统画像</p>
+        <p class="profile-switch__hint">
+          输入系统英文名称，查询后切换当前系统画像
+        </p>
         <div class="profile-switch__row">
           <el-input
             :value="switchQuery"
@@ -260,7 +302,12 @@
             @input="onSwitchInput"
             @keyup.enter.native="searchSystemFromDialog"
           />
-          <el-button type="primary" size="medium" @click="searchSystemFromDialog">查询</el-button>
+          <el-button
+            type="primary"
+            size="medium"
+            @click="searchSystemFromDialog"
+            >查询</el-button
+          >
         </div>
       </div>
     </el-dialog>
@@ -279,13 +326,15 @@
           <template slot-scope="scope">{{ scope.row.clusterName }}</template>
         </el-table-column>
         <el-table-column label="集群节点" show-overflow-tooltip>
-          <template slot-scope="scope">{{ (scope.row.nodes || []).join('、') }}</template>
+          <template slot-scope="scope">{{
+            (scope.row.nodes || []).join("、")
+          }}</template>
         </el-table-column>
         <el-table-column label="集群描述" width="240" show-overflow-tooltip>
           <template slot-scope="scope">
             <!-- desc 字段兼容：旧数据没有 desc 时显示 - -->
             <span :class="{ 'profile-relation-desc--empty': !scope.row.desc }">
-              {{ scope.row.desc || '-' }}
+              {{ scope.row.desc || "-" }}
             </span>
           </template>
         </el-table-column>
@@ -295,193 +344,241 @@
 </template>
 
 <script>
-import { getSystemProfile } from '@/api/tool/systemProfile'
+import { getSystemProfile } from "@/api/tool/systemProfile";
 
 // 组件类型的展示顺序（与调用流向一致）
-const COMPONENT_ORDER = ['NGINX', 'HAPROXY', '容器云', '应用', 'MYSQL', 'CANAL', 'ZOOKEEPER', 'KAFKA', 'ES', 'GREATDB', 'HADOOP']
+const COMPONENT_ORDER = [
+  "NGINX",
+  "HAPROXY",
+  "容器云",
+  "应用",
+  "MYSQL",
+  "CANAL",
+  "ZOOKEEPER",
+  "KAFKA",
+  "ES",
+  "GREATDB",
+  "HADOOP",
+];
 
 export default {
-  name: 'SystemProfile',
+  name: "SystemProfile",
 
   data() {
     return {
       loading: false,
       profileData: null,
       links: [],
-      activeComponent: '',
-      searchQuery: '',
+      activeComponent: "",
+      searchQuery: "",
       openClusters: [], // 展开的集群（非手风琴，默认展开第一个）
-      systemQuery: '', // 系统英文名称搜索框
+      systemQuery: "", // 系统英文名称搜索框
       searched: false, // 是否已执行查询（未查询前仅显示居中的搜索入口）
       switchDialogVisible: false, // 系统切换弹窗
-      switchQuery: '', // 切换弹窗内的查询输入（与主搜索框独立）
-      relationDialogVisible: false // 集群关系弹窗
-    }
+      switchQuery: "", // 切换弹窗内的查询输入（与主搜索框独立）
+      relationDialogVisible: false, // 集群关系弹窗
+    };
   },
 
   watch: {
     // 搜索后若展开的集群全部被过滤掉，自动展开第一个匹配集群
     searchQuery() {
       this.$nextTick(() => {
-        if (!this.filteredGroups.length) return
-        const hasOpen = this.openClusters.some(n => this.filteredGroups.some(g => g.name === n))
+        if (!this.filteredGroups.length) return;
+        const hasOpen = this.openClusters.some((n) =>
+          this.filteredGroups.some((g) => g.name === n)
+        );
         if (!hasOpen) {
-          this.openClusters = [this.filteredGroups[0].name]
+          this.openClusters = [this.filteredGroups[0].name];
         }
-      })
-    }
+      });
+    },
   },
 
   computed: {
     basic() {
-      return (this.profileData && this.profileData['基础信息']) || {}
+      return (this.profileData && this.profileData["基础信息"]) || {};
     },
     // 统计卡片：组件类型 / 集群 / 主机 / 链路（链路预留，仅显示数字）
     stats() {
-      const topo = (this.profileData && this.profileData['组件拓扑']) || {}
-      const componentCount = Object.keys(topo).length
+      const topo = (this.profileData && this.profileData["组件拓扑"]) || {};
+      const componentCount = Object.keys(topo).length;
       const clusterCount = Object.keys(topo).reduce(
-        (sum, comp) => sum + Object.keys(topo[comp]).length, 0)
+        (sum, comp) => sum + Object.keys(topo[comp]).length,
+        0
+      );
       const hostCount = Object.keys(topo).reduce((sum, comp) => {
-        return sum + Object.values(topo[comp]).reduce((s, hosts) => s + hosts.length, 0)
-      }, 0)
+        return (
+          sum +
+          Object.values(topo[comp]).reduce((s, hosts) => s + hosts.length, 0)
+        );
+      }, 0);
       return [
-        { key: 'component', label: '组件', value: componentCount, icon: 'el-icon-menu' },
-        { key: 'cluster', label: '集群', value: clusterCount, icon: 'el-icon-office-building' },
-        { key: 'host', label: '主机', value: hostCount, icon: 'el-icon-monitor' },
-        { key: 'link', label: '链路', value: this.links.length, icon: 'el-icon-connection', reserved: true }
-      ]
+        {
+          key: "component",
+          label: "组件",
+          value: componentCount,
+          icon: "el-icon-menu",
+        },
+        {
+          key: "cluster",
+          label: "集群",
+          value: clusterCount,
+          icon: "el-icon-office-building",
+        },
+        {
+          key: "host",
+          label: "主机",
+          value: hostCount,
+          icon: "el-icon-monitor",
+        },
+        {
+          key: "link",
+          label: "链路",
+          value: this.links.length,
+          icon: "el-icon-connection",
+          reserved: true,
+        },
+      ];
     },
     // 组件类型列表（含集群与主机统计），按 COMPONENT_ORDER 排序
     componentList() {
-      const topo = (this.profileData && this.profileData['组件拓扑']) || {}
+      const topo = (this.profileData && this.profileData["组件拓扑"]) || {};
       return Object.keys(topo)
-        .map(name => {
-          const clusterMap = topo[name]
+        .map((name) => {
+          const clusterMap = topo[name];
           const clusters = Object.keys(clusterMap)
-            .map(cname => ({ name: cname, hosts: clusterMap[cname] }))
-            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((cname) => ({ name: cname, hosts: clusterMap[cname] }))
+            .sort((a, b) => a.name.localeCompare(b.name));
           // isStandard：首条记录含 hostname+ip 视为标准主机结构，用于文案（台主机/条记录）
-          const firstHost = clusters[0] && clusters[0].hosts[0]
+          const firstHost = clusters[0] && clusters[0].hosts[0];
           return {
             name,
             clusters,
             clusterCount: clusters.length,
             hostCount: clusters.reduce((s, c) => s + c.hosts.length, 0),
-            isStandard: !!(firstHost && firstHost.hostname && firstHost.ip)
-          }
+            isStandard: !!(firstHost && firstHost.hostname && firstHost.ip),
+          };
         })
         .sort((a, b) => {
-          const ia = COMPONENT_ORDER.indexOf(a.name)
-          const ib = COMPONENT_ORDER.indexOf(b.name)
-          if (ia === -1 && ib === -1) return a.name.localeCompare(b.name)
-          if (ia === -1) return 1
-          if (ib === -1) return -1
-          return ia - ib
-        })
+          const ia = COMPONENT_ORDER.indexOf(a.name);
+          const ib = COMPONENT_ORDER.indexOf(b.name);
+          if (ia === -1 && ib === -1) return a.name.localeCompare(b.name);
+          if (ia === -1) return 1;
+          if (ib === -1) return -1;
+          return ia - ib;
+        });
     },
     // 当前选中组件的主机总数（未过滤）
     activeHostTotal() {
-      const comp = this.componentList.find(c => c.name === this.activeComponent)
-      return comp ? comp.hostCount : 0
+      const comp = this.componentList.find(
+        (c) => c.name === this.activeComponent
+      );
+      return comp ? comp.hostCount : 0;
     },
     // 集群关系：仅当选中组件的 key 在“集群关系”中存在且有数据时返回（否则空态）
     relationGroups() {
-      const rel = (this.profileData && this.profileData['集群关系']) || {}
-      const item = rel[this.activeComponent]
-      return Array.isArray(item) && item.length ? item : null
+      const rel = (this.profileData && this.profileData["集群关系"]) || {};
+      const item = rel[this.activeComponent];
+      return Array.isArray(item) && item.length ? item : null;
     },
     // 当前选中组件下、按集群分组的主机（搜索过滤后），空集群剔除
     filteredGroups() {
-      const comp = this.componentList.find(c => c.name === this.activeComponent)
-      const clusters = comp ? comp.clusters : []
-      const q = this.searchQuery.trim().toLowerCase()
+      const comp = this.componentList.find(
+        (c) => c.name === this.activeComponent
+      );
+      const clusters = comp ? comp.clusters : [];
+      const q = this.searchQuery.trim().toLowerCase();
       if (!q) {
-        return clusters.map(g => ({
+        return clusters.map((g) => ({
           ...g,
           hostCount: g.hosts.length,
-          columns: this.buildColumns(g.hosts)
-        }))
+          columns: this.buildColumns(g.hosts),
+        }));
       }
       return clusters
-        .map(g => {
+        .map((g) => {
           // 匹配记录中任意字段：标准主机搜主机名/IP，微服务等结构搜 serviceName 等任意字段
-          const hosts = g.hosts.filter(h => {
-            return Object.keys(h).some(k => {
-              const v = h[k]
-              return String(v == null ? '' : v).toLowerCase().includes(q)
-            })
-          })
+          const hosts = g.hosts.filter((h) => {
+            return Object.keys(h).some((k) => {
+              const v = h[k];
+              return String(v == null ? "" : v)
+                .toLowerCase()
+                .includes(q);
+            });
+          });
           return {
             ...g,
             hosts,
             hostCount: hosts.length,
-            columns: this.buildColumns(hosts)
-          }
+            columns: this.buildColumns(hosts),
+          };
         })
-        .filter(g => g.hosts.length > 0)
+        .filter((g) => g.hosts.length > 0);
     },
     // 搜索后匹配的主机总数
     filteredTotal() {
-      return this.filteredGroups.reduce((s, g) => s + g.hosts.length, 0)
-    }
+      return this.filteredGroups.reduce((s, g) => s + g.hosts.length, 0);
+    },
   },
 
   methods: {
     // 搜索框只允许英文，小写自动转大写（非英文字符直接过滤）
     onSystemInput(val) {
-      this.systemQuery = (val || '').replace(/[^a-zA-Z]/g, '').toUpperCase()
+      this.systemQuery = (val || "").replace(/[^a-zA-Z]/g, "").toUpperCase();
     },
 
     // 打开系统切换弹窗（预填当前查询词，回车/点查询后重新查询）
     openSystemSwitch() {
-      this.switchQuery = this.systemQuery
-      this.switchDialogVisible = true
+      this.switchQuery = this.systemQuery;
+      this.switchDialogVisible = true;
     },
 
     // 切换弹窗输入框：同样只允许英文并转大写
     onSwitchInput(val) {
-      this.switchQuery = (val || '').replace(/[^a-zA-Z]/g, '').toUpperCase()
+      this.switchQuery = (val || "").replace(/[^a-zA-Z]/g, "").toUpperCase();
     },
 
     // 查询系统画像：输入系统英文名称后回车或点查询按钮触发
     searchSystem() {
-      this.doSearch(this.systemQuery)
+      this.doSearch(this.systemQuery);
     },
 
     // 切换弹窗内查询：复用同一查询逻辑，成功后自动关闭弹窗
     searchSystemFromDialog() {
-      this.doSearch(this.switchQuery)
+      this.doSearch(this.switchQuery);
     },
 
     // 统一查询逻辑（空值校验 → 请求 → 更新状态）
     doSearch(q) {
-      const name = (q || '').trim()
+      const name = (q || "").trim();
       if (!name) {
-        this.$message.warning('请输入系统英文名称')
-        return
+        this.$message.warning("请输入系统英文名称");
+        return;
       }
-      this.systemQuery = name
-      this.loading = true
+      this.systemQuery = name;
+      this.loading = true;
       getSystemProfile({ systemId: name })
-        .then(res => {
-          this.profileData = res.data || res
-          this.prepareData()
-          this.searched = true
+        .then((res) => {
+          this.profileData = res.data || res;
+          this.prepareData();
+          this.searched = true;
           // 默认选中第一个组件（按数据顺序），并展开其第一个集群
-          const first = this.componentList[0]
+          const first = this.componentList[0];
           if (first) {
-            this.activeComponent = first.name
-            this.openClusters = first.clusters.length ? [first.clusters[0].name] : []
+            this.activeComponent = first.name;
+            this.openClusters = first.clusters.length
+              ? [first.clusters[0].name]
+              : [];
           }
         })
         .catch(() => {
-          this.$message.error('获取系统画像数据失败')
+          this.$message.error("获取系统画像数据失败");
         })
         .finally(() => {
-          this.loading = false
-          this.switchDialogVisible = false
-        })
+          this.loading = false;
+          this.switchDialogVisible = false;
+        });
     },
 
     // 链路去重（用于统计），防御后端出现重复数据；
@@ -489,75 +586,78 @@ export default {
     //   1. 链路直接是数组：[{ fnode, snode }, ...]
     //   2. 链路是对象且 arrow 字段为数组：{ ..., arrow: [{ fnode, snode }, ...] }
     prepareData() {
-      const raw = this.profileData['链路']
+      const raw = this.profileData["链路"];
       const rawLinks = Array.isArray(raw)
         ? raw
-        : (raw && Array.isArray(raw.arrow) ? raw.arrow : [])
-      const seen = new Set()
-      this.links = []
-      rawLinks.forEach(l => {
-        if (!l || !l.fnode || !l.snode) return // 防御缺字段的脏数据
-        const key = `${l.fnode}|${l.snode}`
-        if (seen.has(key)) return
-        seen.add(key)
-        this.links.push(l)
-      })
+        : raw && Array.isArray(raw.arrow)
+        ? raw.arrow
+        : [];
+      const seen = new Set();
+      this.links = [];
+      rawLinks.forEach((l) => {
+        if (!l || !l.fnode || !l.snode) return; // 防御缺字段的脏数据
+        const key = `${l.fnode}|${l.snode}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        this.links.push(l);
+      });
     },
 
     // 切换组件类型：左侧主机列表联动筛选，并默认展开其第一个集群
     selectComponent(name) {
-      this.activeComponent = name
-      const comp = this.componentList.find(c => c.name === name)
-      this.openClusters = comp && comp.clusters.length ? [comp.clusters[0].name] : []
+      this.activeComponent = name;
+      const comp = this.componentList.find((c) => c.name === name);
+      this.openClusters =
+        comp && comp.clusters.length ? [comp.clusters[0].name] : [];
     },
 
     // 展开/收起集群（非手风琴，value 为展开的集群名数组）
     onClusterToggle(val) {
-      this.openClusters = val || []
+      this.openClusters = val || [];
     },
 
     // 打开集群关系弹窗（数据来自 relationGroups computed）
     openRelationDialog() {
-      this.relationDialogVisible = true
+      this.relationDialogVisible = true;
     },
 
     // 判断集群记录结构：首条含 hostname+ip 视为标准主机（固定友好列）；
     // 其他结构（微服务/未来新增组件类型）按字段 key 动态生成列，保证新增字段也能正常展示
     buildColumns(hosts) {
-      const first = hosts && hosts[0]
+      const first = hosts && hosts[0];
       if (first && first.hostname && first.ip) {
-        return { standard: true, items: [] }
+        return { standard: true, items: [] };
       }
       return {
         standard: false,
-        items: Object.keys(first || {}).map(k => ({ prop: k, label: k }))
-      }
+        items: Object.keys(first || {}).map((k) => ({ prop: k, label: k })),
+      };
     },
 
     machineType(mtype) {
-      const map = { V: '虚拟机', P: '物理机' }
-      return map[mtype] || mtype
-    }
-  }
-}
+      const map = { V: "虚拟机", P: "物理机" };
+      return map[mtype] || mtype;
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
 /* ============ 设计变量 ============ */
-$profile-bg: #f5f7fa;                          // 页面整体背景（极浅灰蓝，避免纯白）
-$profile-card-bg: #fff;                        // 卡片背景
-$profile-card-border: #ebeef5;                 // 卡片浅边框
-$profile-card-radius: 10px;                    // 卡片圆角
-$profile-card-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06);       // 卡片轻量阴影
-$profile-stat-bg: #f8f9fa;                     // 极浅灰（标签兜底色）
-$profile-accent: #409eff;                      // 主题蓝（Element 默认主色）
+$profile-bg: #f5f7fa; // 页面整体背景（极浅灰蓝，避免纯白）
+$profile-card-bg: #fff; // 卡片背景
+$profile-card-border: #ebeef5; // 卡片浅边框
+$profile-card-radius: 10px; // 卡片圆角
+$profile-card-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.06); // 卡片轻量阴影
+$profile-stat-bg: #f8f9fa; // 极浅灰（标签兜底色）
+$profile-accent: #409eff; // 主题蓝（Element 默认主色）
 
 // 统计卡片：key → 强调色（左色条 + 图标色块 + 淡色渐变背景）
 $stat-colors: (
-  'component': #409eff,
-  'cluster': #67c23a,
-  'host': #e6a23c,
-  'link': #9254de
+  "component": #409eff,
+  "cluster": #67c23a,
+  "host": #e6a23c,
+  "link": #9254de,
 );
 
 /* ============ 页面整体：一屏内，仅主机列表内部滚动 ============ */
