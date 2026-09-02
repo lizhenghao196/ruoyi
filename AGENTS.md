@@ -67,5 +67,3 @@ AGENTS.md
 系统执行态势 > 状态消息 > 顶部概览
 
 所有icon必须flex居中。
-
-如果我上传了图片，你要看图片的话，用.claude/skills/glm-vision/这个工具去看
