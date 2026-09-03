@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>银行维护定时任务配置面板</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system;
+      background: #f7f8fa;
+      margin: 0;
+      padding: 20px 0;
+    }
+
+    .wrap {
+      width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 32px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-item {
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    label {
+      width: 120px;
+      font-weight: 500;
+      flex-shrink: 0;
+      padding-top: 8px;
+    }
+
+    .input-col {
+      flex: 1;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    textarea {
+      height: 95px;
+      resize: vertical;
+    }
+
+    .tip {
+      font-size: 12px;
+      color: #666;
+      margin: 4px 0 0 0;
+    }
+
+    #logBox {
+      margin-top: 16px;
+      background: #15171b;
+      color: #73e273;
+      padding: 14px;
+      min-height: 220px;
+      white-space: pre-wrap;
+      overflow: auto;
+      font-family: Consolas, Monaco;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 28px;
+      background: #2363eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:disabled {
+      background: #84a4e0;
+      cursor: not-allowed;
+    }
+
+    .btn-wrap {
+      padding-left: 132px;
+      margin: 8px 0 24px;
+    }
+
+    /* ==========自定义居中确认弹窗样式========== */
+    .modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      display: none;
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      width: 520px;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    .modal-content {
+      background: #f5f7fa;
+      padding: 14px;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      margin-bottom: 20px;
+    }
+
+    .modal-btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-cancel {
+      background: #909399;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h3>银行维护定时任务配置</h3>
+    <div class="form-item">
+      <div class="form-row">
+        <label>选择银行：</label>
+        <div class="input-col">
+          <select id="bank">
+            <option value="icbc">工商银行</option>
+            <option value="abc">农业银行</option>
+            <option value="boc">中国银行</option>
+            <option value="ccb">建设银行</option>
+            <option value="comm">交通银行</option>
+            <option value="gdb">广发银行</option>
+            <option value="ceb">光大银行</option>
+            <option value="pingan">平安银行</option>
+            <option value="cmb">招商银行</option>
+            <option value="hxb">华夏银行</option>
+            <option value="spdb">浦发银行</option>
+            <option value="psbc">邮储银行</option>
+            <option value="cib">兴业银行</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="form-item">
+      <div class="form-row">
+        <label>维护日期：</label>
+        <div class="input-col">
+          <input type="date" id="taskDate">
+        </div>
+      </div>
+    </div>
+    <div class="form-item">
+      <div class="form-row">
+        <label>开始时间：</label>
+        <div class="input-col">
+          <input type="time" id="taskTime" value="00:00">
+          <div class="tip">维护窗口开始时刻</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-item">
+      <div class="form-row">
+        <label>结束时间：</label>
+        <div class="input-col">
+          <input type="time" id="endTime">
+          <div class="tip">若结束早于开始，程序自动跨天+1天</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-item">
+      <div class="form-row">
+        <label>备注信息：</label>
+        <div class="input-col">
+          <textarea id="remark" placeholder="填写本次维护备注，会写入日志"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="btn-wrap">
+      <button id="submitBtn">提交生成Crontab任务</button>
+    </div>
+    <div>
+      <h4>执行输出日志</h4>
+      <div id="logBox">等待提交任务...</div>
+    </div>
+  </div>
+
+  <!-- 居中确认弹窗 -->
+  <div class="modal-mask" id="modalMask">
+    <div class="modal-box">
+      <div class="modal-title">确认提交定时任务</div>
+      <div class="modal-content" id="modalContent"></div>
+      <div class="modal-btn-group">
+        <button class="btn-cancel" id="modalCancel">取消</button>
+        <button id="modalConfirm">确认提交</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const submitBtn = document.querySelector('#submitBtn');
+    const logBox = document.querySelector('#logBox');
+    const endTimeInput = document.querySelector('#endTime');
+    const taskTimeInput = document.querySelector('#taskTime');
+    const taskDateInput = document.querySelector('#taskDate');
+    const modalMask = document.querySelector('#modalMask');
+    const modalContent = document.querySelector('#modalContent');
+    const modalCancel = document.querySelector('#modalCancel');
+    const modalConfirm = document.querySelector('#modalConfirm');
+
+    // ==========初始化维护日期：默认填充明天日期==========
+    {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const y = tomorrow.getFullYear();
+      const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const d = String(tomorrow.getDate()).padStart(2, '0');
+      taskDateInput.value = `${y}-${m}-${d}`;
+    }
+
+    // ==========修复：点击整个时间输入框任意位置触发时间面板==========
+    endTimeInput.addEventListener('click', function (e) {
+      e.stopPropagation();
+      // 输入框为空时，预设置01:00，唤起选择器后立刻清空value，输入框视觉保持空白
+      if (!this.value) {
+        this.value = "01:00";
+        this.focus();
+        setTimeout(() => {
+          this.value = "";
+        }, 10);
+      } else {
+        this.focus();
+      }
+    });
+    taskTimeInput.addEventListener('click', function () {
+      this.focus();
+    });
+
+    // 关闭弹窗
+    function closeModal() {
+      modalMask.style.display = "none";
+    }
+    modalCancel.addEventListener('click', closeModal);
+
+    // 真正向后端发起请求函数
+    async function doSubmit(payload) {
+      submitBtn.disabled = true;
+      logBox.innerText = "正在请求后端执行脚本...\n";
+      closeModal();
+      try {
+        // 从 cookie 中读取若依登录令牌（与主应用 Admin-Token 同源共享）
+        const token = (document.cookie.match(/(?:^|;\s*)Admin-Token=([^;]+)/) || [])[1] || '';
+        const res = await fetch("/api/run_task", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        logBox.innerText += `\n【返回结果】\n${JSON.stringify(json, null, 2)}`;
+        if (json.log) {
+          logBox.innerText += `\n\n【脚本完整输出日志】\n${json.log}`;
+        }
+      } catch (err) {
+        logBox.innerText += `\n请求异常：${err.message}`;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    submitBtn.onclick = function () {
+      let rawTaskTime = document.querySelector('#taskTime').value;
+      let rawEndTime = document.querySelector('#endTime').value;
+      const taskTime = rawTaskTime.substring(0, 5);
+      const endTime = rawEndTime.substring(0, 5);
+      const bankSel = document.querySelector('#bank');
+      const bankText = bankSel.options[bankSel.selectedIndex].text;
+      const bankVal = bankSel.value;
+      const taskDate = document.querySelector('#taskDate').value;
+      const remark = document.querySelector('#remark').value.trim();
+
+      // 前端参数校验
+      if (!taskDate || !taskTime || !endTime) {
+        logBox.innerText = "参数校验失败：维护日期、开始时间、结束时间不能为空！";
+        return;
+      }
+
+      // 弹窗预览，移除银行编码，只保留中文名称
+      const previewText = `银行：${bankText}
+维护日期：${taskDate}
+开始时间：${taskTime}
+结束时间：${endTime}
+备注：${remark || '(无)'}
+
+⚠️确认后将直接写入服务器crontab定时任务，请核对信息！`;
+
+      modalContent.innerText = previewText;
+      modalMask.style.display = "flex";
+
+      const payload = {
+        token: "RepaySwitch@2026",
+        bank: bankVal,
+        taskDate: taskDate,
+        taskTime: taskTime,
+        endTime: endTime,
+        remark: remark
+      };
+      modalConfirm.dataset.payload = JSON.stringify(payload);
+    };
+
+    // 弹窗确认按钮
+    modalConfirm.onclick = function () {
+      const payloadStr = this.dataset.payload;
+      if (!payloadStr) return;
+      const payload = JSON.parse(payloadStr);
+      doSubmit(payload);
+    };
+  </script>
+</body>
+
+</html>

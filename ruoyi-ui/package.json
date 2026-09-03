@@ -49,7 +49,10 @@
     "vue-json-viewer": "^2.2.22",
     "vue-router": "3.4.9",
     "vuedraggable": "2.24.3",
-    "vuex": "3.6.0"
+    "vuex": "3.6.0",
+    "vxe-pc-ui": "^3.9.6",
+    "vxe-table": "^3.18.20",
+    "xe-utils": "^3.7.9"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "4.4.6",
