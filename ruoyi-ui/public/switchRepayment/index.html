@@ -238,6 +238,23 @@
     const modalCancel = document.querySelector('#modalCancel');
     const modalConfirm = document.querySelector('#modalConfirm');
 
+    // ==========接收主应用注入的当前登录人==========
+    // 由若依主应用(RuoYi /getInfo 接口的 userName)通过 postMessage 下发，字段名 operator
+    let operatorName = '';
+    window.addEventListener('message', function (e) {
+      if (e.origin !== window.location.origin) {
+        return;
+      }
+      const msg = e.data || {};
+      if (msg.source === 'ruoyi-main' && msg.type === 'operator') {
+        operatorName = msg.operator || '';
+      }
+    });
+    // 页面就绪后通知主应用，确保能收到操作人信息
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ source: 'switchRepayment', type: 'ready' }, window.location.origin);
+    }
+
     // ==========初始化维护日期：默认填充明天日期==========
     {
       const now = new Date();
@@ -346,6 +363,13 @@
       const payloadStr = this.dataset.payload;
       if (!payloadStr) return;
       const payload = JSON.parse(payloadStr);
+      // 点确定提交时，把当前登录操作人(RuoYi /getInfo 接口的 userName)一并传给后端
+      if (!operatorName) {
+        logBox.innerText = "⚠️ 未获取到当前登录操作人，已取消提交！\n请通过若依系统菜单登录后进入本页面操作。";
+        closeModal();
+        return;
+      }
+      payload.operator = operatorName;
       doSubmit(payload);
     };
   </script>
