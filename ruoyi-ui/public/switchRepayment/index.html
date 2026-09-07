@@ -95,7 +95,10 @@
     .btn-wrap {
       padding-left: 132px;
       margin: 8px 0 24px;
+      display: flex;
+      gap: 12px;
     }
+
 
     /* ==========自定义居中确认弹窗样式========== */
     .modal-mask {
@@ -208,6 +211,7 @@
     </div>
     <div class="btn-wrap">
       <button id="submitBtn">提交生成Crontab任务</button>
+      <button id="viewCronBtn">查看Crontab任务</button>
     </div>
     <div>
       <h4>执行输出日志</h4>
@@ -229,6 +233,7 @@
 
   <script>
     const submitBtn = document.querySelector('#submitBtn');
+    const viewCronBtn = document.querySelector('#viewCronBtn');
     const logBox = document.querySelector('#logBox');
     const endTimeInput = document.querySelector('#endTime');
     const taskTimeInput = document.querySelector('#taskTime');
@@ -290,22 +295,21 @@
     }
     modalCancel.addEventListener('click', closeModal);
 
-    // 真正向后端发起请求函数
-    async function doSubmit(payload) {
-      submitBtn.disabled = true;
-      logBox.innerText = "正在请求后端执行脚本...\n";
-      closeModal();
+    // 通用请求封装：携带登录令牌请求后端接口，并把返回结果渲染到日志区
+    // 提交生成/查看Crontab任务共用同一套处理逻辑
+    async function runRequest(url, method, payload) {
       try {
         // 从 cookie 中读取若依登录令牌（与主应用 Admin-Token 同源共享）
         const token = (document.cookie.match(/(?:^|;\s*)Admin-Token=([^;]+)/) || [])[1] || '';
-        const res = await fetch("/api/run_task", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + token
-          },
-          body: JSON.stringify(payload)
-        });
+        const headers = {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        };
+        const options = { method, headers };
+        if (payload !== undefined) {
+          options.body = JSON.stringify(payload);
+        }
+        const res = await fetch(url, options);
         const json = await res.json();
         logBox.innerText += `\n【返回结果】\n${JSON.stringify(json, null, 2)}`;
         if (json.log) {
@@ -313,10 +317,29 @@
         }
       } catch (err) {
         logBox.innerText += `\n请求异常：${err.message}`;
+      }
+    }
+
+    // 提交生成Crontab任务（后端 maintain 接口）
+    async function doSubmit(payload) {
+      submitBtn.disabled = true;
+      logBox.innerText = "正在请求后端执行脚本...\n";
+      closeModal();
+      try {
+        await runRequest("/prod-api/python/api/payrepayment/maintain", "POST", payload);
       } finally {
         submitBtn.disabled = false;
       }
     }
+
+    // 查看Crontab任务（后端 searchcron 接口，GET）
+    viewCronBtn.onclick = function () {
+      viewCronBtn.disabled = true;
+      logBox.innerText = "正在查询Crontab任务...\n";
+      runRequest("/prod-api/python/api/payrepayment/searchcron", "GET").finally(() => {
+        viewCronBtn.disabled = false;
+      });
+    };
 
     submitBtn.onclick = function () {
       let rawTaskTime = document.querySelector('#taskTime').value;
