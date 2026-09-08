@@ -13,7 +13,7 @@
     </div>
 
     <!-- 定高容器：撑满视口剩余高度，内部表格 100% 跟随 -->
-    <div class="table-wrap">
+    <div v-loading="loading" element-loading-text="HDFS目录数据加载中..." class="table-wrap">
       <vxe-table
         :data="filteredRows"
         stripe
@@ -24,22 +24,37 @@
         :cell-class-name="cellClassName"
         show-overflow
       >
-        <vxe-column field="cluster_name" title="集群名" width="180" />
-        <vxe-column field="path" title="PATH" width="180" show-overflow />
+        <vxe-column field="cluster_name" title="集群名" width="150" />
+        <vxe-column field="path" title="PATH" width="160" show-overflow />
+        <!-- 空间占用两列：size=默认(原始字节) / sizeFormat=转化拟人单位，排序均依据 size 字节数值 -->
         <vxe-column
           field="size"
           align="right"
-          width="150"
+          width="145"
           sortable
-          :sort-by="({ row }) => parseNum(row.size)"
+          :sort-by="({ row }) => sortSize(row)"
         >
           <template #header>
-            <span class="head-title">空间占用 (TB)</span>
+            <span class="head-title">空间占用 (默认)</span>
           </template>
+          <template #default="{ row }">{{ row.size || "—" }}</template>
+        </vxe-column>
+        <vxe-column
+          field="sizeFormat"
+          align="right"
+          width="145"
+          sortable
+          :sort-by="({ row }) => sortSize(row)"
+        >
+          <template #header>
+            <span class="head-title">空间占用 (拟人)</span>
+          </template>
+          <template #default="{ row }">{{ row.sizeFormat || "—" }}</template>
         </vxe-column>
         <vxe-column
           field="daily"
           align="center"
+          width="100"
           sortable
           :sort-by="({ row }) => parseNum(row.daily)"
         >
@@ -50,11 +65,12 @@
               <i class="el-icon-question head-help-icon"></i>
             </el-tooltip>
           </template>
-          <template #default="{ row }">{{ row.daily || "—" }}</template>
+          <template #default="{ row }">{{ fmtGrowth(row.daily) }}</template>
         </vxe-column>
         <vxe-column
           field="weekly"
           align="center"
+          width="100"
           sortable
           :sort-by="({ row }) => parseNum(row.weekly)"
         >
@@ -64,11 +80,12 @@
               <i class="el-icon-question head-help-icon"></i>
             </el-tooltip>
           </template>
-          <template #default="{ row }">{{ row.weekly || "—" }}</template>
+          <template #default="{ row }">{{ fmtGrowth(row.weekly) }}</template>
         </vxe-column>
         <vxe-column
           field="monthly"
           align="center"
+          width="100"
           sortable
           :sort-by="({ row }) => parseNum(row.monthly)"
         >
@@ -78,11 +95,12 @@
               <i class="el-icon-question head-help-icon"></i>
             </el-tooltip>
           </template>
-          <template #default="{ row }">{{ row.monthly || "—" }}</template>
+          <template #default="{ row }">{{ fmtGrowth(row.monthly) }}</template>
         </vxe-column>
         <vxe-column
           field="yearly"
           align="center"
+          width="100"
           sortable
           :sort-by="({ row }) => parseNum(row.yearly)"
         >
@@ -92,26 +110,25 @@
               <i class="el-icon-question head-help-icon"></i>
             </el-tooltip>
           </template>
-          <template #default="{ row }">{{ row.yearly || "—" }}</template>
+          <template #default="{ row }">{{ fmtGrowth(row.yearly) }}</template>
         </vxe-column>
         <vxe-column
           field="usage"
           title="当前使用率"
           align="center"
-          width="130"
+          width="120"
           sortable
-          :sort-by="({ row }) =>
-            row.usage === null || row.usage === undefined ? -Infinity : row.usage"
+          :sort-by="({ row }) => parseNum(row.usage)"
         >
-          <!-- 状态胶囊：只突出数字，不整格变色 -->
+          <!-- 状态胶囊：只突出数字，不整格变色（usage 兼容数字与 "100.0 %" 字符串） -->
           <template #default="{ row }">
-            <span v-if="row.usage == null" class="usage-pill is-empty">—</span>
+            <span v-if="isEmptyText(row.usage)" class="usage-pill is-empty">—</span>
             <span v-else class="usage-pill" :class="usageClass(row.usage)">{{
-              row.usage
-            }}%</span>
+              fmtUsage(row.usage)
+            }}</span>
           </template>
         </vxe-column>
-        <vxe-column field="warning" align="center" width="130">
+        <vxe-column field="warning" align="center" width="110">
           <template #header>
             <span class="head-title">智能预警</span>
             <el-tooltip content="多维度预警空间使用" placement="top">
@@ -119,8 +136,9 @@
             </el-tooltip>
           </template>
         </vxe-column>
-        <vxe-column field="note" title="备注" width="130" show-overflow />
-        <vxe-column field="cleanupStrategy" align="center" width="140">
+        <!-- 备注不设宽度：吸收表格右侧剩余空间，自由展示 -->
+        <vxe-column field="note" title="备注" show-overflow />
+        <vxe-column field="cleanupStrategy" align="center" width="135">
           <template #header>
             <span class="head-title">目录清理策略</span>
             <el-tooltip placement="top">
@@ -143,8 +161,63 @@
 </template>
 
 <script>
-// ===================== 性能压测（模拟大数据量） =====================
-// 正式使用时把 MOCK_COUNT 改为 0，只保留下方 3 条样例数据
+import { listHdfsDirInfo } from '@/api/hdp'
+
+// ===================== 数据源说明 =====================
+// 真实数据：进入页面即 GET /hdp_api/get_hdp_node/hdfs_dir_info（python 服务）
+// 接口成功 → 渲染真实目录行；接口失败/返回异常 → 追加 MOCK_COUNT 条模拟数据供本地预览
+// 生产正式使用：删掉 loadData 失败分支里的 buildMockRows 追加即可
+
+// 字节 → 拟人单位（与后端 sizeFormat 口径一致，如 "716.871 TB"）
+function fmtBytes(bytes) {
+  if (bytes === "" || bytes === null || bytes === undefined) return "";
+  const n = Number(bytes);
+  if (isNaN(n) || n < 0) return "";
+  const units = ["B", "KB", "MB", "GB", "TB", "PB"];
+  let v = n;
+  let u = 0;
+  while (v >= 1024 && u < units.length - 1) {
+    v /= 1024;
+    u++;
+  }
+  return v.toFixed(3).replace(/\.?0+$/, "") + " " + units[u];
+}
+
+// 从接口返回体中稳健地取出目录行数组（兼容多种包装格式）
+function normalizeDirRows(body) {
+  if (!body) return null;
+  if (Array.isArray(body)) return body; // 1. 直接返回数组
+  if (typeof body !== "object") return null;
+  if (Array.isArray(body.data)) return body.data; // 2. 若依风格 { code, data:[...] }
+  const data = body.data && typeof body.data === "object" ? body.data : body;
+  if (data) {
+    for (const k of [
+      "rows",
+      "list",
+      "records",
+      "items",
+      "result",
+      "hdfs_dir_info",
+      "hdfsDirInfo",
+    ]) {
+      if (Array.isArray(data[k])) return data[k]; // 3. 包装在 rows/list/... 下
+    }
+  }
+  // 4. 按节点分组的字典 { 节点名: [行…] }：把目录行数组拍平成列表
+  if (data && typeof data === "object") {
+    const isRowObj = x =>
+      x &&
+      typeof x === "object" &&
+      !Array.isArray(x) &&
+      ("path" in x || "size" in x || "sizeFormat" in x || "cluster_name" in x || "name" in x);
+    const lists = Object.values(data).filter(v => Array.isArray(v) && v.length && v.every(isRowObj));
+    if (lists.length) return [].concat(...lists);
+  }
+  return null;
+}
+
+// ===================== 大数据量预览（模拟数据） =====================
+// 接口不可用时追加 2 万条模拟数据，方便本地预览虚拟滚动渲染性能与效果
 const MOCK_COUNT = 20000;
 
 const clusterPool = ["集群名1", "集群名2", "集群名3", "集群名4", "集群名5"];
@@ -172,28 +245,39 @@ function rand(min, max) {
   return min + Math.random() * (max - min);
 }
 
-function fmtRate(v) {
-  return (v >= 0 ? "+" : "") + v.toFixed(1) + "%";
+// 增长率 mock：仅覆盖后端四种形态 ""(空) / "0" / "20%" / "新增：20%"（不再有 +/- 号）
+function pickGrowth() {
+  const t = Math.random();
+  if (t < 0.08) return "";
+  if (t < 0.14) return "0";
+  if (t < 0.2) return "新增：" + rand(1, 60).toFixed(0) + "%";
+  return rand(0.05, 40).toFixed(2).replace(/\.?0+$/, "") + "%";
 }
 
-// 模拟真实分布：大部分使用率 <70%，少数超阈值触发预警；部分字段留空
+// 字段口径与后端一致：size=原始字节、sizeFormat=拟人单位、usage="xx.x %"、增长率支持四种形态
 function buildMockRows(count) {
   const rows = [];
   for (let i = 0; i < count; i++) {
     const r = Math.random();
-    const usage = r < 0.05 ? null : r < 0.9 ? +rand(8, 70).toFixed(1) : +rand(70.1, 98).toFixed(1);
+    const size = r < 0.03 ? "" : String(Math.floor(rand(1e11, 9e14)));
+    let usage = "";
+    if (r >= 0.05) {
+      const v = r < 0.9 ? rand(8, 70) : rand(70.1, 99);
+      usage = v.toFixed(1) + " %";
+    }
     rows.push({
       cluster_name:
         clusterPool[i % clusterPool.length] + (Math.random() < 0.15 ? "-Total" : ""),
       path: dirPool[(i * 7 + Math.floor(Math.random() * 3)) % dirPool.length],
-      size: Math.random() < 0.02 ? "" : rand(30, 9000).toFixed(2),
-      daily: Math.random() < 0.08 ? "" : fmtRate(rand(-1.5, 1.5)),
-      weekly: Math.random() < 0.06 ? "" : fmtRate(rand(-4, 4)),
-      monthly: Math.random() < 0.04 ? "" : fmtRate(rand(-30, 35)),
-      yearly: Math.random() < 0.03 ? "" : fmtRate(rand(-60, 160)),
+      size,
+      sizeFormat: fmtBytes(size),
+      daily: pickGrowth(),
+      weekly: pickGrowth(),
+      monthly: pickGrowth(),
+      yearly: pickGrowth(),
       usage,
       warning: "",
-      note: usage !== null && usage > 70 ? "想降低至70%的阈值，需要清理{XX}数据" : "",
+      note: usage && parseFloat(usage) > 70 ? "想降低至70%的阈值，需要清理{XX}数据" : "",
       cleanupStrategy: "",
       cleanupStandard: "",
     });
@@ -209,30 +293,35 @@ export default {
       threshold: 70,
       // 前端搜索关键字（匹配集群名 / PATH）
       searchText: "",
+      // 接口加载状态
+      loading: false,
       rows: [
         {
-          cluster_name: "集群名1-Total（案例）", // 集群名
-          path: "", // PATH
-          size: "3204.76", // 空间占用
-          daily: "+0.3%", // 日增长率
-          weekly: "+1.1%", // 周增长率
-          monthly: "+5.4%", // 月增长率
-          yearly: "+12.4%", // 年增长率
-          usage: 66.0, // 当前使用率
+          // 与真实返回同构的样例
+          cluster_name: "hf_cluster_arm（案例）", // 集群名
+          path: "/", // PATH
+          size: "788207629211633", // 空间占用（默认，原始字节）
+          sizeFormat: "716.871 TB", // 空间占用（拟人单位）
+          daily: "0.3%", // 日增长率
+          weekly: "0.63%", // 周增长率
+          monthly: "", // 月增长率（形态：空）
+          yearly: "新增：20%", // 年增长率（形态：新增）
+          usage: "100.0 %", // 当前使用率
           warning: "", // 智能预警
-          note: "距离70%的阈值，还剩{XX}天——最近90天折算", // 备注
-          cleanupStrategy: "", // 目录清理策略
-          cleanupStandard: "", // 目录清理规范
+          note: "使用率已达100%，需立即清理", // 备注
+          cleanupStrategy: "定期审计目录使用情况，清理无用数据", // 目录清理策略
+          cleanupStandard: "遵循最小权限原则，确保清理操作安全可控", // 目录清理规范
         },
         {
           cluster_name: "集群名2-Total（案例）",
-          path: "",
-          size: "128.22",
-          daily: "+0.3%",
-          weekly: "+2.0%",
-          monthly: "+2.0%",
-          yearly: "+12.0%",
-          usage: 76.0,
+          path: "/apps/hive/warehouse/business_dw.db",
+          size: "1282210111221",
+          sizeFormat: "1.166 TB",
+          daily: "0", // 形态：0
+          weekly: "20%", // 形态：20%
+          monthly: "2%",
+          yearly: "12%",
+          usage: "76.0 %",
           warning: "",
           note: "想降低至70%的阈值，需要清理{XX}数据",
           cleanupStrategy: "",
@@ -241,12 +330,13 @@ export default {
         {
           cluster_name: "集群名2-目录",
           path: "",
-          size: "18.88",
+          size: "",
+          sizeFormat: "",
           daily: "",
           weekly: "",
           monthly: "",
           yearly: "",
-          usage: null,
+          usage: "",
           warning: "",
           note: "",
           cleanupStrategy: "",
@@ -256,8 +346,8 @@ export default {
     };
   },
   created() {
-    // 压测：追加模拟大数据，观察虚拟滚动渲染性能
-    this.rows = this.rows.concat(buildMockRows(MOCK_COUNT));
+    // 进入页面即请求真实接口（成功渲染真实数据，失败保留样例兜底）
+    this.loadData();
   },
   computed: {
     // 前端搜索：集群名 或 PATH 包含关键字（忽略大小写）
@@ -272,17 +362,106 @@ export default {
     },
   },
   methods: {
-    // 解析数值："+0.3%" → 0.3；空值 → 负无穷（排序靠后）
+    // 进入页面拉取 HDFS 目录信息：GET /hdp_api/get_hdp_node/hdfs_dir_info
+    async loadData() {
+      this.loading = true;
+      try {
+        const res = await listHdfsDirInfo();
+        const raw = normalizeDirRows(res.data);
+        if (!raw) {
+          console.warn("HDFS目录接口返回结构异常：", res.data);
+          this.appendMockRows();
+          this.$message({ message: "目录接口返回格式异常，已加载模拟数据供预览", type: "warning" });
+          return;
+        }
+        this.rows = raw.map(row => this.normalizeRow(row));
+        if (!this.rows.length) {
+          this.$message({ message: "暂无HDFS目录数据", type: "info" });
+        }
+      } catch (e) {
+        console.error("加载HDFS目录信息失败：", e);
+        this.appendMockRows();
+        this.$message({ message: "目录接口请求失败，已加载模拟数据供预览", type: "warning" });
+      } finally {
+        this.loading = false;
+      }
+    },
+    // 接口不可用时：在样例行后追加 2 万条模拟数据，供本地预览大数据量效果
+    appendMockRows() {
+      this.rows = this.rows.concat(buildMockRows(MOCK_COUNT));
+    },
+    // 行数据规整：缺 sizeFormat 时按 size 字节换算补上（后端可能只返回字节数）
+    normalizeRow(row) {
+      const r = { ...row };
+      const s = r.size === null || r.size === undefined ? "" : String(r.size).trim();
+      const f = r.sizeFormat === null || r.sizeFormat === undefined ? "" : String(r.sizeFormat).trim();
+      if (!f && s) r.sizeFormat = fmtBytes(s);
+      return r;
+    },
+    // 解析数值：兼容 "+0.3%"、"0.05 %"、"0"、"20%"、"新增：20%"、"100.0 %" 等
+    // 提取首个（可带负号的）数字；无法解析或空值 → 负无穷（排序靠后）
     parseNum(val) {
-      if (val === null || val === "" || val === undefined) return -Infinity;
-      const n = parseFloat(String(val).replace(/[+%,\s]/g, ""));
+      if (val === null || val === undefined) return -Infinity;
+      const s = String(val).trim();
+      if (!s) return -Infinity;
+      const m = s.match(/-?\d+(?:\.\d+)?/);
+      const n = m ? parseFloat(m[0]) : NaN;
       return isNaN(n) ? -Infinity : n;
     },
-    // 使用率档位：60/70/85 三档 → 状态色
+    // 容量字符串 → 字节数（排序用）：兼容 "716.871 TB" / "320 GB" / "1.166 TB" 等 KB/MB/GB/TB/PB 单位
+    parseBytes(val) {
+      if (val === null || val === undefined) return -Infinity;
+      const s = String(val).trim().toUpperCase();
+      if (!s) return -Infinity;
+      const m = s.match(/(\d+(?:\.\d+)?)\s*(B|KB|MB|GB|TB|PB|K|M|G|T|P)?/);
+      if (!m) return -Infinity;
+      const num = parseFloat(m[1]);
+      if (isNaN(num)) return -Infinity;
+      const units = {
+        B: 1,
+        K: 1024,
+        KB: 1024,
+        M: 1024 ** 2,
+        MB: 1024 ** 2,
+        G: 1024 ** 3,
+        GB: 1024 ** 3,
+        T: 1024 ** 4,
+        TB: 1024 ** 4,
+        P: 1024 ** 5,
+        PB: 1024 ** 5,
+      };
+      return num * (units[m[2]] || 1);
+    },
+    // 空间占用排序键：size 为纯数字字节串时直接按字节比较（最精确，无 2^53 精度顾虑以外的问题）
+    // 否则回退解析拟人单位 sizeFormat，兼容 KB/MB/GB/TB/PB 混合排序
+    sortSize(row) {
+      const raw = row.size === null || row.size === undefined ? '' : String(row.size).trim();
+      if (/^\d+(?:\.\d+)?$/.test(raw)) return parseFloat(raw);
+      return this.parseBytes(row.sizeFormat);
+    },
+    // 增长率展示：空 → "—"；其余原样保留（"0" / "20%" / "新增：20%" / "-0.5 %"…）
+    fmtGrowth(v) {
+      const s = String(v === null || v === undefined ? "" : v).trim();
+      return s ? s : "—";
+    },
+    // 使用率展示：空 → "—"；已有 "%" 去掉多余空格统一为 "xx.x%"；纯数字补 "%"
+    fmtUsage(v) {
+      const s = String(v === null || v === undefined ? "" : v).trim();
+      if (!s) return "—";
+      const n = this.parseNum(s);
+      if (n === -Infinity) return s;
+      return (n % 1 ? n.toFixed(1) : n) + "%";
+    },
+    // 是否为空文本（usage 兼容 null / "" / "  "）
+    isEmptyText(v) {
+      return !String(v === null || v === undefined ? "" : v).trim();
+    },
+    // 使用率档位：60/70/85 三档 → 状态色（内部先解析，兼容字符串 "100.0 %"）
     usageClass(usage) {
-      if (usage >= 85) return "usage-danger";
-      if (usage >= this.threshold) return "usage-warning";
-      if (usage >= 60) return "usage-focus";
+      const n = this.parseNum(usage);
+      if (n >= 85) return "usage-danger";
+      if (n >= this.threshold) return "usage-warning";
+      if (n >= 60) return "usage-focus";
       return "usage-normal";
     },
     // 单元格样式：按列/数据语义返回不同 class（纯视觉，不影响逻辑）
@@ -291,19 +470,20 @@ export default {
       const cls = [];
       if (field === "cluster_name") {
         cls.push(String(row[field] || "").includes("-Total") ? "cell-total" : "col-main");
-      } else if (field === "size") {
+      } else if (field === "size" || field === "sizeFormat") {
         cls.push("num-col", "col-main");
       } else if (field === "path") {
         cls.push("col-path");
       } else if (field === "note") {
         cls.push("col-note");
-        if (row.usage > this.threshold) cls.push("col-note-warn");
+        if (this.parseNum(row.usage) > this.threshold) cls.push("col-note-warn");
       } else if (["daily", "weekly", "monthly", "yearly"].includes(field)) {
         cls.push("num-col", "col-growth");
         const v = this.parseNum(row[field]);
+        const text = String(row[field] || "").trim();
         if (v === -Infinity) cls.push("grow-empty");
+        else if (text.indexOf("新增") === 0) cls.push("grow-new"); // 新增目录：绿色
         else if (v > 0.05) cls.push("grow-up");
-        else if (v < -0.05) cls.push("grow-down");
         else cls.push("grow-flat");
       }
       return cls.join(" ");
@@ -451,13 +631,14 @@ export default {
   background-color: #fcfdff;
 }
 ::v-deep .vxe-body--column.grow-up {
-  color: #e6a23c; /* 正增长：低饱和橙 */
+  color: #e6a23c; /* 增长：低饱和橙 */
 }
-::v-deep .vxe-body--column.grow-down {
-  color: #67c23a; /* 负增长：柔和绿 */
+::v-deep .vxe-body--column.grow-new {
+  color: #67c23a; /* 新增目录：绿 */
+  font-weight: 600;
 }
 ::v-deep .vxe-body--column.grow-flat {
-  color: #909399; /* 接近 0 */
+  color: #909399; /* 无增长 / 0 */
 }
 ::v-deep .vxe-body--column.grow-empty {
   color: #c0c4cc; /* 无数据占位 — */
