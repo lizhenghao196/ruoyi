@@ -323,7 +323,7 @@
     // 提交生成Crontab任务（后端 maintain 接口）
     async function doSubmit(payload) {
       submitBtn.disabled = true;
-      logBox.innerText = "正在请求后端执行脚本...\n";
+      logBox.innerText = "";
       closeModal();
       try {
         await runRequest("/prod-api/python/api/payrepayment/maintain", "POST", payload);
@@ -335,7 +335,7 @@
     // 查看Crontab任务（后端 searchcron 接口，GET）
     viewCronBtn.onclick = function () {
       viewCronBtn.disabled = true;
-      logBox.innerText = "正在查询Crontab任务...\n";
+      logBox.innerText = "";
       runRequest("/prod-api/python/api/payrepayment/searchcron", "GET").finally(() => {
         viewCronBtn.disabled = false;
       });
