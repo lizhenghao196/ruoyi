@@ -128,7 +128,12 @@ export default {
       return (this.item && this.item.component) || '--'
     },
     status() {
-      return getResourceStatus(this.item ? this.item.inspect_data : null)
+      const inspect = this.item ? this.item.inspect_data : null
+      // 无指标数据时不显示「正常」：大多来自环比新增等仅带基础信息的资源
+      if (!inspect || typeof inspect !== 'object' || Object.keys(inspect).length === 0) {
+        return { key: 'unknown', label: '无指标数据', color: '#909399' }
+      }
+      return getResourceStatus(inspect)
     },
     cpuText() {
       const v = this.item && this.item.cpu

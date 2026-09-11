@@ -119,6 +119,14 @@
           </div>
         </section>
 
+        <!-- 环比差异：与上一报表周期对比 -->
+        <ring-ratio-diff
+          v-if="hasRingRatio"
+          class="ar-ring"
+          :diff="ringRatioData"
+          @view-detail="openDetail"
+        />
+
         <!-- 采集异常 -->
         <collect-exception-table
           v-if="collectRows.length > 0 || collectDate"
@@ -135,11 +143,12 @@
 
 <script>
 import { getAbnormalReport } from '@/api/tool/abnormalReport'
-import { getCategoryIcon, flattenCollectException } from './utils'
+import { getCategoryIcon, flattenCollectException, normalizeRingRatio } from './utils'
 import ExceptionOverview from './components/ExceptionOverview'
 import ResourceCard from './components/ResourceCard'
 import ResourceDetailDrawer from './components/ResourceDetailDrawer'
 import CollectExceptionTable from './components/CollectExceptionTable'
+import RingRatioDiff from './components/RingRatioDiff'
 
 const pad = (n) => String(n).padStart(2, '0')
 // 默认查询上一月（月初出上月报表场景）
@@ -158,7 +167,8 @@ export default {
     ExceptionOverview,
     ResourceCard,
     ResourceDetailDrawer,
-    CollectExceptionTable
+    CollectExceptionTable,
+    RingRatioDiff
   },
   data() {
     return {
@@ -170,6 +180,7 @@ export default {
       searched: false,
       indicatorData: {}, // 指标异常: { 分类: [] }
       collectData: {}, // 采集异常: { 数据, 采集日期 }
+      ringRatioData: {}, // 环比差异: { 总结, 环比减少, 环比新增 }
       collapsedGroups: {}, // 已收起的分类: { 分类名: true }
       lastParams: null, // 最近一次查询参数
       drawerVisible: false,
@@ -181,6 +192,10 @@ export default {
       if (!this.lastParams) return ''
       const { year, month_no } = this.lastParams
       return `${year}年${pad(month_no)}月`
+    },
+    // 环比差异是否有可展示内容（有总结或无环比明细都可展示）
+    hasRingRatio() {
+      return normalizeRingRatio(this.ringRatioData).hasData
     },
     // 指标异常分类（动态 key），仅保留有数据的分类，行元素做空值过滤
     indicatorGroups() {
@@ -205,8 +220,13 @@ export default {
       return d === undefined || d === null || d === '' ? '' : String(d)
     },
     hasData() {
-      // 采集日期也算「有数据」：此时指标异常模块空态也需要展示
-      return this.indicatorGroups.length > 0 || this.collectRows.length > 0 || !!this.collectDate
+      // 采集日期、环比差异也算「有数据」：此时指标异常模块空态也需要展示
+      return (
+        this.indicatorGroups.length > 0 ||
+        this.collectRows.length > 0 ||
+        !!this.collectDate ||
+        this.hasRingRatio
+      )
     },
     // 所有分组都已收起
     allCollapsed() {
@@ -255,10 +275,11 @@ export default {
       getAbnormalReport(params)
         .then((res) => {
           const data = (res && res.data) || {}
-          // 防御：指标异常/采集异常 可能缺失、为 null 或空对象
+          // 防御：指标异常/采集异常/环比差异 可能缺失、为 null 或空对象
           const isPlain = (v) => !!v && typeof v === 'object' && !Array.isArray(v)
           this.indicatorData = isPlain(data.指标异常) ? data.指标异常 : {}
           this.collectData = isPlain(data.采集异常) ? data.采集异常 : {}
+          this.ringRatioData = isPlain(data.环比差异) ? data.环比差异 : {}
           this.collapsedGroups = {} // 新查询默认全部分组展开
           this.searched = true
           this.lastParams = params
@@ -494,7 +515,8 @@ $text-sub: #909399;
   }
 }
 
-/* ================= 采集异常 ================= */
+/* ================= 环比差异 / 采集异常 ================= */
+.ar-ring,
 .ar-collect {
   margin-top: 16px;
 }

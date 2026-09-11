@@ -114,3 +114,48 @@ export function flattenCollectException(collect) {
   })
   return rows
 }
+
+/** 安全取数：null/undefined/''/非数字 统一返回 null */
+function toNumberOrNull(value) {
+  if (value === undefined || value === null || value === '') return null
+  const num = Number(value)
+  return Number.isFinite(num) ? num : null
+}
+
+/**
+ * 环比差异规范化
+ * 原始: { 总结: { 上一个版本, 当前版本 }, 环比减少: [ { ip, idc } ], 环比新增: [ 资源对象 ] }
+ * 返回: { hasData, previous, current, delta, decreased, increased }
+ * 字段可能缺失或为 null，统一兜底为 null / 空数组
+ */
+export function normalizeRingRatio(diff) {
+  const result = {
+    hasData: false,
+    previous: null,
+    current: null,
+    delta: null,
+    decreased: [],
+    increased: []
+  }
+  if (!diff || typeof diff !== 'object') return result
+
+  const summary = diff.总结 && typeof diff.总结 === 'object' ? diff.总结 : {}
+  result.previous = toNumberOrNull(summary.上一个版本)
+  result.current = toNumberOrNull(summary.当前版本)
+  result.decreased = (Array.isArray(diff.环比减少) ? diff.环比减少 : []).filter(
+    (row) => row && typeof row === 'object'
+  )
+  result.increased = (Array.isArray(diff.环比新增) ? diff.环比新增 : []).filter(
+    (row) => row && typeof row === 'object'
+  )
+  if (result.previous !== null && result.current !== null) {
+    result.delta = result.current - result.previous
+  }
+  result.hasData =
+    result.previous !== null ||
+    result.current !== null ||
+    result.decreased.length > 0 ||
+    result.increased.length > 0
+
+  return result
+}
