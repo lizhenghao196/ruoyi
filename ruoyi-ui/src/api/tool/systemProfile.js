@@ -5,9 +5,9 @@ import { systemProfileRes } from '../../../mockData/res'
  *
  * 返回数据与 mockData/res.js 中的 systemProfileRes 结构保持一致：
  * {
- *   基础信息: { 主机房, 数据中心[], 系统名, 系统简介, 系统重要性级别 },
+ *   基础信息: { 主机房, 数据中心[], 系统名, 系统简介, 系统重要性级别, 所属集群 },
  *   组件拓扑: { 组件类型: { 集群名: [ 主机对象 ] } },
- *   链路: [ { fnode, snode } ],
+ *   链路: [ { fnode, snode } ],  // fnode/snode 为「组件类型/集群名」，链路关系图中心节点 = 基础信息.所属集群
  *   集群关系: { 组件类型: [ { clusterName, nodes[] } ] }
  * }
  */

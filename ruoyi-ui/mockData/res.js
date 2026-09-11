@@ -63,6 +63,7 @@ let systemProfileRes = {
     系统简介:
       "提供以查询处理和文件处理等为核心的交易驱动型业务系统，主要包括产品服务、营销支撑、运营支撑、发卡与用卡、消息服务、账单查询与计算服务、风险服务、数据采集等十几个子模块",
     系统重要性级别: "A+",
+    所属集群: "应用/dasp-app-mgr-d5c7",
   },
   组件拓扑: {
     CANAL: {
@@ -1400,148 +1401,100 @@ let systemProfileRes = {
   },
   链路: [
     {
-      fnode: "dasp_ht_haproxy_4",
-      snode: "dasp-azkaban-mgr-4d86",
+      fnode: "NGINX/bjb-dasp-nginx-kzx",
+      snode: "HAPROXY/dasp_ht_haproxy_4",
     },
     {
-      fnode: "dasp_ht_haproxy_5",
-      snode: "dasp-app-mgr-d5c7",
+      fnode: "NGINX/bjc-dasp-nginx-kzx",
+      snode: "HAPROXY/dasp_cym_haproxy_4",
     },
     {
-      fnode: "dasp_cym_haproxy_4",
-      snode: "bjc-dasp-mgr-7384",
+      fnode: "NGINX/hfa-dasp-nginx-kzx",
+      snode: "HAPROXY/dasp_ht_haproxy_5",
     },
     {
-      fnode: "dasp_cym_haproxy_8",
-      snode: "bjc-dasp-mgr-3174",
+      fnode: "HAPROXY/dasp_ht_haproxy_4",
+      snode: "应用/dasp-azkaban-mgr-4d86",
     },
     {
-      fnode: "dasp_ht_haproxy_4",
-      snode: "dasp_ht_haproxy_5",
+      fnode: "HAPROXY/dasp_ht_haproxy_5",
+      snode: "应用/dasp-app-mgr-d5c7",
     },
     {
-      fnode: "dasp_cym_haproxy_4",
-      snode: "dasp_cym_haproxy_8",
+      fnode: "HAPROXY/dasp_cym_haproxy_4",
+      snode: "应用/bjc-dasp-mgr-7384",
     },
     {
-      fnode: "dasp-azkaban-mgr-4d86",
-      snode: "bjb-dasp-mysql-kzx",
+      fnode: "HAPROXY/dasp_cym_haproxy_8",
+      snode: "应用/bjc-dasp-mgr-3174",
     },
     {
-      fnode: "dasp-app-mgr-d5c7",
-      snode: "bjb-dasp-mysql-kzx",
+      fnode: "应用/dasp-app-mgr-d5c7",
+      snode: "容器云/bjb-dasp-k8s-kzx",
     },
     {
-      fnode: "bjc-dasp-mgr-7384",
-      snode: "bjc-dasp-mysql-kzx",
+      fnode: "应用/bjc-dasp-mgr-7384",
+      snode: "容器云/bjc-dasp-k8s-kzx",
     },
     {
-      fnode: "bjc-dasp-mgr-3174",
-      snode: "bjc-dasp-mysql-kzx",
+      fnode: "应用/dasp-app-mgr-d5c7",
+      snode: "MYSQL/bjb-dasp-mysql-kzx",
     },
     {
-      fnode: "bjb-dasp-mysql-kzx",
-      snode: "bjb-dasp-canal-kzx",
+      fnode: "应用/bjc-dasp-mgr-7384",
+      snode: "MYSQL/bjc-dasp-mysql-kzx",
     },
     {
-      fnode: "bjc-dasp-mysql-kzx",
-      snode: "bjc-dasp-canal-kzx",
+      fnode: "应用/dasp-azkaban-mgr-4d86",
+      snode: "MYSQL/bjb-dasp-mysql-kzx",
     },
     {
-      fnode: "hfa-dasp-mysql-kzx",
-      snode: "hfa-dasp-canal-kzx",
+      fnode: "MYSQL/bjb-dasp-mysql-kzx",
+      snode: "CANAL/bjb-dasp-canal-kzx",
     },
     {
-      fnode: "bjb-dasp-canal-kzx",
-      snode: "bjb-dasp-kafka-kzx",
+      fnode: "MYSQL/bjc-dasp-mysql-kzx",
+      snode: "CANAL/bjc-dasp-canal-kzx",
     },
     {
-      fnode: "bjc-dasp-canal-kzx",
-      snode: "bjc-dasp-kafka-kzx",
+      fnode: "MYSQL/hfa-dasp-mysql-kzx",
+      snode: "CANAL/hfa-dasp-canal-kzx",
     },
     {
-      fnode: "hfa-dasp-canal-kzx",
-      snode: "hfa-dasp-kafka-kzx",
+      fnode: "CANAL/bjb-dasp-canal-kzx",
+      snode: "KAFKA/bjb-dasp-kafka-kzx",
     },
     {
-      fnode: "bjb-dasp-kafka-kzx",
-      snode: "bjb-dasp-es-kzx",
+      fnode: "CANAL/bjc-dasp-canal-kzx",
+      snode: "KAFKA/bjc-dasp-kafka-kzx",
     },
     {
-      fnode: "bjc-dasp-kafka-kzx",
-      snode: "bjc-dasp-es-kzx",
+      fnode: "CANAL/hfa-dasp-canal-kzx",
+      snode: "KAFKA/hfa-dasp-kafka-kzx",
     },
     {
-      fnode: "hfa-dasp-kafka-kzx",
-      snode: "hfa-dasp-es-kzx",
+      fnode: "KAFKA/bjb-dasp-kafka-kzx",
+      snode: "ZOOKEEPER/bjb-dasp-zk-kzx",
     },
     {
-      fnode: "bjb-dasp-kafka-kzx",
-      snode: "bjb-dasp-greatdb-kzx",
+      fnode: "KAFKA/bjb-dasp-kafka-kzx",
+      snode: "ES/bjb-dasp-es-kzx",
     },
     {
-      fnode: "bjc-dasp-kafka-kzx",
-      snode: "bjc-dasp-greatdb-kzx",
+      fnode: "KAFKA/bjb-dasp-kafka-kzx",
+      snode: "GREATDB/bjb-dasp-greatdb-kzx",
     },
     {
-      fnode: "hfa-dasp-kafka-kzx",
-      snode: "hfa-dasp-greatdb-kzx",
+      fnode: "KAFKA/bjb-dasp-kafka-kzx",
+      snode: "HADOOP/bjb-dasp-hadoop-kzx",
     },
     {
-      fnode: "bjb-dasp-kafka-kzx",
-      snode: "bjb-dasp-hadoop-kzx",
+      fnode: "ZOOKEEPER/bjb-dasp-zk-kzx",
+      snode: "KAFKA/bjb-dasp-kafka-kzx",
     },
     {
-      fnode: "bjc-dasp-kafka-kzx",
-      snode: "hfa-dasp-hadoop-kzx",
-    },
-    {
-      fnode: "bjb-dasp-zk-kzx",
-      snode: "bjb-dasp-kafka-kzx",
-    },
-    {
-      fnode: "bjc-dasp-zk-kzx",
-      snode: "bjc-dasp-kafka-kzx",
-    },
-    {
-      fnode: "hfa-dasp-zk-kzx",
-      snode: "hfa-dasp-kafka-kzx",
-    },
-    {
-      fnode: "bjb-dasp-nginx-kzx",
-      snode: "dasp_ht_haproxy_4",
-    },
-    {
-      fnode: "bjc-dasp-nginx-kzx",
-      snode: "dasp_cym_haproxy_4",
-    },
-    {
-      fnode: "hfa-dasp-nginx-kzx",
-      snode: "dasp_ht_haproxy_5",
-    },
-    {
-      fnode: "bjb-dasp-k8s-kzx",
-      snode: "dasp-app-mgr-d5c7",
-    },
-    {
-      fnode: "bjc-dasp-k8s-kzx",
-      snode: "bjc-dasp-mgr-7384",
-    },
-    {
-      fnode: "bjb-dasp-mysql-kzx",
-      snode: "hfa-dasp-mysql-kzx",
-    },
-    {
-      fnode: "bjc-dasp-mysql-kzx",
-      snode: "hfa-dasp-mysql-kzx",
-    },
-    {
-      fnode: "bjb-dasp-es-kzx",
-      snode: "bjc-dasp-es-kzx",
-    },
-    {
-      fnode: "bjc-dasp-es-kzx",
-      snode: "hfa-dasp-es-kzx",
+      fnode: "ES/bjb-dasp-es-kzx",
+      snode: "GREATDB/bjb-dasp-greatdb-kzx",
     },
   ],
   集群关系: {

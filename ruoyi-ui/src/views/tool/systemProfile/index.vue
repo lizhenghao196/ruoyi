@@ -263,19 +263,16 @@
           </div>
         </section>
 
-        <!-- 链路关系图预留区：固定高度，后续替换为 ECharts -->
+        <!-- 链路关系图：集群为节点、链路为边，ECharts 力导向布局 -->
         <section class="profile-link">
           <header class="profile-link__head">
             <span class="profile-link__title">链路关系图</span>
-            <span class="profile-link__badge">预留 · ECharts</span>
+            <span class="profile-link__count"
+              >{{ links.length }} 条链路 · {{ linkNodes.length }} 个集群</span
+            >
+            <span class="profile-link__badge">ECharts 力导向</span>
           </header>
-          <div class="profile-link__placeholder">
-            <i class="el-icon-connection profile-link__icon" />
-            <p class="profile-link__text">链路关系图区域</p>
-            <p class="profile-link__hint">
-              后续接入 ECharts 拓扑关系图（共 {{ links.length }} 条链路）
-            </p>
-          </div>
+          <div ref="linkChart" class="profile-link__chart" />
         </section>
       </div>
     </template>
@@ -344,6 +341,7 @@
 </template>
 
 <script>
+import * as echarts from "echarts";
 import { getSystemProfile } from "@/api/tool/systemProfile";
 
 // 组件类型的展示顺序（与调用流向一致）
@@ -361,6 +359,24 @@ const COMPONENT_ORDER = [
   "HADOOP",
 ];
 
+// 链路关系图节点配色：组件类型 → 颜色（与图例一致），未列出的类型用兜底色
+const TYPE_COLORS = {
+  NGINX: "#409eff",
+  HAPROXY: "#67c23a",
+  容器云: "#e6a23c",
+  应用: "#9254de",
+  MYSQL: "#f56c6c",
+  CANAL: "#36cfc9",
+  ZOOKEEPER: "#fa8c16",
+  KAFKA: "#eb2f96",
+  ES: "#4dbcac",
+  GREATDB: "#7cb342",
+  HADOOP: "#b37feb",
+  微服务: "#5c6bc0",
+  测试: "#78909c",
+};
+const TYPE_FALLBACK_COLOR = "#c0c4cc";
+
 export default {
   name: "SystemProfile",
 
@@ -377,6 +393,7 @@ export default {
       switchDialogVisible: false, // 系统切换弹窗
       switchQuery: "", // 切换弹窗内的查询输入（与主搜索框独立）
       relationDialogVisible: false, // 集群关系弹窗
+      linkChart: null, // ECharts 实例（链路关系图渲染后创建）
     };
   },
 
@@ -393,6 +410,19 @@ export default {
         }
       });
     },
+  },
+
+  mounted() {
+    // 窗口尺寸变化时重绘链路关系图
+    window.addEventListener("resize", this.handleResize);
+  },
+
+  beforeDestroy() {
+    window.removeEventListener("resize", this.handleResize);
+    if (this.linkChart) {
+      this.linkChart.dispose();
+      this.linkChart = null;
+    }
   },
 
   computed: {
@@ -520,6 +550,43 @@ export default {
     filteredTotal() {
       return this.filteredGroups.reduce((s, g) => s + g.hosts.length, 0);
     },
+    // 链路关系图节点：只取链路两端的集群（fnode/snode），链路里有什么才显示什么；
+    // 主机数仅从组件拓扑查（用于节点大小），查不到则按 0 计，不额外新增节点
+    linkNodes() {
+      const topo = (this.profileData && this.profileData["组件拓扑"]) || {};
+      const map = new Map(); // id -> node
+      const add = (id) => {
+        if (!id || map.has(id)) return;
+        const parts = String(id).split("/");
+        const type = parts[0] || "未知";
+        const cname = parts[parts.length - 1];
+        let hostCount = 0;
+        if (topo[type]) {
+          const hosts = topo[type][cname];
+          if (Array.isArray(hosts)) hostCount = hosts.length;
+        }
+        map.set(id, {
+          id,
+          name: cname,
+          type,
+          hostCount,
+        });
+      };
+      this.links.forEach((l) => {
+        add(l.fnode);
+        add(l.snode);
+      });
+      return Array.from(map.values());
+    },
+    // 中心集群：基础信息里的「所属集群」（兼容数组，取第一个）
+    centerId() {
+      const raw =
+        (this.profileData &&
+          this.profileData["基础信息"] &&
+          this.profileData["基础信息"]["所属集群"]) ||
+        "";
+      return Array.isArray(raw) ? (raw[0] || "") : raw;
+    },
   },
 
   methods: {
@@ -578,6 +645,8 @@ export default {
         .finally(() => {
           this.loading = false;
           this.switchDialogVisible = false;
+          // loading 置 false 后内容区（含图表容器）才挂载，此时再渲染链路关系图
+          this.$nextTick(() => this.renderLinkChart());
         });
     },
 
@@ -601,6 +670,144 @@ export default {
         seen.add(key);
         this.links.push(l);
       });
+    },
+
+    // 渲染链路关系图（ECharts 力导向图）：集群为节点、链路为边、所属集群固定居中
+    renderLinkChart() {
+      const el = this.$refs.linkChart;
+      if (!el) return;
+      if (this.linkChart) {
+        this.linkChart.dispose();
+        this.linkChart = null;
+      }
+      const chart = echarts.init(el);
+      this.linkChart = chart;
+
+      const nodes = this.linkNodes;
+      const coreId = this.centerId;
+      // 分类顺序：COMPONENT_ORDER 优先，未覆盖的类型按出现顺序追加
+      const order = COMPONENT_ORDER.filter((t) =>
+        nodes.some((n) => n.type === t)
+      );
+      nodes.forEach((n) => {
+        if (!order.includes(n.type)) order.push(n.type);
+      });
+      const catIndex = {};
+      order.forEach((t, i) => (catIndex[t] = i));
+
+      chart.setOption({
+        tooltip: {
+          trigger: "item",
+          formatter: (p) => {
+            if (p.dataType === "edge") {
+              const d = p.data || {};
+              // v4 的边数据 source/target 可能是索引，转回名称
+              const getName = (v) =>
+                typeof v === "number" ? convertName(v) : v;
+              function convertName(i) {
+                const n = nodes[i];
+                return n ? n.name : i;
+              }
+              return `${getName(d.source) || ""}<br/>↓<br/>${
+                getName(d.target) || ""
+              }`;
+            }
+            const d = p.data || {};
+            const lines = [d.name || ""];
+            if (d.type) lines.push(`类型：${d.type}`);
+            if (d.hostCount) lines.push(`主机数：${d.hostCount}`);
+            if (d.isCore) lines.push("当前系统所属集群");
+            return lines.join("<br/>");
+          },
+        },
+        legend: {
+          type: "scroll",
+          orient: "horizontal",
+          bottom: 6,
+          left: "center",
+          itemWidth: 10,
+          itemHeight: 10,
+          itemGap: 8,
+          textStyle: { fontSize: 10, color: "#606266" },
+          data: order,
+        },
+        series: [
+          {
+            type: "graph",
+            layout: "force",
+            roam: true,
+            focus: "adjacency",
+            symbol: "circle",
+            edgeSymbol: ["none", "arrow"],
+            edgeSymbolSize: 7,
+            categories: order.map((t) => ({
+              name: t,
+              itemStyle: { color: TYPE_COLORS[t] || TYPE_FALLBACK_COLOR },
+            })),
+            data: nodes.map((n) => {
+              const isCore = n.id === coreId;
+              return {
+                ...n,
+                isCore,
+                category: catIndex[n.type],
+                symbolSize: isCore
+                  ? 46
+                  : Math.max(
+                      14,
+                      Math.min(30, 10 + Math.sqrt(n.hostCount || 1) * 3.5)
+                    ),
+                // 中心集群固定在画布中央，其余节点围绕力导向布局
+                fixed: isCore,
+                x: isCore ? Math.round(el.clientWidth / 2) : undefined,
+                y: isCore ? Math.round(el.clientHeight / 2) : undefined,
+                itemStyle: isCore
+                  ? {
+                      color: TYPE_COLORS[n.type] || TYPE_FALLBACK_COLOR,
+                      borderColor: "#409eff",
+                      borderWidth: 4,
+                      shadowBlur: 10,
+                      shadowColor: "rgba(64, 158, 255, 0.6)",
+                    }
+                  : undefined,
+                label: {
+                  show: true,
+                  position: "right",
+                  fontSize: isCore ? 12 : 10,
+                  fontWeight: isCore ? "bold" : "normal",
+                },
+              };
+            }),
+            links: this.links.map((l) => ({
+              source: l.fnode,
+              target: l.snode,
+            })),
+            force: {
+              repulsion: 420,
+              gravity: 0.06,
+              edgeLength: [80, 160],
+              friction: 0.68,
+            },
+            label: {
+              show: true,
+              position: "right",
+              formatter: (p) =>
+                p.data.isCore ? `${p.data.name}\n[当前系统]` : p.data.name,
+              fontSize: 10,
+              color: "#606266",
+            },
+            lineStyle: { color: "#b6c2d4", width: 1.4, curveness: 0.15 },
+            emphasis: {
+              lineStyle: { width: 2 },
+              label: { fontSize: 12, fontWeight: "bold" },
+            },
+          },
+        ],
+      });
+    },
+
+    // 窗口尺寸变化时重绘链路关系图
+    handleResize() {
+      if (this.linkChart) this.linkChart.resize();
     },
 
     // 切换组件类型：左侧主机列表联动筛选，并默认展开其第一个集群
@@ -1347,37 +1554,33 @@ $stat-colors: (
     line-height: 16px;
   }
 
-  /* 占位卡片：虚线边框 + 图标 + 文字，后续替换为 ECharts */
-  &__placeholder {
+  /* 图表容器：占满头部以下区域；淡蓝渐变 + 中心柔光，营造高级感背景 */
+  &__chart {
     flex: 1;
     min-height: 0;
     margin: 0 16px 16px;
-    border: 1.5px dashed #dcdfe6;
+    border: 1px solid #e3edfa;
     border-radius: $profile-card-radius;
-    background: linear-gradient(180deg, #fbfdff, #fff);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        ellipse at 50% 42%,
+        rgba(94, 158, 255, 0.14) 0%,
+        rgba(94, 158, 255, 0.05) 46%,
+        rgba(255, 255, 255, 0) 72%
+      ),
+      linear-gradient(175deg, #f8fbff 0%, #edf4fc 100%);
+    box-shadow: inset 0 1px 10px rgba(64, 158, 255, 0.06);
   }
 
-  &__icon {
-    font-size: 40px;
-    color: #c0c4cc;
-  }
-
-  &__text {
-    margin: 6px 0 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #606266;
-  }
-
-  &__hint {
-    margin: 0;
-    font-size: 12px;
+  /* 链路/集群计数徽标 */
+  &__count {
+    font-size: 11px;
     color: #909399;
+    background: $profile-stat-bg;
+    padding: 1px 8px;
+    border-radius: 8px;
+    line-height: 18px;
   }
 }
 </style>
