@@ -11,13 +11,7 @@
 
     <div class="atom-pool__body">
       <ul v-if="atoms.length" class="atom-list">
-        <li
-          v-for="atom in atoms"
-          :key="atom.id"
-          class="atom-item"
-          :class="{ 'is-active': atom.id === activeAtomId }"
-          @click="$emit('atom-click', atom)"
-        >
+        <li v-for="atom in atoms" :key="atom.id" class="atom-item">
           <span class="atom-item__icon"><svg-icon icon-class="component" /></span>
           <div class="atom-item__main">
             <div class="atom-item__name" :title="atom.name">{{ atom.name }}</div>
@@ -47,11 +41,6 @@ export default {
       default: () => []
     },
     orderId: {
-      type: String,
-      default: ''
-    },
-    // 当前选中的原子，选中项高亮
-    activeAtomId: {
       type: String,
       default: ''
     }
@@ -140,7 +129,7 @@ export default {
   align-items: center;
   padding: 8px 10px;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: default;
   transition: background 0.16s ease;
 
   & + & {
@@ -149,20 +138,6 @@ export default {
 
   &:hover {
     background: #f7f9fc;
-  }
-
-  // 当前选中的原子
-  &.is-active {
-    background: var(--orch-accent-soft);
-
-    .atom-item__icon {
-      background: #fff;
-      color: var(--orch-accent);
-    }
-
-    .atom-item__name {
-      color: var(--orch-accent);
-    }
   }
 
   &__icon {

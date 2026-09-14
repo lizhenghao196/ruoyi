@@ -82,7 +82,7 @@ export default {
       type: String,
       default: ''
     },
-    // 所选原子在各环境 / 各流上的出现次数（{ key: count }）
+    // 所选工单的原子在各环境 / 各流上的数量（{ key: count }）
     envMatches: {
       type: Object,
       default: () => ({})
@@ -93,7 +93,7 @@ export default {
     }
   },
   computed: {
-    // 当前选中原子是否已编排到某些位置：有位置时才做"未命中"的弱化展示
+    // 所选工单是否已编排到某些位置：有位置时才做"未命中"的弱化展示
     marking() {
       return Object.keys(this.envMatches).length > 0
     }
@@ -219,18 +219,33 @@ export default {
     color: var(--orch-accent);
   }
 
+  // 选中环境：实心填充，与"命中"的描边浅底明确区分
   &.is-active {
     border-color: var(--orch-accent);
-    background: var(--orch-accent-soft);
+    background: var(--orch-accent);
+    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.28);
 
     .env-chip__dot {
-      background: var(--orch-accent);
-      box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.16);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28);
+    }
+
+    .env-chip__name {
+      color: #fff;
+    }
+
+    .env-chip__desc {
+      color: rgba(255, 255, 255, 0.76);
+    }
+
+    .chip-badge {
+      background: #fff;
+      color: var(--orch-accent);
     }
   }
 
-  // 含所选原子
-  &.is-match {
+  // 含所选工单的原子（选中态优先，命中样式不再覆盖实心填充）
+  &.is-match:not(.is-active) {
     border-color: var(--orch-accent);
     background: var(--orch-accent-soft);
 
@@ -239,8 +254,8 @@ export default {
     }
   }
 
-  // 不含所选原子
-  &.is-dim {
+  // 不含所选工单的原子
+  &.is-dim:not(.is-active) {
     opacity: 0.5;
   }
 }
@@ -322,17 +337,40 @@ export default {
     border-color: var(--orch-accent);
   }
 
+  // 选中流：实心填充
   &.is-active {
     border-color: var(--orch-accent);
-    background: var(--orch-accent-soft);
+    background: var(--orch-accent);
+    box-shadow: 0 2px 10px rgba(64, 158, 255, 0.26);
+
+    .flow-chip__status {
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+    }
 
     .flow-chip__name {
+      color: #fff;
+    }
+
+    .flow-chip__meta {
+      color: rgba(255, 255, 255, 0.76);
+    }
+
+    .flow-chip__bar {
+      background: rgba(255, 255, 255, 0.28);
+
+      i {
+        background: #fff;
+      }
+    }
+
+    .chip-badge {
+      background: #fff;
       color: var(--orch-accent);
     }
   }
 
-  // 含所选原子
-  &.is-match {
+  // 含所选工单的原子（选中态优先）
+  &.is-match:not(.is-active) {
     border-color: var(--orch-accent);
 
     .flow-chip__name {
@@ -340,13 +378,13 @@ export default {
     }
   }
 
-  // 不含所选原子
-  &.is-dim {
+  // 不含所选工单的原子
+  &.is-dim:not(.is-active) {
     opacity: 0.5;
   }
 }
 
-/* 含所选原子的数量标识 */
+/* 含所选工单的原子数量标识 */
 .chip-badge {
   display: inline-flex;
   align-items: center;

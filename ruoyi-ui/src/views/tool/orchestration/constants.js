@@ -23,8 +23,8 @@ export const NODE_TYPE_TEXT = {
   check: '校验'
 }
 
-// 原子状态样式
-export const ATOM_STATUS_CLASS = {
+// 工单状态样式
+export const ORDER_STATUS_CLASS = {
   已编排: 'is-success',
   待实施: 'is-warning',
   审批中: 'is-running',

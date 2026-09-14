@@ -15,7 +15,7 @@
           <i class="legend-item__dot" :class="'is-' + item.status" />{{ item.text }}
         </span>
         <span v-if="marking" class="legend-item is-match">
-          <i class="legend-item__dot is-match" />含所选原子
+          <i class="legend-item__dot is-match" />含所选工单
         </span>
       </div>
     </header>
@@ -49,7 +49,7 @@
             </div>
             <div class="flow-node__atoms">
               <span class="flow-node__atom-count">原子 {{ node.atomCount || 0 }}</span>
-              <span v-if="matchOf(node)" class="flow-node__match">含所选原子 {{ matchOf(node) }}</span>
+              <span v-if="matchOf(node)" class="flow-node__match">含该工单 {{ matchOf(node) }}</span>
             </div>
           </div>
 
@@ -82,12 +82,12 @@ export default {
       type: String,
       default: ''
     },
-    // 所选原子在各节点上的出现次数（{ nodeId: count }）
+    // 所选工单的原子在各节点上的数量（{ 'flowId#nodeId': count }）
     nodeMatches: {
       type: Object,
       default: () => ({})
     },
-    // 当前选中的原子是否已编排到某些位置
+    // 所选工单是否已编排到某些位置
     marking: {
       type: Boolean,
       default: false
@@ -104,7 +104,7 @@ export default {
   },
   methods: {
     matchOf(node) {
-      return this.nodeMatches[node.id] || 0
+      return (this.flow && this.nodeMatches[this.flow.id + '#' + node.id]) || 0
     },
     nodeStatusText(status) {
       return NODE_STATUS_TEXT[status] || status
@@ -380,7 +380,7 @@ export default {
     box-shadow: 0 0 0 3px var(--orch-accent-soft);
   }
 
-  // 含所选原子：左侧强调条 + 原子数行高亮
+  // 含所选工单的原子：左侧强调条 + 原子数行高亮
   &.is-match {
     border-color: var(--orch-accent);
     background: linear-gradient(180deg, var(--orch-accent-soft), #fff 62%);
@@ -397,7 +397,7 @@ export default {
     }
   }
 
-  // 不含所选原子
+  // 不含所选工单的原子
   &.is-dim {
     opacity: 0.55;
   }

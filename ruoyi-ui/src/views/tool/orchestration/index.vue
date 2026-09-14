@@ -12,14 +12,14 @@
         @env-change="handleEnvChange"
         @flow-change="handleFlowChange"
       />
-      <atom-bar
-        :atoms="selectableAtoms"
-        :active-atom-id="atomId"
-        :atom="currentAtom"
+      <order-bar
+        :orders="orders"
+        :active-order-id="orderId"
+        :env-places="envPlaces"
         :places="places"
-        :order-name="orderName"
-        @atom-change="handleAtomChange"
-        @locate="handleLocate"
+        :active-env="envKey"
+        @order-change="handleOrderChange"
+        @locate="handleLocateEnv"
       />
     </header>
 
@@ -36,12 +36,7 @@
         />
 
         <div class="orch-main__bottom">
-          <atom-pool
-            :atoms="unassignedAtoms"
-            :order-id="orderId"
-            :active-atom-id="atomId"
-            @atom-click="handleAtomChange"
-          />
+          <atom-pool :atoms="unassignedAtoms" :order-id="orderId" />
           <doc-panel :docs="currentDocs" :flow-name="currentFlowName" />
         </div>
       </div>
@@ -60,7 +55,7 @@
 
 <script>
 import EnvFlowBar from './components/EnvFlowBar'
-import AtomBar from './components/AtomBar'
+import OrderBar from './components/OrderBar'
 import FlowCanvas from './components/FlowCanvas'
 import AtomPool from './components/AtomPool'
 import DocPanel from './components/DocPanel'
@@ -69,7 +64,7 @@ import { environments, flows, orders, atoms, unassignedAtoms } from './mock'
 
 export default {
   name: 'Orchestration',
-  components: { EnvFlowBar, AtomBar, FlowCanvas, AtomPool, DocPanel, NodeInfoPanel },
+  components: { EnvFlowBar, OrderBar, FlowCanvas, AtomPool, DocPanel, NodeInfoPanel },
   data() {
     return {
       environments,
@@ -77,7 +72,7 @@ export default {
       envKey: environments.length ? environments[0].key : '',
       flowId: '',
       nodeId: '',
-      atomId: atoms.length ? atoms[0].id : ''
+      orderId: orders.length ? orders[0].orderId : ''
     }
   },
   computed: {
@@ -101,58 +96,40 @@ export default {
       }
       return this.currentFlow.nodes.find(node => node.id === this.nodeId) || null
     },
-    // 可选原子：已编排原子 + 未分配原子
-    selectableAtoms() {
-      return atoms.concat(unassignedAtoms)
-    },
-    // 当前选中的原子
-    currentAtom() {
-      return this.selectableAtoms.find(atom => atom.id === this.atomId) || null
-    },
-    // 该原子所属工单
-    orderId() {
-      return this.currentAtom ? this.currentAtom.orderId : ''
-    },
-    orderName() {
-      const order = this.orders.find(item => item.orderId === this.orderId)
-      return order ? order.planName : ''
-    },
-    // 未分配原子（与所选原子同工单）
+    // 未分配原子（按工单归属）
     unassignedAtoms() {
       return unassignedAtoms.filter(atom => atom.orderId === this.orderId)
     },
-    // 所选原子的出现位置（补齐环境 / 流 / 节点名称，供面板展示与跳转）
+    // 该工单的原子编排到哪些流程节点上（即"工单出现在哪里"）
     places() {
-      const placements = (this.currentAtom && this.currentAtom.placements) || []
-      return placements.map(item => {
-        const flow = flows.find(flow => flow.id === item.flowId)
-        const node = flow ? flow.nodes.find(node => node.id === item.nodeId) : null
-        const env = environments.find(env => env.key === item.envKey)
-        return {
-          key: item.envKey + '-' + item.flowId + '-' + item.nodeId,
-          envKey: item.envKey,
-          flowId: item.flowId,
-          nodeId: item.nodeId,
-          envName: env ? env.name : item.envKey,
-          flowName: flow ? flow.name : item.flowId,
-          nodeName: node ? node.name : item.nodeId,
-          current: item.envKey === this.envKey && item.flowId === this.flowId
-        }
-      })
+      return atoms
+        .filter(atom => atom.orderId === this.orderId)
+        .reduce((list, atom) => list.concat(atom.placements || []), [])
     },
-    // 所选原子是否已编排到某些位置：有位置时才做"未命中"的弱化展示
+    // 该工单是否已编排到某些位置：有位置时才做"未命中"的弱化展示
     marking() {
       return this.places.length > 0
     },
-    // 各环境 / 流 / 节点上含有该原子的数量
+    // 该工单的原子在各环境 / 流上的数量
     envMatches() {
-      return this.countBy('envKey')
+      return this.countBy(item => item.envKey)
     },
     flowMatches() {
-      return this.countBy('flowId')
+      return this.countBy(item => item.flowId)
     },
+    // 节点 id 只在流内唯一，用 flowId#nodeId 作键
     nodeMatches() {
-      return this.countBy('nodeId')
+      return this.countBy(item => item.flowId + '#' + item.nodeId)
+    },
+    // 按环境汇总，供工单面板展示与跳转
+    envPlaces() {
+      return environments
+        .map(env => ({
+          envKey: env.key,
+          envName: env.name,
+          count: this.envMatches[env.key] || 0
+        }))
+        .filter(item => item.count > 0)
     }
   },
   created() {
@@ -174,25 +151,36 @@ export default {
       this.flowId = flowId
       this.nodeId = ''
     },
-    // 选择原子：环境 / 流 / 节点上的标识随之刷新
-    handleAtomChange(atomId) {
-      this.atomId = atomId
+    // 切换工单：环境 / 流 / 节点上的标识随之刷新
+    handleOrderChange(orderId) {
+      this.orderId = orderId
+      // 当前流不含该工单的原子时，自动落到本环境第一个含该工单的流
+      if (this.flowMatches[this.flowId]) {
+        return
+      }
+      this.nodeId = ''
+      const matched = this.envFlows.find(flow => this.flowMatches[flow.id])
+      if (matched) {
+        this.flowId = matched.id
+      }
     },
-    // 点击出现位置：直接切换到该环境、流，并展开对应节点
-    handleLocate(place) {
-      this.envKey = place.envKey
-      this.flowId = place.flowId
-      this.nodeId = place.nodeId
+    // 点击环境标识：切到该环境，并自动选中其中第一个含该工单的流
+    handleLocateEnv(envKey) {
+      this.envKey = envKey
+      this.nodeId = ''
+      const list = flows.filter(flow => flow.envKey === envKey)
+      const matched = list.find(flow => this.flowMatches[flow.id])
+      this.flowId = matched ? matched.id : (list.length ? list[0].id : '')
     },
     // 点击节点：选中并弹出右侧信息面板，再次点击同一个节点则收起
     handleNodeClick(node) {
       this.nodeId = this.nodeId === node.id ? '' : node.id
     },
-    // 按出现位置字段统计数量
-    countBy(field) {
+    // 按出现位置取键统计数量
+    countBy(keyOf) {
       const result = {}
       this.places.forEach(item => {
-        const key = item[field]
+        const key = keyOf(item)
         result[key] = (result[key] || 0) + 1
       })
       return result
