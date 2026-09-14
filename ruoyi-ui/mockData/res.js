@@ -77,6 +77,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -87,6 +88,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -97,6 +99,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -107,6 +110,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -117,6 +121,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -127,6 +132,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -137,6 +143,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -147,6 +154,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -157,6 +165,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -167,6 +176,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -177,6 +187,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -187,6 +198,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -197,6 +209,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -207,6 +220,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -217,6 +231,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -227,6 +242,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -237,6 +253,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -247,6 +264,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -257,6 +275,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -267,6 +286,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -277,6 +297,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -287,6 +308,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -297,6 +319,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -307,6 +330,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -317,6 +341,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -327,6 +352,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -337,6 +363,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -347,6 +374,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -357,6 +385,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -367,6 +396,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -377,6 +407,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -387,6 +418,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -397,6 +429,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -407,6 +440,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -417,6 +451,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -427,6 +462,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -437,6 +473,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -447,6 +484,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -457,6 +495,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -467,6 +506,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -477,6 +517,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -487,6 +528,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -497,6 +539,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -507,6 +550,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -517,6 +561,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -527,6 +572,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -537,6 +583,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -547,6 +594,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -557,6 +605,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -567,6 +616,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -577,6 +627,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -587,6 +638,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -597,6 +649,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -607,6 +660,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -617,6 +671,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -627,6 +682,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -637,6 +693,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -647,6 +704,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -657,6 +715,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -667,6 +726,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -677,6 +737,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -687,6 +748,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -697,6 +759,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -707,6 +770,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -717,6 +781,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -727,6 +792,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -737,6 +803,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -747,6 +814,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -757,6 +825,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -767,6 +836,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -777,6 +847,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -787,6 +858,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -797,6 +869,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -807,6 +880,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -817,6 +891,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -827,6 +902,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -837,6 +913,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -847,6 +924,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -857,6 +935,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-canal-server",
@@ -867,6 +946,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-canal-kzx": [
@@ -879,6 +959,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "hfa-dasp-canal-kzx": [
@@ -891,6 +972,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -905,6 +987,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-es-node",
@@ -915,6 +998,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-es-kzx": [
@@ -927,6 +1011,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "hfa-dasp-es-kzx": [
@@ -939,6 +1024,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -953,6 +1039,7 @@ let systemProfileRes = {
           memory: 256,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-greatdb-kzx": [
@@ -965,6 +1052,7 @@ let systemProfileRes = {
           memory: 256,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "hfa-dasp-greatdb-kzx": [
@@ -977,6 +1065,7 @@ let systemProfileRes = {
           memory: 256,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -991,6 +1080,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-hadoop-namenode",
@@ -1001,6 +1091,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "hfa-dasp-hadoop-kzx": [
@@ -1013,6 +1104,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -1027,6 +1119,7 @@ let systemProfileRes = {
           memory: 16,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       dasp_ht_haproxy_5: [
@@ -1039,6 +1132,7 @@ let systemProfileRes = {
           memory: 16,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       dasp_cym_haproxy_4: [
@@ -1051,6 +1145,7 @@ let systemProfileRes = {
           memory: 16,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       dasp_cym_haproxy_8: [
@@ -1063,6 +1158,7 @@ let systemProfileRes = {
           memory: 16,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
     },
@@ -1077,6 +1173,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-kafka-broker",
@@ -1087,6 +1184,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-kafka-kzx": [
@@ -1099,6 +1197,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "hfa-dasp-kafka-kzx": [
@@ -1111,6 +1210,7 @@ let systemProfileRes = {
           memory: 64,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -1125,6 +1225,7 @@ let systemProfileRes = {
           memory: 256,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-mysql-slave",
@@ -1135,6 +1236,7 @@ let systemProfileRes = {
           memory: 256,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-mysql-kzx": [
@@ -1147,6 +1249,7 @@ let systemProfileRes = {
           memory: 256,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "hfa-dasp-mysql-kzx": [
@@ -1159,6 +1262,7 @@ let systemProfileRes = {
           memory: 256,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -1173,6 +1277,7 @@ let systemProfileRes = {
           memory: 16,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-nginx-kzx": [
@@ -1185,6 +1290,7 @@ let systemProfileRes = {
           memory: 16,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "hfa-dasp-nginx-kzx": [
@@ -1197,6 +1303,7 @@ let systemProfileRes = {
           memory: 16,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -1211,6 +1318,7 @@ let systemProfileRes = {
           memory: 32,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-zk-kzx": [
@@ -1223,6 +1331,7 @@ let systemProfileRes = {
           memory: 32,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "hfa-dasp-zk-kzx": [
@@ -1235,6 +1344,7 @@ let systemProfileRes = {
           memory: 32,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -1249,6 +1359,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-k8s-node",
@@ -1259,6 +1370,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           component: "dasp-plat-k8s-node",
@@ -1269,6 +1381,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-k8s-kzx": [
@@ -1281,6 +1394,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
         {
           component: "dasp-plat-k8s-node",
@@ -1291,6 +1405,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "hfa-dasp-k8s-kzx": [
@@ -1303,6 +1418,7 @@ let systemProfileRes = {
           memory: 128,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "HF/HCS/YN/HXYW",
         },
       ],
     },
@@ -1317,6 +1433,7 @@ let systemProfileRes = {
           memory: 32,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "dasp-app-mgr-d5c7": [
@@ -1329,6 +1446,7 @@ let systemProfileRes = {
           memory: 32,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
       "bjc-dasp-mgr-7384": [
@@ -1341,6 +1459,7 @@ let systemProfileRes = {
           memory: 32,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "bjc-dasp-mgr-3174": [
@@ -1353,6 +1472,7 @@ let systemProfileRes = {
           memory: 32,
           mtype: "V",
           os: "Kylin Linux Advanced Server release V10 (Tercel)",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
     },
@@ -1363,6 +1483,7 @@ let systemProfileRes = {
           limitMemory: 8.192,
           replica: 2,
           serviceName: "auth-adapt-mcd",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "BJ-DB@auth-service-pay": [
@@ -1371,6 +1492,7 @@ let systemProfileRes = {
           limitMemory: 8.192,
           replica: 3,
           serviceName: "auth-service-pay020",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
       "BJ-DB@auth-service-switchadapt": [
@@ -1379,6 +1501,7 @@ let systemProfileRes = {
           limitMemory: 8.192,
           replica: 3,
           serviceName: "auth-service-switchadapt",
+          net_zone_code: "BJ-DB/HCS/YN/HXYW",
         },
       ],
     },
@@ -1387,116 +1510,119 @@ let systemProfileRes = {
         {
           a: 1,
           b: 2,
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           a: 3,
           b: 4,
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
         {
           a: 5,
           b: 6,
+          net_zone_code: "BJ-NFX/HCS/YW/HXYW",
         },
       ],
     },
   },
-  链路: [
-    {
-      fnode: "NGINX/bjb-dasp-nginx-kzx",
-      snode: "HAPROXY/dasp_ht_haproxy_4",
-    },
-    {
-      fnode: "NGINX/bjc-dasp-nginx-kzx",
-      snode: "HAPROXY/dasp_cym_haproxy_4",
-    },
-    {
-      fnode: "NGINX/hfa-dasp-nginx-kzx",
-      snode: "HAPROXY/dasp_ht_haproxy_5",
-    },
-    {
-      fnode: "HAPROXY/dasp_ht_haproxy_4",
-      snode: "应用/dasp-azkaban-mgr-4d86",
-    },
-    {
-      fnode: "HAPROXY/dasp_ht_haproxy_5",
-      snode: "应用/dasp-app-mgr-d5c7",
-    },
-    {
-      fnode: "HAPROXY/dasp_cym_haproxy_4",
-      snode: "应用/bjc-dasp-mgr-7384",
-    },
-    {
-      fnode: "HAPROXY/dasp_cym_haproxy_8",
-      snode: "应用/bjc-dasp-mgr-3174",
-    },
-    {
-      fnode: "应用/dasp-app-mgr-d5c7",
-      snode: "容器云/bjb-dasp-k8s-kzx",
-    },
-    {
-      fnode: "应用/bjc-dasp-mgr-7384",
-      snode: "容器云/bjc-dasp-k8s-kzx",
-    },
-    {
-      fnode: "应用/dasp-app-mgr-d5c7",
-      snode: "MYSQL/bjb-dasp-mysql-kzx",
-    },
-    {
-      fnode: "应用/bjc-dasp-mgr-7384",
-      snode: "MYSQL/bjc-dasp-mysql-kzx",
-    },
-    {
-      fnode: "应用/dasp-azkaban-mgr-4d86",
-      snode: "MYSQL/bjb-dasp-mysql-kzx",
-    },
-    {
-      fnode: "MYSQL/bjb-dasp-mysql-kzx",
-      snode: "CANAL/bjb-dasp-canal-kzx",
-    },
-    {
-      fnode: "MYSQL/bjc-dasp-mysql-kzx",
-      snode: "CANAL/bjc-dasp-canal-kzx",
-    },
-    {
-      fnode: "MYSQL/hfa-dasp-mysql-kzx",
-      snode: "CANAL/hfa-dasp-canal-kzx",
-    },
-    {
-      fnode: "CANAL/bjb-dasp-canal-kzx",
-      snode: "KAFKA/bjb-dasp-kafka-kzx",
-    },
-    {
-      fnode: "CANAL/bjc-dasp-canal-kzx",
-      snode: "KAFKA/bjc-dasp-kafka-kzx",
-    },
-    {
-      fnode: "CANAL/hfa-dasp-canal-kzx",
-      snode: "KAFKA/hfa-dasp-kafka-kzx",
-    },
-    {
-      fnode: "KAFKA/bjb-dasp-kafka-kzx",
-      snode: "ZOOKEEPER/bjb-dasp-zk-kzx",
-    },
-    {
-      fnode: "KAFKA/bjb-dasp-kafka-kzx",
-      snode: "ES/bjb-dasp-es-kzx",
-    },
-    {
-      fnode: "KAFKA/bjb-dasp-kafka-kzx",
-      snode: "GREATDB/bjb-dasp-greatdb-kzx",
-    },
-    {
-      fnode: "KAFKA/bjb-dasp-kafka-kzx",
-      snode: "HADOOP/bjb-dasp-hadoop-kzx",
-    },
-    {
-      fnode: "ZOOKEEPER/bjb-dasp-zk-kzx",
-      snode: "KAFKA/bjb-dasp-kafka-kzx",
-    },
-    {
-      fnode: "ES/bjb-dasp-es-kzx",
-      snode: "GREATDB/bjb-dasp-greatdb-kzx",
-    },
-  ],
+  // 链路: [
+  //   {
+  //     fnode: "NGINX/bjb-dasp-nginx-kzx",
+  //     snode: "HAPROXY/dasp_ht_haproxy_4",
+  //   },
+  //   {
+  //     fnode: "NGINX/bjc-dasp-nginx-kzx",
+  //     snode: "HAPROXY/dasp_cym_haproxy_4",
+  //   },
+  //   {
+  //     fnode: "NGINX/hfa-dasp-nginx-kzx",
+  //     snode: "HAPROXY/dasp_ht_haproxy_5",
+  //   },
+  //   {
+  //     fnode: "HAPROXY/dasp_ht_haproxy_4",
+  //     snode: "应用/dasp-azkaban-mgr-4d86",
+  //   },
+  //   {
+  //     fnode: "HAPROXY/dasp_ht_haproxy_5",
+  //     snode: "应用/dasp-app-mgr-d5c7",
+  //   },
+  //   {
+  //     fnode: "HAPROXY/dasp_cym_haproxy_4",
+  //     snode: "应用/bjc-dasp-mgr-7384",
+  //   },
+  //   {
+  //     fnode: "HAPROXY/dasp_cym_haproxy_8",
+  //     snode: "应用/bjc-dasp-mgr-3174",
+  //   },
+  //   {
+  //     fnode: "应用/dasp-app-mgr-d5c7",
+  //     snode: "容器云/bjb-dasp-k8s-kzx",
+  //   },
+  //   {
+  //     fnode: "应用/bjc-dasp-mgr-7384",
+  //     snode: "容器云/bjc-dasp-k8s-kzx",
+  //   },
+  //   {
+  //     fnode: "应用/dasp-app-mgr-d5c7",
+  //     snode: "MYSQL/bjb-dasp-mysql-kzx",
+  //   },
+  //   {
+  //     fnode: "应用/bjc-dasp-mgr-7384",
+  //     snode: "MYSQL/bjc-dasp-mysql-kzx",
+  //   },
+  //   {
+  //     fnode: "应用/dasp-azkaban-mgr-4d86",
+  //     snode: "MYSQL/bjb-dasp-mysql-kzx",
+  //   },
+  //   {
+  //     fnode: "MYSQL/bjb-dasp-mysql-kzx",
+  //     snode: "CANAL/bjb-dasp-canal-kzx",
+  //   },
+  //   {
+  //     fnode: "MYSQL/bjc-dasp-mysql-kzx",
+  //     snode: "CANAL/bjc-dasp-canal-kzx",
+  //   },
+  //   {
+  //     fnode: "MYSQL/hfa-dasp-mysql-kzx",
+  //     snode: "CANAL/hfa-dasp-canal-kzx",
+  //   },
+  //   {
+  //     fnode: "CANAL/bjb-dasp-canal-kzx",
+  //     snode: "KAFKA/bjb-dasp-kafka-kzx",
+  //   },
+  //   {
+  //     fnode: "CANAL/bjc-dasp-canal-kzx",
+  //     snode: "KAFKA/bjc-dasp-kafka-kzx",
+  //   },
+  //   {
+  //     fnode: "CANAL/hfa-dasp-canal-kzx",
+  //     snode: "KAFKA/hfa-dasp-kafka-kzx",
+  //   },
+  //   {
+  //     fnode: "KAFKA/bjb-dasp-kafka-kzx",
+  //     snode: "ZOOKEEPER/bjb-dasp-zk-kzx",
+  //   },
+  //   {
+  //     fnode: "KAFKA/bjb-dasp-kafka-kzx",
+  //     snode: "ES/bjb-dasp-es-kzx",
+  //   },
+  //   {
+  //     fnode: "KAFKA/bjb-dasp-kafka-kzx",
+  //     snode: "GREATDB/bjb-dasp-greatdb-kzx",
+  //   },
+  //   {
+  //     fnode: "KAFKA/bjb-dasp-kafka-kzx",
+  //     snode: "HADOOP/bjb-dasp-hadoop-kzx",
+  //   },
+  //   {
+  //     fnode: "ZOOKEEPER/bjb-dasp-zk-kzx",
+  //     snode: "KAFKA/bjb-dasp-kafka-kzx",
+  //   },
+  //   {
+  //     fnode: "ES/bjb-dasp-es-kzx",
+  //     snode: "GREATDB/bjb-dasp-greatdb-kzx",
+  //   },
+  // ],
   集群关系: {
     CANAL: [
       {

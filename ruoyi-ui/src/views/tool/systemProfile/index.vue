@@ -150,7 +150,7 @@
       <!-- ============ 底部：左侧主机列表（45%） + 右侧链路关系图预留区（55%） ============ -->
       <div class="profile-bottom">
         <!-- 主机列表：按集群分组，表头固定，内容区内部滚动 -->
-        <section class="profile-hosts">
+        <section ref="hostsCard" class="profile-hosts">
           <header class="profile-hosts__head">
             <span class="profile-hosts__title">主机列表</span>
             <span class="profile-hosts__count"
@@ -166,7 +166,7 @@
             />
           </header>
 
-          <div class="profile-hosts__panel">
+          <div ref="hostsPanel" class="profile-hosts__panel">
             <!-- 每个集群一个可展开收起的表格，默认展开第一个 -->
             <el-collapse
               v-if="filteredGroups.length"
@@ -183,76 +183,53 @@
                   <span class="profile-cluster__title">{{ cluster.name }}</span>
                   <span class="profile-cluster__count">
                     {{ cluster.hostCount }}
-                    {{ cluster.columns.standard ? "台主机" : "条记录" }}
+                    {{ cluster.isStandard ? "台主机" : "条记录" }}
                   </span>
                 </template>
-                <!-- max-height：数据多（80+ 条）时表内滚动，表头固定；
-                     列宽固定总和 680px < 表格可用 ~693px（1920 全屏），
-                     主机名（最长 22 字符 ≈ 200px 含图标与内边距）完整展示且不出现横向滚动条 -->
+                <!-- 动态列：列来自数据字段并集，字段增减/新增组件类型都无需改代码；
+                     主机名/机房/类型/CPU/内存保留图标与标签样式，其余字段原样展示。
+                     max-height：数据多（80+ 条）时表内滚动，表头固定 -->
                 <el-table
                   :data="cluster.hosts"
                   size="mini"
                   border
                   max-height="320"
                 >
-                  <!-- 标准主机结构（hostname+ip）：固定友好列 -->
-                  <template v-if="cluster.columns.standard">
-                    <el-table-column
-                      label="主机名"
-                      width="190"
-                      show-overflow-tooltip
-                    >
-                      <template slot-scope="scope">
-                        <span class="profile-host">
-                          <i class="el-icon-monitor profile-host__icon" />
-                          <span class="profile-host__name">{{
-                            scope.row.hostname
-                          }}</span>
-                        </span>
-                      </template>
-                    </el-table-column>
-                    <el-table-column prop="ip" label="IP" width="108" />
-                    <el-table-column label="机房" width="80">
-                      <template slot-scope="scope">
-                        <span class="profile-idc">{{ scope.row.idc }}</span>
-                      </template>
-                    </el-table-column>
-                    <el-table-column label="类型" width="56">
-                      <template slot-scope="scope">
-                        <span
-                          class="profile-mtype"
-                          :class="scope.row.mtype === 'P' ? 'is-p' : 'is-v'"
-                        >
-                          {{ machineType(scope.row.mtype) }}
-                        </span>
-                      </template>
-                    </el-table-column>
-                    <el-table-column label="CPU" width="60">
-                      <template slot-scope="scope"
-                        >{{ scope.row.cpu }}C</template
+                  <el-table-column
+                    v-for="col in cluster.columns"
+                    :key="col.prop"
+                    :prop="col.prop"
+                    :label="col.label"
+                    :width="col.width"
+                    :min-width="col.minWidth"
+                    :render-header="renderColumnHeader"
+                    show-overflow-tooltip
+                  >
+                    <template slot-scope="scope">
+                      <span v-if="col.prop === 'hostname'" class="profile-host">
+                        <i class="el-icon-monitor profile-host__icon" />
+                        <span class="profile-host__name">{{
+                          scope.row.hostname
+                        }}</span>
+                      </span>
+                      <span v-else-if="col.prop === 'idc'" class="profile-idc">{{
+                        scope.row.idc
+                      }}</span>
+                      <span
+                        v-else-if="col.prop === 'mtype'"
+                        class="profile-mtype"
+                        :class="scope.row.mtype === 'P' ? 'is-p' : 'is-v'"
+                        >{{ machineType(scope.row.mtype) }}</span
                       >
-                    </el-table-column>
-                    <el-table-column label="内存" width="60">
-                      <template slot-scope="scope"
-                        >{{ scope.row.memory }}G</template
+                      <span v-else-if="col.prop === 'cpu'"
+                        >{{ scope.row.cpu }}C</span
                       >
-                    </el-table-column>
-                    <el-table-column
-                      prop="os"
-                      label="操作系统"
-                      show-overflow-tooltip
-                    />
-                  </template>
-                  <!-- 其他结构（微服务/未来新增组件类型）：表头用字段 key 动态渲染，字段变化不影响展示 -->
-                  <template v-else>
-                    <el-table-column
-                      v-for="col in cluster.columns.items"
-                      :key="col.prop"
-                      :prop="col.prop"
-                      :label="col.label"
-                      show-overflow-tooltip
-                    />
-                  </template>
+                      <span v-else-if="col.prop === 'memory'"
+                        >{{ scope.row.memory }}G</span
+                      >
+                      <span v-else>{{ scope.row[col.prop] }}</span>
+                    </template>
+                  </el-table-column>
                 </el-table>
               </el-collapse-item>
             </el-collapse>
@@ -272,7 +249,14 @@
             >
             <span class="profile-link__badge">ECharts 力导向</span>
           </header>
-          <div ref="linkChart" class="profile-link__chart" />
+          <!-- 有链路数据才渲染 ECharts；没有链路字段时中间显示占位区，
+               后续接入拓扑关系图直接在这里画，不用再改结构 -->
+          <div v-if="links.length" ref="linkChart" class="profile-link__chart" />
+          <div v-else class="profile-link__empty">
+            <i class="el-icon-share" />
+            <p>链路关系图</p>
+            <span>暂无链路数据，后续接入 ECharts 拓扑关系图</span>
+          </div>
         </section>
       </div>
     </template>
@@ -377,6 +361,32 @@ const TYPE_COLORS = {
 };
 const TYPE_FALLBACK_COLOR = "#c0c4cc";
 
+// 主机列表列定义：已知字段的中文表头 + 期望列宽（minWidth，不是固定宽度）；
+// 未收录的字段直接用英文 key 当表头，键顺序即列的展示顺序。
+// 列宽只写“期望值”，实际渲染时会被 buildColumns 等比压缩到表格可用宽度内，
+// 保证永远不出现横向滚动条；装不下的内容用省略号 + 悬浮 tooltip 看全
+// fixedWidth：短字段（IP/机房/CPU/内存…）内容就那么长，宽度够用时锁死这个宽度不再变宽，
+// 省下来的宽度全给主机名、操作系统这类文本列；宽度不够时固定宽失效，退化成 minWidth 参与压缩
+const FIELD_COLUMNS = {
+  hostname: { label: "主机名", minWidth: 150, fixedWidth: 190 },
+  ip: { label: "IP", minWidth: 104, fixedWidth: 104 },
+  idc: { label: "机房", minWidth: 76, fixedWidth: 76 },
+  mtype: { label: "类型", minWidth: 72, fixedWidth: 76 },
+  cpu: { label: "CPU", minWidth: 58, fixedWidth: 58 },
+  memory: { label: "内存", minWidth: 64, fixedWidth: 64 },
+  os: { label: "操作系统", minWidth: 96 },
+  component: { label: "组件", minWidth: 84 },
+  net_zone_code: { label: "网络区域", minWidth: 96 },
+  serviceName: { label: "服务名", minWidth: 110 },
+  limitCPU: { label: "CPU限额", minWidth: 84, fixedWidth: 84 },
+  limitMemory: { label: "内存限额", minWidth: 92, fixedWidth: 92 },
+  replica: { label: "副本数", minWidth: 72, fixedWidth: 72 },
+};
+const FIELD_ORDER = Object.keys(FIELD_COLUMNS);
+// 未收录字段的期望列宽 / 列宽压缩下限（再窄就没法看了）
+const DEFAULT_COLUMN_WIDTH = 110;
+const MIN_COLUMN_WIDTH = 56;
+
 export default {
   name: "SystemProfile",
 
@@ -385,6 +395,8 @@ export default {
       loading: false,
       profileData: null,
       links: [],
+      // 主机列表表格可用宽度（实测），用于把动态列压缩到容器内，避免横向滚动条
+      tableWidth: 0,
       activeComponent: "",
       searchQuery: "",
       openClusters: [], // 展开的集群（非手风琴，默认展开第一个）
@@ -419,6 +431,10 @@ export default {
 
   beforeDestroy() {
     window.removeEventListener("resize", this.handleResize);
+    if (this.panelObserver) {
+      this.panelObserver.disconnect();
+      this.panelObserver = null;
+    }
     if (this.linkChart) {
       this.linkChart.dispose();
       this.linkChart = null;
@@ -645,8 +661,12 @@ export default {
         .finally(() => {
           this.loading = false;
           this.switchDialogVisible = false;
-          // loading 置 false 后内容区（含图表容器）才挂载，此时再渲染链路关系图
-          this.$nextTick(() => this.renderLinkChart());
+          // loading 置 false 后内容区（含图表容器）才挂载，此时再测量表格宽度、渲染链路关系图
+          this.$nextTick(() => {
+            this.measureTableWidth();
+            this.observeHostsCard();
+            this.renderLinkChart();
+          });
         });
     },
 
@@ -805,9 +825,39 @@ export default {
       });
     },
 
-    // 窗口尺寸变化时重绘链路关系图
+    // 窗口尺寸变化时重绘链路关系图，并重新测量表格可用宽度（列宽跟着重算）
     handleResize() {
       if (this.linkChart) this.linkChart.resize();
+      this.measureTableWidth();
+    },
+
+    // 测量表格可用于分列的宽度：直接量 el-table__body-wrapper，
+    // 它已经扣掉了竖向滚动条（正是 Element 计算列宽时用的那个宽度），不用靠内边距去估算
+    measureTableWidth() {
+      const panel = this.$refs.hostsPanel;
+      if (!panel) return;
+      const bodies = panel.querySelectorAll(".el-table__body-wrapper");
+      let w = 0;
+      for (let i = 0; i < bodies.length; i += 1) {
+        if (bodies[i].clientWidth > 0) {
+          w = bodies[i].clientWidth;
+          break;
+        }
+      }
+      // 表格还没渲染 / 集群全收起时量不到，退回按面板宽度估算（内边距 8+8、内容区 10+10、边框与滚动条再留 20）
+      if (!w) w = panel.clientWidth - 56;
+      if (w > 0 && w !== this.tableWidth) this.tableWidth = w;
+    },
+
+    // 卡片渲染后才能拿到 DOM：监听卡片宽度变化（窗口缩放、侧边栏折叠都覆盖），
+    // 监听卡片而不是面板 —— 卡片宽度由 flex 决定，不受表格滚动条出现/消失影响，不会来回抖
+    observeHostsCard() {
+      const el = this.$refs.hostsCard;
+      if (!el || !window.ResizeObserver) return;
+      if (!this.panelObserver) {
+        this.panelObserver = new ResizeObserver(() => this.measureTableWidth());
+      }
+      this.panelObserver.observe(el);
     },
 
     // 切换组件类型：左侧主机列表联动筛选，并默认展开其第一个集群
@@ -828,22 +878,74 @@ export default {
       this.relationDialogVisible = true;
     },
 
-    // 判断集群记录结构：首条含 hostname+ip 视为标准主机（固定友好列）；
-    // 其他结构（微服务/未来新增组件类型）按字段 key 动态生成列，保证新增字段也能正常展示
+    // 构建主机列表列（全动态）：取集群内所有记录字段的并集，数据里有几个字段就展示几列，
+    // 新增字段无需改代码；已知字段用中文表头，未收录的字段直接用英文 key 当表头。
+    // 列宽不写死：按期望宽度等比压缩到当前表格可用宽度内 ——
+    // 字段变多时只是列变窄 + 省略号，永远不会撑出横向滚动条
     buildColumns(hosts) {
-      const first = hosts && hosts[0];
-      if (first && first.hostname && first.ip) {
-        return { standard: true, items: [] };
+      const keys = [];
+      const seen = new Set();
+      (hosts || []).forEach((h) =>
+        Object.keys(h).forEach((k) => {
+          if (!seen.has(k)) {
+            seen.add(k);
+            keys.push(k);
+          }
+        })
+      );
+      // 已知字段按 FIELD_ORDER 排序，未收录字段保持首次出现顺序排在最后
+      keys.sort((a, b) => {
+        const ia = FIELD_ORDER.indexOf(a);
+        const ib = FIELD_ORDER.indexOf(b);
+        if (ia === -1 && ib === -1) return 0;
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+      const metas = keys.map((k) => FIELD_COLUMNS[k] || {});
+      const prefs = metas.map((m) => m.minWidth || DEFAULT_COLUMN_WIDTH);
+      // 表格可用宽度（还没测量到就按 900 估一个），再留 4px 边框余量
+      const budget = Math.max(320, (this.tableWidth || 900) - 4);
+      // 列数特别多时，压缩下限也跟着降，保证“总宽 <= 可用宽度”这条能成立
+      const floor = Math.min(MIN_COLUMN_WIDTH, Math.floor(budget / keys.length));
+      const total = prefs.reduce((s, w) => s + w, 0);
+      // 固定宽模式下的实际总宽（固定列用 fixedWidth，其余用 minWidth）；
+      // 只有它塞得进容器才敢用固定宽 —— 否则整表退化成等比压缩，宁可列窄也不能出横向滚动条
+      const roomyTotal = prefs.reduce((s, w, i) => s + (metas[i].fixedWidth || w), 0);
+      const roomy = roomyTotal <= budget;
+      const scale = roomy ? 1 : budget / total;
+      const widths = prefs.map((w, i) => {
+        if (roomy && metas[i].fixedWidth) return metas[i].fixedWidth;
+        return Math.max(floor, Math.floor(w * scale));
+      });
+      // 压缩（或垫到下限）后还有零头超预算的话，从最宽的列往下削，直到正好塞进容器
+      let sum = widths.reduce((s, w) => s + w, 0);
+      while (sum > budget) {
+        let widest = -1;
+        widths.forEach((w, i) => {
+          if (w > floor && (widest === -1 || w > widths[widest])) widest = i;
+        });
+        if (widest === -1) break; // 所有列都到下限，再削就没法看了
+        widths[widest] -= 1;
+        sum -= 1;
       }
-      return {
-        standard: false,
-        items: Object.keys(first || {}).map((k) => ({ prop: k, label: k })),
-      };
+      return keys.map((k, i) => ({
+        prop: k,
+        label: metas[i].label || k,
+        // 短字段固定宽（富余时锁死不再被撑开），其余列 minWidth 自适应吃掉富余宽度
+        width: roomy && metas[i].fixedWidth ? metas[i].fixedWidth : undefined,
+        minWidth: widths[i],
+      }));
     },
 
     machineType(mtype) {
       const map = { V: "虚拟机", P: "物理机" };
       return map[mtype] || mtype;
+    },
+
+    // 表头：列被压窄时用省略号，同时挂原生 title，悬浮可看完整字段名
+    renderColumnHeader(h, { column }) {
+      return h("span", { attrs: { title: column.label } }, column.label);
     },
   },
 };
@@ -1290,7 +1392,7 @@ $stat-colors: (
   }
 }
 
-/* ============ 底部：主机列表 + 链路占位 ============ */
+/* ============ 底部：主机列表（宽，动态列多）+ 链路关系图（窄） ============ */
 .profile-bottom {
   flex: 1;
   min-height: 440px;
@@ -1300,7 +1402,7 @@ $stat-colors: (
 
 /* ---- 主机列表卡片 ---- */
 .profile-hosts {
-  flex: 9;
+  flex: 13;
   min-width: 0;
   box-sizing: border-box;
   display: flex;
@@ -1433,6 +1535,20 @@ $stat-colors: (
     .el-table__row:hover > td.el-table__cell {
       background: #f5f9ff;
     }
+
+    /* 动态列多、列被压窄时：单元格左右内边距收窄给文字让位 */
+    th .cell,
+    td .cell {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    /* 表头单行长省略号（完整名称用原生 title 悬浮查看），避免表头折行撑高 */
+    th .cell {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 }
 
@@ -1517,9 +1633,9 @@ $stat-colors: (
   }
 }
 
-/* ---- 链路关系图预留区 ---- */
+/* ---- 链路关系图 ---- */
 .profile-link {
-  flex: 11;
+  flex: 7;
   min-width: 0;
   box-sizing: border-box;
   display: flex;
@@ -1571,6 +1687,40 @@ $stat-colors: (
       ),
       linear-gradient(175deg, #f8fbff 0%, #edf4fc 100%);
     box-shadow: inset 0 1px 10px rgba(64, 158, 255, 0.06);
+  }
+
+  /* 无链路数据时的占位：和图表容器同一个盒子（虚线边框表示“待接入”），
+     多宽多高都跟图表一致，接入真实图后不会跳版 */
+  &__empty {
+    flex: 1;
+    min-height: 0;
+    margin: 0 16px 16px;
+    border: 1px dashed #cfe0f5;
+    border-radius: $profile-card-radius;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+    background: linear-gradient(175deg, #f8fbff 0%, #eff5fd 100%);
+
+    i {
+      font-size: 30px;
+      color: #c3d7f0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #7b8da8;
+    }
+
+    span {
+      font-size: 11.5px;
+      color: #a6b1bf;
+    }
   }
 
   /* 链路/集群计数徽标 */
