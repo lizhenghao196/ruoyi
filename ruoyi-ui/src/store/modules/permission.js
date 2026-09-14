@@ -52,17 +52,33 @@ const permission = {
   }
 }
 
+// 新标签页打开的路由（菜单原始 path 与拼接后的完整 path 都要匹配）
+const OPEN_TAB_PATHS = ['/tool/overview', 'overview']
+// 新标签页打开且独立全屏展示的路由（隐藏侧边栏、顶栏、页签栏）
+const STANDALONE_PATHS = ['/tool/orchestration', 'orchestration']
+
+// 标记路由打开方式：openTab=新标签页打开，standalone=独立全屏展示
+function markOpenMode(route) {
+  if (!route.path) {
+    return
+  }
+  if (OPEN_TAB_PATHS.includes(route.path) || STANDALONE_PATHS.includes(route.path)) {
+    if (!route.meta) route.meta = {}
+    route.meta.openTab = true
+  }
+  if (STANDALONE_PATHS.includes(route.path)) {
+    if (!route.meta) route.meta = {}
+    route.meta.standalone = true
+  }
+}
+
 // 遍历后台传来的路由字符串，转换为组件对象
 function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = false) {
   return asyncRouterMap.filter(route => {
     if (type && route.children) {
       route.children = filterChildren(route.children)
     }
-    // 总览页面新 tab 打开
-    if (route.path && (route.path === '/tool/overview' || route.path === 'overview')) {
-      if (!route.meta) route.meta = {}
-      route.meta.openTab = true
-    }
+    markOpenMode(route)
     if (route.component) {
       // Layout ParentView 组件特殊处理
       if (route.component === 'Layout') {
@@ -89,11 +105,7 @@ function filterChildren(childrenMap, lastRouter = false) {
   var children = []
   childrenMap.forEach(el => {
     el.path = lastRouter ? lastRouter.path + '/' + el.path : el.path
-    // 总览页面新 tab 打开
-    if (el.path === '/tool/overview' || el.path === 'overview') {
-      if (!el.meta) el.meta = {}
-      el.meta.openTab = true
-    }
+    markOpenMode(el)
     if (el.children && el.children.length && el.component === 'ParentView') {
       children = children.concat(filterChildren(el.children, el))
     } else {
