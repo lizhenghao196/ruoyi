@@ -52,7 +52,6 @@
             <span class="flow-chip__meta">{{ flow.nodes.length }} 节点 · {{ flow.updatedAt }}</span>
           </span>
           <span v-if="matchOf(flowMatches, flow.id)" class="chip-badge">{{ matchOf(flowMatches, flow.id) }}</span>
-          <span class="flow-chip__bar"><i :style="{ width: flowProgress(flow) + '%' }" /></span>
         </button>
         <p v-if="!flows.length" class="env-flow-bar__empty">该环境下暂无流</p>
       </div>
@@ -104,15 +103,6 @@ export default {
     },
     matchOf(matches, key) {
       return matches[key] || 0
-    },
-    // 流进度：已完成节点占比
-    flowProgress(flow) {
-      const total = flow.nodes.length
-      if (!total) {
-        return 0
-      }
-      const done = flow.nodes.filter(node => node.status === 'done').length
-      return Math.round((done / total) * 100)
     }
   }
 }
@@ -182,6 +172,8 @@ export default {
 }
 
 .env-chip {
+  position: relative;
+  z-index: 0;
   display: flex;
   align-items: center;
   height: 30px;
@@ -192,7 +184,9 @@ export default {
   color: var(--orch-text-2);
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  isolation: isolate;
+  transition: border-color 0.18s ease, border-width 0.18s ease, background 0.18s ease,
+    color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
 
   &__dot {
     width: 6px;
@@ -200,79 +194,158 @@ export default {
     margin-right: 7px;
     border-radius: 50%;
     background: #cbd5e1;
-    transition: background 0.18s ease;
+    transition: background 0.18s ease, box-shadow 0.18s ease;
   }
 
   &__name {
     font-weight: 600;
     color: var(--orch-text);
+    transition: color 0.18s ease;
   }
 
   &__desc {
     margin-left: 6px;
     font-size: 11px;
     color: var(--orch-text-3);
+    transition: color 0.18s ease;
   }
 
+  /* hover：只把边框转成浅蓝，弱于选中 */
   &:hover {
-    border-color: var(--orch-accent);
-    color: var(--orch-accent);
+    border-color: #a5c9f5;
   }
 
-  // 选中环境：实心填充，与"命中"的描边浅底明确区分
+  /* 选中：2px 主题描边 + 浅色外环，走"描边"通道，背景保持纯白 */
   &.is-active {
+    border-width: 2px;
     border-color: var(--orch-accent);
-    background: var(--orch-accent);
-    box-shadow: 0 2px 8px rgba(64, 158, 255, 0.28);
+    box-shadow: 0 0 0 3px var(--orch-accent-soft);
+    padding: 0 11px; // 补掉边框加粗带来的 1px 位移，内容不跳动
 
     .env-chip__dot {
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28);
+      background: var(--orch-accent);
+      box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.18);
     }
 
     .env-chip__name {
-      color: #fff;
-    }
-
-    .env-chip__desc {
-      color: rgba(255, 255, 255, 0.76);
-    }
-
-    .chip-badge {
-      background: #fff;
       color: var(--orch-accent);
     }
   }
 
-  // 含所选工单的原子（选中态优先，命中样式不再覆盖实心填充）
-  &.is-match:not(.is-active) {
-    border-color: var(--orch-accent);
-    background: var(--orch-accent-soft);
+  /* 含该工单原子：旋转流光描边 + 光晕，比单向扫光更抓眼 */
+  &.is-match {
+    border-color: transparent;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      // 环厚度跟随边框宽度：未选中 1px，选中（2px 边框）时同步为 2px
+      padding: 1px;
+      border-radius: 8px;
+      background: conic-gradient(
+        from var(--flow-angle, 0deg),
+        rgba(64, 158, 255, 0.18) 0deg,
+        rgba(64, 158, 255, 0.18) 200deg,
+        #a5d5ff 260deg,
+        #ffffff 292deg,
+        #409eff 320deg,
+        #7cc0ff 344deg,
+        rgba(64, 158, 255, 0.18) 360deg
+      );
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask-composite: exclude;
+      animation: chip-spin 2.4s linear infinite;
+      pointer-events: none;
+    }
+
+    /* 外发光：流光溢出到元素外围，明显但不过分 */
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      z-index: -2;
+      border-radius: 9px;
+      background: linear-gradient(120deg, rgba(64, 158, 255, 0.5), rgba(125, 200, 255, 0.28));
+      filter: blur(6px);
+      opacity: 0.75;
+      animation: chip-glow 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
 
     .env-chip__dot {
       background: var(--orch-accent);
+      box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.18);
+    }
+
+    .env-chip__name {
+      color: var(--orch-accent);
     }
   }
 
-  // 不含所选工单的原子
+  /* 命中 + 选中：流光由蓝转金，与"仅命中（未选中）"的蓝色流光明确区分 */
+  &.is-active.is-match {
+    border-color: transparent;
+    box-shadow: none;
+
+    &::before {
+      padding: 2px;
+      background: conic-gradient(
+        from var(--flow-angle, 0deg),
+        rgba(245, 158, 11, 0.25) 0deg,
+        rgba(245, 158, 11, 0.25) 190deg,
+        #fcd34d 255deg,
+        #fffbeb 288deg,
+        #f59e0b 320deg,
+        #fbbf24 345deg,
+        rgba(245, 158, 11, 0.25) 360deg
+      );
+    }
+
+    &::after {
+      background: linear-gradient(120deg, rgba(245, 158, 11, 0.6), rgba(252, 211, 77, 0.35));
+      filter: blur(8px);
+      opacity: 0.9;
+    }
+
+    .env-chip__dot {
+      background: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.22);
+    }
+
+    .env-chip__name {
+      color: #b45309;
+    }
+  }
+
+  /* 不含该工单原子：弱化到可忽略，hover 恢复 */
   &.is-dim:not(.is-active) {
-    opacity: 0.5;
+    opacity: 0.45;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
 .flow-chip {
   position: relative;
+  z-index: 0;
   display: flex;
   align-items: center;
   height: 50px;
-  padding: 0 12px 3px;
+  padding: 0 12px;
   overflow: hidden;
   border: 1px solid var(--orch-border);
   border-radius: 8px;
   background: #fff;
   text-align: left;
   cursor: pointer;
-  transition: all 0.18s ease;
+  isolation: isolate;
+  transition: border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease;
 
   &__status {
     flex: none;
@@ -307,6 +380,7 @@ export default {
     font-weight: 600;
     color: var(--orch-text);
     white-space: nowrap;
+    transition: color 0.18s ease;
   }
 
   &__meta {
@@ -316,75 +390,142 @@ export default {
     white-space: nowrap;
   }
 
-  // 流方块底部进度条：已完成节点占比
-  &__bar {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: 3px;
-    background: #eef2f8;
-
-    i {
-      display: block;
-      height: 100%;
-      background: linear-gradient(90deg, #60a5fa, var(--orch-accent));
-      transition: width 0.3s ease;
-    }
-  }
-
+  /* hover：只把边框转成浅蓝，弱于选中 */
   &:hover {
-    border-color: var(--orch-accent);
+    border-color: #a5c9f5;
   }
 
-  // 选中流：实心填充
+  /* 选中：2px 主题描边 + 浅色外环（同环境 chip） */
   &.is-active {
+    border-width: 2px;
     border-color: var(--orch-accent);
-    background: var(--orch-accent);
-    box-shadow: 0 2px 10px rgba(64, 158, 255, 0.26);
-
-    .flow-chip__status {
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
-    }
-
-    .flow-chip__name {
-      color: #fff;
-    }
-
-    .flow-chip__meta {
-      color: rgba(255, 255, 255, 0.76);
-    }
-
-    .flow-chip__bar {
-      background: rgba(255, 255, 255, 0.28);
-
-      i {
-        background: #fff;
-      }
-    }
-
-    .chip-badge {
-      background: #fff;
-      color: var(--orch-accent);
-    }
-  }
-
-  // 含所选工单的原子（选中态优先）
-  &.is-match:not(.is-active) {
-    border-color: var(--orch-accent);
+    box-shadow: 0 0 0 3px var(--orch-accent-soft);
+    padding: 0 11px; // 补掉边框加粗带来的 1px 位移
 
     .flow-chip__name {
       color: var(--orch-accent);
     }
   }
 
-  // 不含所选工单的原子
+  /* 含该工单原子：旋转流光描边 + 光晕（同环境 chip） */
+  &.is-match {
+    border-color: transparent;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      // 环厚度跟随边框宽度
+      padding: 1px;
+      border-radius: 8px;
+      background: conic-gradient(
+        from var(--flow-angle, 0deg),
+        rgba(64, 158, 255, 0.18) 0deg,
+        rgba(64, 158, 255, 0.18) 200deg,
+        #a5d5ff 260deg,
+        #ffffff 292deg,
+        #409eff 320deg,
+        #7cc0ff 344deg,
+        rgba(64, 158, 255, 0.18) 360deg
+      );
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask-composite: exclude;
+      animation: chip-spin 2.4s linear infinite;
+      pointer-events: none;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      z-index: -2;
+      border-radius: 9px;
+      background: linear-gradient(120deg, rgba(64, 158, 255, 0.5), rgba(125, 200, 255, 0.28));
+      filter: blur(6px);
+      opacity: 0.75;
+      animation: chip-glow 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .flow-chip__name {
+      color: var(--orch-accent);
+    }
+  }
+
+  /* 命中 + 选中：流光由蓝转金，与"仅命中（未选中）"的蓝色流光明确区分 */
+  &.is-active.is-match {
+    border-color: transparent;
+    box-shadow: none;
+
+    &::before {
+      padding: 2px;
+      background: conic-gradient(
+        from var(--flow-angle, 0deg),
+        rgba(245, 158, 11, 0.25) 0deg,
+        rgba(245, 158, 11, 0.25) 190deg,
+        #fcd34d 255deg,
+        #fffbeb 288deg,
+        #f59e0b 320deg,
+        #fbbf24 345deg,
+        rgba(245, 158, 11, 0.25) 360deg
+      );
+    }
+
+    &::after {
+      background: linear-gradient(120deg, rgba(245, 158, 11, 0.6), rgba(252, 211, 77, 0.35));
+      filter: blur(8px);
+      opacity: 0.9;
+    }
+
+    .flow-chip__name {
+      color: #b45309;
+    }
+  }
+
+  /* 不含该工单原子：弱化到可忽略，hover 恢复 */
   &.is-dim:not(.is-active) {
-    opacity: 0.5;
+    opacity: 0.45;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
-/* 含所选工单的原子数量标识 */
+/* 流光角度：注册为可动画的自定义属性，让 conic-gradient 原地转动 */
+@property --flow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* 旋转流光：角度递增，光带沿边框连续绕行（形状不变） */
+@keyframes chip-spin {
+  from {
+    --flow-angle: 0deg;
+  }
+
+  to {
+    --flow-angle: 360deg;
+  }
+}
+
+/* 外发光呼吸 */
+@keyframes chip-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* 含该工单原子：计数胶囊 */
 .chip-badge {
   display: inline-flex;
   align-items: center;

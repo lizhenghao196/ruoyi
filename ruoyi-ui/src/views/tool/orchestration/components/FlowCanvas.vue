@@ -230,6 +230,7 @@ export default {
 
 .flow-node {
   position: relative;
+  z-index: 0;
   display: flex;
   flex-direction: column;
   flex: none;
@@ -239,7 +240,9 @@ export default {
   border-radius: 10px;
   background: #fff;
   cursor: pointer;
-  transition: all 0.18s ease;
+  isolation: isolate;
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease,
+    opacity 0.18s ease, transform 0.18s ease;
 
   &__top {
     display: flex;
@@ -369,37 +372,144 @@ export default {
     }
   }
 
+  /* hover：只把边框转成浅蓝，弱于选中 */
   &:hover {
-    border-color: var(--orch-accent);
+    border-color: #a5c9f5;
     box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
     transform: translateY(-1px);
   }
 
+  /* 选中：2px 主题描边 + 浅色外环（与环境 / 流 chip 同语言） */
   &.is-active {
+    border-width: 2px;
     border-color: var(--orch-accent);
     box-shadow: 0 0 0 3px var(--orch-accent-soft);
+    padding: 10px 11px 9px; // 补掉边框加粗带来的 1px 位移
+
+    .flow-node__name {
+      color: var(--orch-accent);
+    }
   }
 
-  // 含所选工单的原子：左侧强调条 + 原子数行高亮
+  // 含所选工单的原子：旋转流光描边 + 光晕
   &.is-match {
-    border-color: var(--orch-accent);
-    background: linear-gradient(180deg, var(--orch-accent-soft), #fff 62%);
+    border-color: transparent;
 
     &::before {
       content: '';
       position: absolute;
-      top: 10px;
-      bottom: 10px;
-      left: 0;
-      width: 3px;
-      border-radius: 0 3px 3px 0;
-      background: var(--orch-accent);
+      inset: 0;
+      z-index: -1;
+      // 环厚度跟随边框宽度
+      padding: 1px;
+      border-radius: 10px;
+      background: conic-gradient(
+        from var(--flow-angle, 0deg),
+        rgba(64, 158, 255, 0.18) 0deg,
+        rgba(64, 158, 255, 0.18) 200deg,
+        #a5d5ff 260deg,
+        #ffffff 292deg,
+        #409eff 320deg,
+        #7cc0ff 344deg,
+        rgba(64, 158, 255, 0.18) 360deg
+      );
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask-composite: exclude;
+      animation: chip-spin 2.4s linear infinite;
+      pointer-events: none;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      z-index: -2;
+      border-radius: 11px;
+      background: linear-gradient(120deg, rgba(64, 158, 255, 0.5), rgba(125, 200, 255, 0.28));
+      filter: blur(6px);
+      opacity: 0.75;
+      animation: chip-glow 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .flow-node__atom-count {
+      color: var(--orch-text-2);
     }
   }
 
-  // 不含所选工单的原子
+  // 命中 + 选中：流光由蓝转金，与"仅命中（未选中）"的蓝色流光明确区分
+  &.is-active.is-match {
+    border-color: transparent;
+    box-shadow: none;
+
+    &::before {
+      padding: 2px;
+      background: conic-gradient(
+        from var(--flow-angle, 0deg),
+        rgba(245, 158, 11, 0.25) 0deg,
+        rgba(245, 158, 11, 0.25) 190deg,
+        #fcd34d 255deg,
+        #fffbeb 288deg,
+        #f59e0b 320deg,
+        #fbbf24 345deg,
+        rgba(245, 158, 11, 0.25) 360deg
+      );
+    }
+
+    &::after {
+      background: linear-gradient(120deg, rgba(245, 158, 11, 0.6), rgba(252, 211, 77, 0.35));
+      filter: blur(8px);
+      opacity: 0.9;
+    }
+
+    .flow-node__name {
+      color: #b45309;
+    }
+
+    .flow-node__atom-count {
+      color: #b45309;
+      font-weight: 600;
+    }
+  }
+
+  // 不含所选工单的原子：弱化到可忽略
   &.is-dim {
+    opacity: 0.45;
+  }
+
+  // 选中节点始终不弱化
+  &.is-active {
+    opacity: 1;
+  }
+}
+
+/* 流光角度：让 conic-gradient 原地转动 */
+@property --flow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes chip-spin {
+  from {
+    --flow-angle: 0deg;
+  }
+
+  to {
+    --flow-angle: 360deg;
+  }
+}
+
+@keyframes chip-glow {
+  0%,
+  100% {
     opacity: 0.55;
+  }
+
+  50% {
+    opacity: 0.95;
   }
 }
 
