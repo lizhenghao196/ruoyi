@@ -70,9 +70,13 @@ $border: #ebeef5;
 
   /* 表格样式对齐系统画像页 */
   ::v-deep .el-table {
-    &::before {
-      display: none;
-    }
+    // ⚠️ 这里**不能**写 `&::before { display: none }`！
+    // Element 的 `.el-table--border { border-right: none; border-bottom: none }` 把根元素的
+    // 下边框去掉了，表格**底部那条横线完全靠 `.el-table::before`（1px 绝对定位）**来画。
+    // 把它 display:none 掉，表格底部就是敞口的，看着「不完整」。
+    // （右侧竖线是 `.el-table--border::after`，与这条无关。）
+    // 行的 `td` 各自有 border-bottom，但表格是 max-height 滚动的，
+    // 滚到中间时最后一条可见行的线并不在容器底边 —— 所以容器底线必须由 ::before 提供。
 
     th.el-table__cell {
       background: #f5f7fa;

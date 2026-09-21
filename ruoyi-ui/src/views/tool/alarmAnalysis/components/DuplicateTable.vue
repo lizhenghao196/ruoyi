@@ -89,9 +89,9 @@ $border: #ebeef5;
 
   /* 表格样式对齐系统画像页 */
   ::v-deep .el-table {
-    &::before {
-      display: none;
-    }
+    // ⚠️ 同 AlarmTable：**不能**写 `&::before { display: none }`。
+    // `.el-table--border` 自身 `border-bottom: none`，底部横线只由 `.el-table::before` 提供，
+    // 隐藏它表格底部就是敞口的。（右侧竖线是 `::after`，不受影响。）
 
     th.el-table__cell {
       background: #f5f7fa;

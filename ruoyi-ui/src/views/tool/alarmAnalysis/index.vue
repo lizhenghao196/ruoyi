@@ -3,10 +3,11 @@
     <!-- ================= 顶部工具栏：查询条件 ================= -->
     <section class="aa-bar">
       <div class="aa-bar__filters">
+        <!-- 系统 ID 选填：不填也能查，组装参数时不会带 systemId 字段 -->
         <el-input
           :value="form.systemId"
           class="aa-bar__input"
-          placeholder="系统英文缩写，如 AUTH"
+          placeholder="系统英文缩写（选填），如 AUTH"
           clearable
           maxlength="32"
           prefix-icon="el-icon-s-grid"
@@ -52,8 +53,8 @@
         <span class="aa-bar__overview-item">
           告警总量 <b>{{ totalCount }}</b>
         </span>
-        <span class="aa-bar__overview-item">
-          重复性分析 <b>{{ duplicateGroups.length }}</b> 组
+        <span v-if="duplicateGroupCount > 0" class="aa-bar__overview-item">
+          重复性分析 <b>{{ duplicateGroupCount }}</b> 组
         </span>
       </div>
     </section>
@@ -63,7 +64,7 @@
       <!-- 未查询 -->
       <section v-if="!searched" class="aa-state">
         <el-empty description="请输入查询条件后点击「查询」" :image-size="110">
-          <p class="aa-state__hint">支持系统英文缩写（如 AUTH）与告警时间范围组合查询</p>
+          <p class="aa-state__hint">支持系统英文缩写（选填，如 AUTH）与告警时间范围组合查询</p>
         </el-empty>
       </section>
 
@@ -73,30 +74,47 @@
       </section>
 
       <template v-else>
-        <!-- P1：指标 -->
+        <!-- 指标：所有「指标型」数据合并成一行，按 key 分组（P1 / P2 …）用标签区分 -->
         <collapse-section
+          v-if="metricGroups.length > 0"
           title="指标"
           icon="el-icon-data-analysis"
-          :badge="`P1 汇总 · ${p1Count} 项`"
-          :collapsed="!!collapsed.metrics"
-          @toggle="toggleSection('metrics')"
+          :badge="metricsBadge"
+          :collapsed="!!collapsed[metricsKey]"
+          @toggle="toggleSection(metricsKey)"
         >
-          <metric-cards :metrics-data="p1Data" />
+          <metric-cards :groups="metricGroups" />
         </collapse-section>
 
-        <!-- P2 / P3：分类内只有一张表就直接展示，多张表用 tab 切换 -->
+        <!-- 其余区块：完全按后端返回的 key 与形态动态渲染 -->
         <collapse-section
-          v-for="section in alarmSections"
+          v-for="section in sections"
           :key="section.key"
           :title="section.title"
-          icon="el-icon-warning-outline"
+          :icon="section.icon"
           :badge="section.badge"
           :collapsed="!!collapsed[section.key]"
           @toggle="toggleSection(section.key)"
         >
-          <template v-if="section.lists.length === 1">
-            <alarm-table :rows="section.lists[0].rows" @view-field="openField" />
-          </template>
+          <!-- 两级型（如 AI处置）：一级 tab → 二级切换 → 表格 -->
+          <nested-groups
+            v-if="section.kind === 'nested'"
+            :levels="section.levels"
+            @view-field="openField"
+          />
+
+          <!-- 重复型（如 重复性分析）：分组纵向合并单元格 -->
+          <duplicate-table
+            v-else-if="section.kind === 'duplicate'"
+            :groups="section.groups"
+          />
+
+          <!-- 表格型：分类内只有一张表就直接展示，多张表用 tab 切换 -->
+          <alarm-table
+            v-else-if="section.lists.length === 1"
+            :rows="section.lists[0].rows"
+            @view-field="openField"
+          />
 
           <el-tabs v-else v-model="activeTabs[section.key]" class="aa-tabs">
             <el-tab-pane
@@ -110,17 +128,6 @@
             </el-tab-pane>
           </el-tabs>
         </collapse-section>
-
-        <!-- 重复性分析 -->
-        <collapse-section
-          title="重复性分析"
-          icon="el-icon-refresh"
-          :badge="`${duplicateGroups.length} 组 / ${duplicateRowCount} 条`"
-          :collapsed="!!collapsed.duplicate"
-          @toggle="toggleSection('duplicate')"
-        >
-          <duplicate-table :groups="duplicateGroups" />
-        </collapse-section>
       </template>
     </div>
 
@@ -130,10 +137,12 @@
 </template>
 
 <script>
-import { getAlarmAnalysis } from '@/api/tool/alarmAnalysis'
+import { getAlarmAnalysis, pickPayload } from '@/api/tool/alarmAnalysis'
+import { buildSections, buildQueryParams, sectionRowCount, METRICS_KEY } from './shape'
 import CollapseSection from './components/CollapseSection'
 import MetricCards from './components/MetricCards'
 import AlarmTable from './components/AlarmTable'
+import NestedGroups from './components/NestedGroups'
 import DuplicateTable from './components/DuplicateTable'
 import FieldDialog from './components/FieldDialog'
 
@@ -152,6 +161,7 @@ export default {
     CollapseSection,
     MetricCards,
     AlarmTable,
+    NestedGroups,
     DuplicateTable,
     FieldDialog
   },
@@ -163,12 +173,14 @@ export default {
       },
       loading: false,
       searched: false,
-      p1Data: {}, // P1: { 指标名: 值 }
-      p2Data: {}, // P2: { 人工关单: [] }
-      p3Data: {}, // P3: { Agent关闭失败: [], 告警未恢复: [] }
-      duplicateGroups: [], // 重复性分析: [ { data: [], 重复性说明 } ]
-      collapsed: {}, // 已收起的区块: { metrics/P2/P3/duplicate: true }
-      activeTabs: {}, // 区块内当前选中的 tab: { P3: 'Agent关闭失败' }
+      // 指标条在 collapsed / sectionKeys 里的固定 key（指标不是 payload 的某个 key）
+      metricsKey: METRICS_KEY,
+      // 指标组： [ { name: 'P1', metrics: [...] } ] —— 所有指标型 key 合并成一行
+      metricGroups: [],
+      // 其余区块：形态由 shape.js 判定，页面只按 kind 选渲染器
+      sections: [],
+      collapsed: {}, // 已收起的区块: { __metrics__/P3/人工关单/AI处置/重复性分析: true }
+      activeTabs: {}, // 表格型区块内当前选中的 tab: { P3: 'Agent关闭失败' }
       lastParams: null, // 最近一次查询参数
       fieldVisible: false,
       fieldType: 'more',
@@ -176,53 +188,29 @@ export default {
     }
   },
   computed: {
-    // P2 / P3 区块：每个分类下有 1 张表直接展示，多张表用 tab 切换
-    alarmSections() {
-      const sections = []
-      const build = (key, group, lists) => {
-        if (!lists || typeof lists !== 'object') return
-        const items = Object.keys(lists).map((name) => ({
-          name: name,
-          rows: Array.isArray(lists[name])
-            ? lists[name].filter((row) => row && typeof row === 'object')
-            : []
-        }))
-        if (items.length === 0) return
-        const total = items.reduce((sum, item) => sum + item.rows.length, 0)
-        sections.push({
-          key: key,
-          group: group,
-          lists: items,
-          title: items.length === 1 ? `${group} · ${items[0].name}` : group,
-          badge: items.length === 1 ? `${total} 条` : `${items.length} 类 / ${total} 条`
-        })
-      }
-      build('P2', 'P2', this.p2Data)
-      build('P3', 'P3', this.p3Data)
-      return sections
-    },
-    // 所有可收缩的区块 key，供一键收起使用
+    // 所有可收缩的区块 key（指标 + 动态区块），供一键收起使用
     sectionKeys() {
-      return ['metrics'].concat(
-        this.alarmSections.map((section) => section.key),
-        ['duplicate']
-      )
+      const keys = this.sections.map((section) => section.key)
+      return this.metricGroups.length > 0 ? [this.metricsKey].concat(keys) : keys
     },
-    p1Count() {
-      return Object.keys(this.p1Data || {}).length
+    metricsBadge() {
+      const count = this.metricGroups.reduce((sum, group) => sum + group.metrics.length, 0)
+      return `${this.metricGroups.length} 组 · ${count} 项`
     },
+    // 告警总量：表格型 + 两级型里的告警条数（重复性分析单独统计）
     totalCount() {
-      return this.alarmSections.reduce((sum, section) => {
-        return sum + section.lists.reduce((s, list) => s + list.rows.length, 0)
+      return this.sections.reduce((sum, section) => {
+        return sum + (section.kind === 'duplicate' ? 0 : sectionRowCount(section))
       }, 0)
     },
-    duplicateRowCount() {
-      return this.duplicateGroups.reduce((sum, group) => {
-        return sum + (Array.isArray(group.data) ? group.data.length : 0)
-      }, 0)
+    duplicateSection() {
+      return this.sections.find((section) => section.kind === 'duplicate') || null
+    },
+    duplicateGroupCount() {
+      return this.duplicateSection ? this.duplicateSection.groups.length : 0
     },
     hasData() {
-      return this.totalCount > 0 || this.duplicateRowCount > 0
+      return this.metricGroups.length > 0 || this.sections.length > 0
     },
     // 所有区块都已收起
     allCollapsed() {
@@ -239,31 +227,20 @@ export default {
     },
     handleQuery() {
       if (this.loading) return
-      const range = Array.isArray(this.form.dateRange) ? this.form.dateRange : []
-      const params = {
-        systemId: this.form.systemId,
-        startDate: range[0] || '',
-        endDate: range[1] || ''
-      }
+      // 系统 ID 选填：没填就不带 systemId 字段（见 shape.js 的 buildQueryParams）
+      const params = buildQueryParams(this.form)
       this.loading = true
-      getAlarmAnalysis(params)
+      // 返回 promise：便于外部（校验脚本 / 调用方）等待本次查询结束
+      return getAlarmAnalysis(params)
         .then((res) => {
-          const data = (res && res.data) || {}
-          // 防御：P1/P2/P3/重复性分析 可能缺失、为 null 或结构不符
-          const isPlain = (v) => !!v && typeof v === 'object' && !Array.isArray(v)
-          this.p1Data = isPlain(data.P1) ? data.P1 : {}
-          this.p2Data = isPlain(data.P2) ? data.P2 : {}
-          this.p3Data = isPlain(data.P3) ? data.P3 : {}
-          this.duplicateGroups = Array.isArray(data.重复性分析)
-            ? data.重复性分析.filter((group) => {
-                return isPlain(group) && Array.isArray(group.data) && group.data.length > 0
-              })
-            : []
+          const built = buildSections(pickPayload(res))
+          this.metricGroups = built.metricGroups
+          this.sections = built.sections
           this.collapsed = {} // 新查询默认全部展开
           // 重新生成 tab 状态：整对象替换，保证新增的 key 也是响应式的
           const tabs = {}
-          this.alarmSections.forEach((section) => {
-            if (section.lists.length > 1) {
+          built.sections.forEach((section) => {
+            if (section.kind === 'table' && section.lists.length > 1) {
               tabs[section.key] = section.lists[0].name
             }
           })

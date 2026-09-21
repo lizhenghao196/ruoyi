@@ -48,3 +48,29 @@
 - 刷新按钮**不写 disabled**：自动刷新期间表格一直 loading，按钮必须还能点（用来停表）。
 - 校验脚本 `test_detail_refresh.mjs`（模板接线 / SCSS 产物 + scoped keyframes 改名一致性 /
   脚本结构 / 弹窗运行时展开保持 / 页面运行时定时器生命周期）。
+
+
+## 两条「不知道就会做错」的硬约束
+
+### 1. `funcChName` 的拼写（Ch，不是 Cn）
+
+`queryAotmOfNode` 返回的 `functions[]` 里，中文名字段是 **`funcChName`**（Ch = Chinese），**不是 `funcCnName`**。
+明细弹窗「函数」列取的就是它 —— 写错**那一列静默变空、零报错**。
+
+改这个字段名要**四处一起改**：
+`AtomDetailDialog.vue` 组件模板 / `_demoAtom.js` 的 `toFunctionRow` 投影 / `execPlan.js` 的字段文档 /
+`test_atom_detail.mjs` 的 `KEYS`。
+
+已加**反向断言**「不许出现 `funcCnName`」钉住拼写。
+⚠️ **断言前必须剥注释**（含模板 `<!-- -->`）—— 自己留的警告注释会让这条断言假红。
+
+### 2. 有 `type="expand"` 的表，任何列都不能加 `fixed`
+
+**左固定也一样不行。** Element 2.15.14 的 `wrappedRowRender()` 不判 `this.fixed`：
+展开行（连同内层「所属函数列表」）会被复制进 `.el-table__fixed-right` 那个
+`position:absolute`、**不跟横向滚动**的白底层 → 内层「跳过/执行」被钉在右边不动，
+看着像「操作列被分成两列」。
+
+外层「操作」列的 `fixed="right"` **已去掉**，原位留了警告注释，**别加回来**。
+守它的脚本：`check_fixed_expand.mjs`。
+
