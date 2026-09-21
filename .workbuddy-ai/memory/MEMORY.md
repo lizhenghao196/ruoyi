@@ -25,7 +25,37 @@
 - 最容易踩的都在 REF 里，**动手前必读**：轮询必须静默 / 横滚在每条流内部 / 页头进度算法 / 哑组件契约 / `type="expand"` 不能加 `fixed`。
   → `REF-exec-page.md`（执行页面、流布局、右键菜单、节点操作）、`REF-exec-detail.md`（查看明细弹窗）。
 
+## 工单甘特图（orderGantt，2026-09-21 新增）
+- 页面 `views/tool/orderGantt/index.vue`（单按钮「查看」+ el-dialog）→ 组件 `components/OrderGantt.vue`（props `orders`）→ **纯函数 `ganttLayout.js`**（可 node 断言）。
+- **三条硬规则**（改动时最容易破）：
+  1. **行装箱从下往上**（`packRows(items, {fromBottom:true})`，两遍：先求最优行数再定向）。方向反了用户一眼就看出「这条明明能往下挪」。
+  2. **弹窗定高 + 按可用高度反推行高**（`fitRowPlan(rowPlan, availableHeight)`），目标是**不出现滚动条、一眼看全**。
+     ⚠️ `containerHeight` 必须量**组件根节点 `.og`**，**绝不能量 `.og__plotwrap`** —— 后者的高度正是被行高决定的，会形成循环依赖。
+     ⚠️ 三段固定高（页头/日期带/时间轴）**用 `outerHeight` 实测**（`offsetHeight` **漏外边距**，页头少算 12px 就会把时间轴切掉 9px）。行高**不能取整**（取整留 `行数×1px` 空白）。
+     ⚠️ 弹窗选择器写 `.el-dialog.ogp-dialog`（0,2,0），单独 `.ogp-dialog` 压不过 element-ui 的 `margin`（同特异性只看打包顺序）。
+  3. **配色：AUTO = 蓝，手动 / 其他 = 绿**（`--og-auto-*` / `--og-manual-*`，图例/气泡/柱体全走变量）。
+     改动时别把两组调换回去 —— `og_scss.mjs` 按**色相 + 明度**钉住了。
+  4. **悬浮气泡必须紧贴矩形、鼠标能走到气泡上**（气泡里有 JsonViewer，走不过去等于白做）：
+     - 定位读**渲染后量到的真实高度** `tipSize.h`（估算常量只当兜底）—— 用估算值算 `top`，矮气泡会离矩形 150px。
+       模板 `.og-tip` 上**必须有 `ref="tip"`**，否则量不到尺寸；`ResizeObserver` 跟住 JSON 展开导致的高度变化。
+     - `TIP_GAP` **必须 ≤ 6px**（算出来的：矩形高 = `min(22, 行高-6)` → 相邻两行矩形间恒定 6px 缝，间距 ≤6 才盖得住，否则鼠标往上走会「跳」到上一行的工单上）。
+     - 水平**以矩形中心居中**，不是左对齐矩形左边缘（宽矩形会让鼠标走出气泡左右边界）。
+     - 气泡打开期间在 `document` 上挂 `mousemove` 守卫（`startPointerWatch`）：指针在「矩形 ∪ 气泡」±10px 内 → `cancelClose()`；走远了且**当前没有定时器**才 `scheduleClose()`（不加这个判断，鼠标一直在外面动就永远关不掉）。**只靠 `mouseleave` 定时器不够 —— 鼠标停在缝里不动时没有任何事件，定时器照样到期。**
+     - 验收：`og_verify_tip.mjs`（真实浏览器，8 组断言，含「分步移动鼠标走过去」「停在缝里 700ms」），源码断言在 `og_verify.mjs` §5.5。
+  5. **`detail` 是对象数组、字段固定 `{ type, count, type_cost }`，气泡用表格展示**（2026-09-21 变更）：
+     - 表头**直接渲染 key 名**（用户要求「表头就用 key 值」），列取所有行 key 的并集**不写死**，`num`（全列是数字）右对齐。
+     - 组件里**不许再引 `vue-json-viewer`**（包本身留着，capacity / function / AtomDetailDialog 还在用）。`og_verify.mjs` §4.1 钉住了这条。
+     - 造数器**不能**给样例单按 mode 覆盖 `total_cost`：样例 1 是 AUTO 但耗时 115 分钟，一覆盖成 AUTO 区间（8~30）就破了 `sum(type_cost) <= total_cost`。
+     - 两条数据自洽约束（断言钉住）：`type_cost` 是 5 的倍数；`sum(type_cost) <= total_cost`。
+     - `TIP_WIDTH` 420 / `TIP_HEIGHT_FALLBACK` 300（实测气泡高：1 行 135px、5 行 243px）。
+- **任何「有宽度的东西」都不能画在 `x === plotWidth` 上**：`alignDomain` 保证最后一个刻度恰好落在 plotWidth，
+  1px 宽的网格线右边缘顶到 plotWidth+1 → `overflow-x: auto` 就冒出一根横向滚动条。网格线/刻度短线走 `gridTicks`（过滤过），**标签仍用完整 `ticks`**。
+- 时间域跨度大时**不横向撑开**（`plotWidth = max(360, 容器宽)`）；真到 3 天时矩形被压窄但保证 ≥8px 仍可悬浮。
+- 校验：`og_verify.mjs`（全量，须 FAILURES:0）+ `og_scss.mjs`（编译 + 配色色相）+ `og_rows.mjs`（方向）+ `og_diag.mjs`（数值体检）+ `og_preview.mjs`（静态预览 HTML）+ **`og_verify_browser.mjs`（真实浏览器：`scrollWidth===clientWidth` 才算「不滚动」）** + **`og_verify_tip.mjs`（气泡可达性）**。
+- 其余细节（矩形宽度判定只此一处、AUTO 分组置底、尾部外溢要偏置、`packRows` 副本坑、对齐后要重校验格数）见 `2026-09-21.md`。
+
 ## 校验 / 协作
 - node 校验：`cd C:/Users/lenovo/AppData/Local/Temp && node --experimental-loader ./resolve_ext_loader.mjs ./test_xxx.mjs`。浏览器视觉/像素校验见技能 `ruoyi-ui-node-verify`。
+- **dev server 日志认人**：仓库根 `frontend.log` 是旧的，真正在写的是 **`ruoyi-ui/npm-dev.log`** —— 先 `ls -lat *.log` 按 mtime 判断，再比「最后一次 `Compiled` 时间 > 所有源文件 mtime」。
 - 不自动跑构建；纯前端改动无需构建。后端 `java -jar` 改动需重构建+重启，**须先说明并等用户明确要求**。工具链 `C:\Users\lenovo\.codex\tools\ruoyi-vue`。
-- 指出差异时**先复述对方意图**，再讲「在什么输入下达不到该意图」。
+- 指出差异时**先复述对方意图**，再讲「在什么输入下达不到该意图」；**能用数据复现就先复现**（本次写脚本量出「38 条可往下挪」，比争论有用）。

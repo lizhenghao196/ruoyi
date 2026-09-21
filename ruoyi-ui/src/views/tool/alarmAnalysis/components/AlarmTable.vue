@@ -1,29 +1,67 @@
 <template>
   <div class="at">
-    <el-table v-if="rows.length > 0" :data="rows" size="mini" border max-height="420">
-      <el-table-column prop="alertKey" label="alertKey" width="170" show-overflow-tooltip />
-      <el-table-column prop="summary" label="summary" min-width="280" show-overflow-tooltip />
-      <el-table-column prop="misInfoReason" label="misInfoReason" width="130" show-overflow-tooltip />
-      <el-table-column prop="alertReasonDesc" label="alertReasonDesc" width="140" show-overflow-tooltip />
+    <el-table
+      v-if="rows.length > 0"
+      :data="rows"
+      size="mini"
+      border
+      height="420"
+    >
+      <el-table-column
+        prop="alertKey"
+        label="alertKey"
+        width="170"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        prop="summary"
+        label="summary"
+        min-width="280"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        prop="misInfoReason"
+        label="misInfoReason"
+        width="130"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        prop="alertReasonDesc"
+        label="alertReasonDesc"
+        width="140"
+        show-overflow-tooltip
+      />
       <el-table-column prop="alertSource" label="alertSource" width="100" />
       <el-table-column prop="closedBy" label="closedby" width="90" />
       <el-table-column label="AgentTrace" width="140" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="mini" @click="$emit('view-field', 'trace', scope.row)">
+          <el-button
+            type="text"
+            size="mini"
+            @click="$emit('view-field', 'trace', scope.row)"
+          >
             使用到的智能体
           </el-button>
         </template>
       </el-table-column>
       <el-table-column label="output" width="110" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="mini" @click="$emit('view-field', 'report', scope.row)">
+          <el-button
+            type="text"
+            size="mini"
+            @click="$emit('view-field', 'report', scope.row)"
+          >
             告警报告
           </el-button>
         </template>
       </el-table-column>
       <el-table-column label="more" width="110" align="center">
         <template slot-scope="scope">
-          <el-button type="text" size="mini" @click="$emit('view-field', 'more', scope.row)">
+          <el-button
+            type="text"
+            size="mini"
+            @click="$emit('view-field', 'more', scope.row)"
+          >
             更多字段
           </el-button>
         </template>
@@ -39,14 +77,14 @@
 
 <script>
 export default {
-  name: 'AlarmTable',
+  name: "AlarmTable",
   props: {
     rows: {
       type: Array,
-      default: () => []
-    }
-  }
-}
+      default: () => [],
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
