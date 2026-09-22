@@ -14,6 +14,19 @@
           @input="onSystemInput"
           @keyup.enter.native="handleQuery"
         />
+        <!-- 组别：字典 dict_system_group（label 与 value 相同），默认「不限定组别」 -->
+        <el-select
+          v-model="form.teamName"
+          class="aa-bar__team"
+          placeholder="组别"
+        >
+          <el-option
+            v-for="dict in dict.type.dict_system_group"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
         <el-date-picker
           v-model="form.dateRange"
           class="aa-bar__range"
@@ -74,7 +87,7 @@
       </section>
 
       <template v-else>
-        <!-- 指标：所有「指标型」数据合并成一行，按 key 分组（P1 / P2 …）用标签区分 -->
+        <!-- 指标：后端按 P1/P2 返回，页面上合并成一条，顺序由 shape.js 的 METRIC_ORDER 决定 -->
         <collapse-section
           v-if="metricGroups.length > 0"
           title="指标"
@@ -157,6 +170,8 @@ const defaultRange = () => {
 
 export default {
   name: 'AlarmAnalysis',
+  // 组别下拉的选项来源（label 与 value 相同，见 sql/dict_system_group.sql）
+  dicts: ['dict_system_group'],
   components: {
     CollapseSection,
     MetricCards,
@@ -169,13 +184,15 @@ export default {
     return {
       form: {
         systemId: '',
+        // 组别：字典 dict_system_group 的第一项，本身就是有效语义（= 不按组别过滤），所以始终传给接口
+        teamName: '不限定组别',
         dateRange: defaultRange() // [startDate, endDate]，yyyy-MM-dd
       },
       loading: false,
       searched: false,
       // 指标条在 collapsed / sectionKeys 里的固定 key（指标不是 payload 的某个 key）
       metricsKey: METRICS_KEY,
-      // 指标组： [ { name: 'P1', metrics: [...] } ] —— 所有指标型 key 合并成一行
+      // 指标条： [ { name: '指标', metrics: [...] } ] —— 后端按 P1/P2 返回，页面合并成一条（不再区分）
       metricGroups: [],
       // 其余区块：形态由 shape.js 判定，页面只按 kind 选渲染器
       sections: [],
@@ -195,7 +212,8 @@ export default {
     },
     metricsBadge() {
       const count = this.metricGroups.reduce((sum, group) => sum + group.metrics.length, 0)
-      return `${this.metricGroups.length} 组 · ${count} 项`
+      // 指标已合并成一条，不再有「N 组」的概念
+      return this.metricGroups.length > 1 ? `${this.metricGroups.length} 组 · ${count} 项` : `${count} 项`
     },
     // 告警总量：表格型 + 两级型里的告警条数（重复性分析单独统计）
     totalCount() {
@@ -227,7 +245,8 @@ export default {
     },
     handleQuery() {
       if (this.loading) return
-      // 系统 ID 选填：没填就不带 systemId 字段（见 shape.js 的 buildQueryParams）
+      // 系统 ID 选填：没填就不带 systemId 字段；组别 teamName 有默认值，始终带上
+      // （见 shape.js 的 buildQueryParams）
       const params = buildQueryParams(this.form)
       this.loading = true
       // 返回 promise：便于外部（校验脚本 / 调用方）等待本次查询结束
@@ -309,6 +328,11 @@ $text-sub: #909399;
 
   &__input {
     width: 260px;
+  }
+
+  // 组别下拉：最长一项「不限定组别」5 个字 + 箭头，150px 刚好不挤
+  &__team {
+    width: 150px;
   }
 
   &__range {

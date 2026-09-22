@@ -57,7 +57,7 @@
         </div>
       </template>
 
-      <!-- ==================== 使用到的智能体 / 告警报告 ==================== -->
+      <!-- ==================== 使用到的智能体 / 告警详情 ==================== -->
       <template v-else>
         <!-- 使用到的智能体：AgentTrace -->
         <template v-if="type === 'trace'">
@@ -86,7 +86,7 @@
           <el-empty v-else description="该告警无智能体调用记录" :image-size="90" />
         </template>
 
-        <!-- 告警报告：output 是 markdown 文本，按 markdown 渲染（标题 / 有序无序列表 / 段落 + 行内链接、加粗、代码） -->
+        <!-- 告警详情：output 是 markdown 文本，按 markdown 渲染（标题 / 有序无序列表 / 段落 + 行内链接、加粗、代码） -->
         <template v-else>
           <div v-if="reportBlocks.length > 0" class="fd__report">
             <component
@@ -112,7 +112,7 @@
               </template>
             </component>
           </div>
-          <el-empty v-else description="该告警暂无告警报告" :image-size="90" />
+          <el-empty v-else description="该告警暂无告警详情" :image-size="90" />
         </template>
       </template>
     </div>
@@ -124,13 +124,13 @@
 const SHOWN_KEYS = [
   'alertKey',
   'summary',
-  'misInfoReason',
+  'misinfoReason', // ⚠️ 小写 i，别写成 misInfoReason
   'alertReasonDesc',
-  'alertSource',
-  'closedBy',
   'AgentTrace',
   'output'
 ]
+// 明确不展示的字段：表格列已去掉，这里也不再列出
+const HIDDEN_KEYS = ['alertSource', 'closedBy']
 // 摘要区已展示的字段，不在下方字段列表里重复
 const SUMMARY_KEYS = ['level', 'status', 'sourceName']
 const META_LABELS = { level: '告警级别', status: '告警状态', sourceName: '来源' }
@@ -173,7 +173,7 @@ function formatMs(value) {
   return `${date} ${time}`
 }
 
-/* ---- 告警报告（output）的 markdown 轻量渲染 ----
+/* ---- 告警详情（output）的 markdown 轻量渲染 ----
    按行拆成块（标题 / 列表项 / 段落），行内再拆成 run（链接 / 加粗 / 代码 / 纯文本）。
    结果交给模板渲染，不用 v-html，避免注入风险。 */
 const HEADING_RE = /^(#{1,6})\s+(.*)$/
@@ -286,9 +286,12 @@ export default {
       return this.type === 'more'
     },
     dialogTitle() {
+      // report = 表格 output 列「告警详情」按钮打开的弹窗（渲染 output 的 markdown）
+      // more   = 原「更多字段」弹窗。该入口已改成「查看简报」（跳外部系统），当前没有调用方，
+      //          代码先留着，需要时还能接回来。
       const titles = {
         trace: '使用到的智能体',
-        report: '告警报告',
+        report: '告警详情',
         more: '告警详情'
       }
       return titles[this.type] || ''
@@ -317,17 +320,21 @@ export default {
       const list = this.item && this.item.AgentTrace
       return Array.isArray(list) ? list.filter((t) => t && typeof t === 'object') : []
     },
-    // 告警报告：把 output 当作 markdown 解析成块
+    // 告警详情：把 output 当作 markdown 解析成块
     reportBlocks() {
       const text = this.item && this.item.output
       if (text === undefined || text === null || text === '') return []
       return parseMarkdown(text)
     },
-    // 除表格列与摘要区之外的字段，按分组输出
+    // 除表格列、摘要区、以及明确不展示的字段之外的字段，按分组输出
     fieldGroups() {
       const item = this.item || {}
       const keys = Object.keys(item).filter((key) => {
-        return SHOWN_KEYS.indexOf(key) < 0 && SUMMARY_KEYS.indexOf(key) < 0
+        return (
+          SHOWN_KEYS.indexOf(key) < 0 &&
+          HIDDEN_KEYS.indexOf(key) < 0 &&
+          SUMMARY_KEYS.indexOf(key) < 0
+        )
       })
       const groups = GROUP_DEFS.map((def) => ({
         name: def.name,
@@ -439,7 +446,7 @@ $text-sub: #909399;
     white-space: pre-wrap;
   }
 
-  /* ---------- 告警报告：output 按 markdown 渲染 ---------- */
+  /* ---------- 告警详情：output 按 markdown 渲染 ---------- */
   &__report {
     border: 1px solid $border;
     border-radius: 8px;
@@ -691,7 +698,7 @@ $text-sub: #909399;
 
 <!-- dialog 挂载在 body 上，覆盖 el-dialog 内部样式需非 scoped（同 bill 页做法） -->
 <style lang="scss">
-// 三个弹窗（更多字段 / 使用到的智能体 / 告警报告）统一圆角
+// 三个弹窗（更多字段 / 使用到的智能体 / 告警详情）统一圆角
 .fd-dialog {
   border-radius: 8px;
 }

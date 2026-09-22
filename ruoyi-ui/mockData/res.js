@@ -3738,7 +3738,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
           receiveTime: 1728782402851,
@@ -3788,7 +3788,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-13 12:18:09\n现象描述：网联银联交易成功率降为0（实际值0.02），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计4534笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:47:09（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273088000,
@@ -3852,7 +3852,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 16:29:18\n现象描述：联机交易量在5分钟内由3600笔/分钟降至865.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心数据库ORACLE-core01\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2367笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:07:18（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789374557000,
@@ -3916,7 +3916,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-12 06:03:23\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约5306笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 06:23:23（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789164202000,
@@ -3966,7 +3966,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_card01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_card01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-13 23:22:27\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 23:57:27（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789312946000,
@@ -4023,7 +4023,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 02:03:09\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计40天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：近7天表空间日增量约115GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:38:09（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789149788000,
@@ -4087,7 +4087,7 @@ let analyzeRes = {
           metric: "ORACLE-慢SQL数量-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 18:21:49\n现象描述：慢SQL数量达到342.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：定位为新增查询语句未命中索引，执行计划发生全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 18:39:49（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789208508000,
@@ -4137,7 +4137,7 @@ let analyzeRes = {
           metric: "KAFKA-消费组堆积量-dasp-core-group",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-13 18:46:04\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费线程数配置偏低，突发流量下消费速度跟不上生产速度。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 19:10:04（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789296363000,
@@ -4201,7 +4201,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 20:09:33\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 20:21:33（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789301372000,
@@ -4251,7 +4251,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-13 15:52:38\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 16:25:38（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789285957000,
@@ -4301,7 +4301,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值91.7,阈值下限:10\n告警时间：2026-09-14 23:08:17\n现象描述：文件系统使用率达到91.7%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约239GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:19:17（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789398496000,
@@ -4358,7 +4358,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-平均耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值2430.0,阈值下限:50\n告警时间：2026-09-13 02:33:54\n现象描述：99线响应时间升至2430.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 02:56:54（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789238033000,
@@ -4408,7 +4408,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_settle",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-12 02:12:36\n现象描述：作业执行时长超出历史基线335%，且仍未执行完成\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:56:36（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789150355000,
@@ -4472,7 +4472,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 23:26:24\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:51:24（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789399583000,
@@ -4522,7 +4522,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-13 18:33:12\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：high\n备注：丢包为间歇性，持续约19分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:40:12（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789295591000,
@@ -4579,7 +4579,7 @@ let analyzeRes = {
           metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 22:45:43\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 23:03:43（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789137942000,
@@ -4629,7 +4629,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-12 15:04:28\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:21:28（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789196667000,
@@ -4686,7 +4686,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 12:30:34\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：近7天内同类告警3次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计6450笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:52:34（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273833000,
@@ -4750,7 +4750,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-交易笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-11 02:49:16\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约8303笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 03:12:16（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789066155000,
@@ -4814,7 +4814,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 21:50:16\n现象描述：消费笔数在10分钟内持续低于阈值下限，且无回升迹象\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约2759笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 22:35:16（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789393815000,
@@ -4864,7 +4864,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 00:02:37\n现象描述：数据库会话数使用率升至96.8%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：high\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 00:32:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789056156000,
@@ -4921,7 +4921,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 07:45:04\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计45天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 07:58:04（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789170303000,
@@ -4971,7 +4971,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 16:51:35\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609128057引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:14:35（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789203094000,
@@ -5035,7 +5035,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-13 18:13:46\n现象描述：消费组堆积量达到153280.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:19:46（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789294425000,
@@ -5085,7 +5085,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0042",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 13:28:25\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：应用节点bjb-dasp-app\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 13:53:25（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789277304000,
@@ -5135,7 +5135,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0012",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0012,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-11 21:48:52\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:19:52（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789134531000,
@@ -5192,7 +5192,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-14 04:42:53\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约157GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:20:53（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789332172000,
@@ -5242,7 +5242,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-99线耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-12 04:49:35\n现象描述：99线响应时间升至1860.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：同期QPS较基线增长约436%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 05:34:35（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789159774000,
@@ -5299,7 +5299,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_interest",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-12 23:17:44\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：上游数据文件到位时间延迟约31分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 23:38:44（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789226263000,
@@ -5356,7 +5356,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值88.9,阈值下限:10\n告警时间：2026-09-11 23:31:52\n现象描述：缓存内存使用率达到88.9%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 00:01:52（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789140711000,
@@ -5420,7 +5420,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-11 21:34:21\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约30分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:07:21（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789133660000,
@@ -5477,7 +5477,7 @@ let analyzeRes = {
           metric: "CANAL-同步延迟-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-同步延迟-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 16:45:02\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:29:02（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789375501000,
@@ -5541,7 +5541,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值21.0,阈值下限:30\n告警时间：2026-09-14 16:09:22\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：证书签发CA\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共2512张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 16:50:22（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789373361000,
@@ -5598,7 +5598,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-11 12:49:24\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计5353笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 13:16:24（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789102163000,
@@ -5662,7 +5662,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 21:16:26\n现象描述：联机交易量跌至1024.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：medium\n备注：变更单CHG-202609104269已关联，变更内容为账户查询逻辑调整。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6387笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:53:26（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789305385000,
@@ -5726,7 +5726,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 04:49:34\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约639笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:24:34（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789332573000,
@@ -5776,7 +5776,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-14 14:52:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 15:19:21（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789368740000,
@@ -5826,7 +5826,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-14 01:50:46\n现象描述：表空间使用率达到92.1%，超过阈值上限90%，存在写满风险\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：近7天表空间日增量约168GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 02:35:46（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789321845000,
@@ -5890,7 +5890,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-14 00:37:37\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 01:09:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789317456000,
@@ -5947,7 +5947,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-12 17:12:18\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：消费端实例在线数正常，无节点宕机。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:31:18（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789204337000,
@@ -6011,7 +6011,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 03:34:15\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 03:58:15（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789241654000,
@@ -6061,7 +6061,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-14 22:51:35\n现象描述：节点内存使用率升至98.1%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：HeapDump分析显示存在大对象缓存未及时释放，判定为缓存实现缺陷导致内存持续增长。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:12:35（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789397494000,
@@ -6111,7 +6111,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值89.2,阈值下限:10\n告警时间：2026-09-13 05:30:57\n现象描述：文件系统使用率持续高于阈值上限，日志与临时目录占用增长明显\n\n### 根因定位\n根因组件：服务器bjc-dasp-hive文件系统/var\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：清理后空间可释放，但会在数日内再次增长。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 06:03:57（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789248656000,
@@ -6164,7 +6164,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
           receiveTime: 1728782402851,
@@ -6214,7 +6214,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-13 12:18:09\n现象描述：网联银联交易成功率降为0（实际值0.02），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计4534笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:47:09（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273088000,
@@ -6278,7 +6278,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 16:29:18\n现象描述：联机交易量在5分钟内由3600笔/分钟降至865.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心数据库ORACLE-core01\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2367笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:07:18（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789374557000,
@@ -6342,7 +6342,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-12 06:03:23\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约5306笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 06:23:23（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789164202000,
@@ -6392,7 +6392,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_card01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_card01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-13 23:22:27\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 23:57:27（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789312946000,
@@ -6449,7 +6449,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 02:03:09\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计40天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：近7天表空间日增量约115GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:38:09（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789149788000,
@@ -6513,7 +6513,7 @@ let analyzeRes = {
           metric: "ORACLE-慢SQL数量-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 18:21:49\n现象描述：慢SQL数量达到342.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：定位为新增查询语句未命中索引，执行计划发生全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 18:39:49（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789208508000,
@@ -6563,7 +6563,7 @@ let analyzeRes = {
           metric: "KAFKA-消费组堆积量-dasp-core-group",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-13 18:46:04\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费线程数配置偏低，突发流量下消费速度跟不上生产速度。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 19:10:04（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789296363000,
@@ -6627,7 +6627,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 20:09:33\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 20:21:33（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789301372000,
@@ -6677,7 +6677,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-13 15:52:38\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 16:25:38（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789285957000,
@@ -6727,7 +6727,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值91.7,阈值下限:10\n告警时间：2026-09-14 23:08:17\n现象描述：文件系统使用率达到91.7%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约239GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:19:17（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789398496000,
@@ -6784,7 +6784,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-平均耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值2430.0,阈值下限:50\n告警时间：2026-09-13 02:33:54\n现象描述：99线响应时间升至2430.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 02:56:54（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789238033000,
@@ -6834,7 +6834,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_settle",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-12 02:12:36\n现象描述：作业执行时长超出历史基线335%，且仍未执行完成\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:56:36（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789150355000,
@@ -6898,7 +6898,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 23:26:24\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:51:24（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789399583000,
@@ -6948,7 +6948,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-13 18:33:12\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：high\n备注：丢包为间歇性，持续约19分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:40:12（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789295591000,
@@ -7005,7 +7005,7 @@ let analyzeRes = {
           metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 22:45:43\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 23:03:43（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789137942000,
@@ -7055,7 +7055,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-12 15:04:28\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:21:28（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789196667000,
@@ -7112,7 +7112,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 12:30:34\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：近7天内同类告警3次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计6450笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:52:34（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273833000,
@@ -7176,7 +7176,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-交易笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-11 02:49:16\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约8303笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 03:12:16（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789066155000,
@@ -7240,7 +7240,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 21:50:16\n现象描述：消费笔数在10分钟内持续低于阈值下限，且无回升迹象\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约2759笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 22:35:16（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789393815000,
@@ -7290,7 +7290,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 00:02:37\n现象描述：数据库会话数使用率升至96.8%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：high\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 00:32:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789056156000,
@@ -7347,7 +7347,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 07:45:04\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计45天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 07:58:04（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789170303000,
@@ -7397,7 +7397,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 16:51:35\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609128057引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:14:35（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789203094000,
@@ -7461,7 +7461,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-13 18:13:46\n现象描述：消费组堆积量达到153280.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:19:46（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789294425000,
@@ -7511,7 +7511,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0042",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 13:28:25\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：应用节点bjb-dasp-app\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 13:53:25（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789277304000,
@@ -7561,7 +7561,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0012",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0012,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-11 21:48:52\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:19:52（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789134531000,
@@ -7618,7 +7618,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-14 04:42:53\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约157GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:20:53（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789332172000,
@@ -7668,7 +7668,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-99线耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-12 04:49:35\n现象描述：99线响应时间升至1860.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：同期QPS较基线增长约436%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 05:34:35（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789159774000,
@@ -7725,7 +7725,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_interest",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-12 23:17:44\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：上游数据文件到位时间延迟约31分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 23:38:44（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789226263000,
@@ -7782,7 +7782,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值88.9,阈值下限:10\n告警时间：2026-09-11 23:31:52\n现象描述：缓存内存使用率达到88.9%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 00:01:52（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789140711000,
@@ -7846,7 +7846,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-11 21:34:21\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约30分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:07:21（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789133660000,
@@ -7903,7 +7903,7 @@ let analyzeRes = {
           metric: "CANAL-同步延迟-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-同步延迟-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 16:45:02\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:29:02（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789375501000,
@@ -7967,7 +7967,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值21.0,阈值下限:30\n告警时间：2026-09-14 16:09:22\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：证书签发CA\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共2512张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 16:50:22（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789373361000,
@@ -8024,7 +8024,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-11 12:49:24\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计5353笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 13:16:24（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789102163000,
@@ -8088,7 +8088,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 21:16:26\n现象描述：联机交易量跌至1024.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：medium\n备注：变更单CHG-202609104269已关联，变更内容为账户查询逻辑调整。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6387笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:53:26（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789305385000,
@@ -8152,7 +8152,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 04:49:34\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约639笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:24:34（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789332573000,
@@ -8202,7 +8202,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-14 14:52:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 15:19:21（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789368740000,
@@ -8252,7 +8252,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-14 01:50:46\n现象描述：表空间使用率达到92.1%，超过阈值上限90%，存在写满风险\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：近7天表空间日增量约168GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 02:35:46（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789321845000,
@@ -8316,7 +8316,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-14 00:37:37\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 01:09:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789317456000,
@@ -8373,7 +8373,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-12 17:12:18\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：消费端实例在线数正常，无节点宕机。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:31:18（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789204337000,
@@ -8437,7 +8437,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 03:34:15\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 03:58:15（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789241654000,
@@ -8487,7 +8487,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-14 22:51:35\n现象描述：节点内存使用率升至98.1%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：HeapDump分析显示存在大对象缓存未及时释放，判定为缓存实现缺陷导致内存持续增长。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:12:35（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789397494000,
@@ -8537,7 +8537,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值89.2,阈值下限:10\n告警时间：2026-09-13 05:30:57\n现象描述：文件系统使用率持续高于阈值上限，日志与临时目录占用增长明显\n\n### 根因定位\n根因组件：服务器bjc-dasp-hive文件系统/var\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：清理后空间可释放，但会在数日内再次增长。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 06:03:57（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789248656000,
@@ -8590,7 +8590,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
           receiveTime: 1728782402851,
@@ -8640,7 +8640,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-13 12:18:09\n现象描述：网联银联交易成功率降为0（实际值0.02），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计4534笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:47:09（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273088000,
@@ -8704,7 +8704,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 16:29:18\n现象描述：联机交易量在5分钟内由3600笔/分钟降至865.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心数据库ORACLE-core01\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2367笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:07:18（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789374557000,
@@ -8768,7 +8768,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-12 06:03:23\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约5306笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 06:23:23（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789164202000,
@@ -8818,7 +8818,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_card01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_card01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-13 23:22:27\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 23:57:27（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789312946000,
@@ -8875,7 +8875,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 02:03:09\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计40天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：近7天表空间日增量约115GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:38:09（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789149788000,
@@ -8939,7 +8939,7 @@ let analyzeRes = {
           metric: "ORACLE-慢SQL数量-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 18:21:49\n现象描述：慢SQL数量达到342.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：定位为新增查询语句未命中索引，执行计划发生全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 18:39:49（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789208508000,
@@ -8989,7 +8989,7 @@ let analyzeRes = {
           metric: "KAFKA-消费组堆积量-dasp-core-group",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-13 18:46:04\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费线程数配置偏低，突发流量下消费速度跟不上生产速度。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 19:10:04（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789296363000,
@@ -9053,7 +9053,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 20:09:33\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 20:21:33（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789301372000,
@@ -9103,7 +9103,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-13 15:52:38\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 16:25:38（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789285957000,
@@ -9153,7 +9153,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值91.7,阈值下限:10\n告警时间：2026-09-14 23:08:17\n现象描述：文件系统使用率达到91.7%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约239GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:19:17（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789398496000,
@@ -9210,7 +9210,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-平均耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值2430.0,阈值下限:50\n告警时间：2026-09-13 02:33:54\n现象描述：99线响应时间升至2430.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 02:56:54（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789238033000,
@@ -9260,7 +9260,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_settle",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-12 02:12:36\n现象描述：作业执行时长超出历史基线335%，且仍未执行完成\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:56:36（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789150355000,
@@ -9324,7 +9324,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 23:26:24\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:51:24（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789399583000,
@@ -9374,7 +9374,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-13 18:33:12\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：high\n备注：丢包为间歇性，持续约19分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:40:12（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789295591000,
@@ -9431,7 +9431,7 @@ let analyzeRes = {
           metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 22:45:43\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 23:03:43（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789137942000,
@@ -9481,7 +9481,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-12 15:04:28\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:21:28（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789196667000,
@@ -9538,7 +9538,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 12:30:34\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：近7天内同类告警3次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计6450笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:52:34（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273833000,
@@ -9602,7 +9602,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-交易笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-11 02:49:16\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约8303笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 03:12:16（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789066155000,
@@ -9666,7 +9666,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 21:50:16\n现象描述：消费笔数在10分钟内持续低于阈值下限，且无回升迹象\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约2759笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 22:35:16（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789393815000,
@@ -9716,7 +9716,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 00:02:37\n现象描述：数据库会话数使用率升至96.8%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：high\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 00:32:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789056156000,
@@ -9773,7 +9773,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 07:45:04\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计45天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 07:58:04（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789170303000,
@@ -9823,7 +9823,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 16:51:35\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609128057引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:14:35（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789203094000,
@@ -9887,7 +9887,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-13 18:13:46\n现象描述：消费组堆积量达到153280.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:19:46（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789294425000,
@@ -9937,7 +9937,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0042",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 13:28:25\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：应用节点bjb-dasp-app\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 13:53:25（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789277304000,
@@ -9987,7 +9987,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0012",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0012,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-11 21:48:52\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:19:52（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789134531000,
@@ -10044,7 +10044,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-14 04:42:53\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约157GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:20:53（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789332172000,
@@ -10094,7 +10094,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-99线耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-12 04:49:35\n现象描述：99线响应时间升至1860.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：同期QPS较基线增长约436%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 05:34:35（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789159774000,
@@ -10151,7 +10151,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_interest",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-12 23:17:44\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：上游数据文件到位时间延迟约31分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 23:38:44（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789226263000,
@@ -10208,7 +10208,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值88.9,阈值下限:10\n告警时间：2026-09-11 23:31:52\n现象描述：缓存内存使用率达到88.9%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 00:01:52（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789140711000,
@@ -10272,7 +10272,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-11 21:34:21\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约30分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:07:21（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789133660000,
@@ -10329,7 +10329,7 @@ let analyzeRes = {
           metric: "CANAL-同步延迟-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-同步延迟-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 16:45:02\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:29:02（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789375501000,
@@ -10393,7 +10393,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值21.0,阈值下限:30\n告警时间：2026-09-14 16:09:22\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：证书签发CA\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共2512张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 16:50:22（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789373361000,
@@ -10450,7 +10450,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-11 12:49:24\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计5353笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 13:16:24（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789102163000,
@@ -10514,7 +10514,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 21:16:26\n现象描述：联机交易量跌至1024.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：medium\n备注：变更单CHG-202609104269已关联，变更内容为账户查询逻辑调整。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6387笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:53:26（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789305385000,
@@ -10578,7 +10578,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 04:49:34\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约639笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:24:34（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789332573000,
@@ -10628,7 +10628,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-14 14:52:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 15:19:21（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789368740000,
@@ -10678,7 +10678,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-14 01:50:46\n现象描述：表空间使用率达到92.1%，超过阈值上限90%，存在写满风险\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：近7天表空间日增量约168GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 02:35:46（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789321845000,
@@ -10742,7 +10742,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-14 00:37:37\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 01:09:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789317456000,
@@ -10799,7 +10799,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-12 17:12:18\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：消费端实例在线数正常，无节点宕机。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:31:18（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789204337000,
@@ -10863,7 +10863,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 03:34:15\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 03:58:15（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789241654000,
@@ -10913,7 +10913,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-14 22:51:35\n现象描述：节点内存使用率升至98.1%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：HeapDump分析显示存在大对象缓存未及时释放，判定为缓存实现缺陷导致内存持续增长。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:12:35（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789397494000,
@@ -10963,7 +10963,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值89.2,阈值下限:10\n告警时间：2026-09-13 05:30:57\n现象描述：文件系统使用率持续高于阈值上限，日志与临时目录占用增长明显\n\n### 根因定位\n根因组件：服务器bjc-dasp-hive文件系统/var\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：清理后空间可释放，但会在数日内再次增长。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 06:03:57（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789248656000,
@@ -11018,7 +11018,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
           receiveTime: 1728782402851,
@@ -11073,7 +11073,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
           receiveTime: 1728782402851,
@@ -11123,7 +11123,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-13 12:18:09\n现象描述：网联银联交易成功率降为0（实际值0.02），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计4534笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:47:09（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273088000,
@@ -11187,7 +11187,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 16:29:18\n现象描述：联机交易量在5分钟内由3600笔/分钟降至865.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心数据库ORACLE-core01\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2367笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:07:18（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789374557000,
@@ -11251,7 +11251,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-12 06:03:23\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约5306笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 06:23:23（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789164202000,
@@ -11301,7 +11301,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_card01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_card01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-13 23:22:27\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 23:57:27（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789312946000,
@@ -11358,7 +11358,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 02:03:09\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计40天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：近7天表空间日增量约115GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:38:09（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789149788000,
@@ -11422,7 +11422,7 @@ let analyzeRes = {
           metric: "ORACLE-慢SQL数量-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 18:21:49\n现象描述：慢SQL数量达到342.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：定位为新增查询语句未命中索引，执行计划发生全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 18:39:49（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789208508000,
@@ -11472,7 +11472,7 @@ let analyzeRes = {
           metric: "KAFKA-消费组堆积量-dasp-core-group",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-13 18:46:04\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费线程数配置偏低，突发流量下消费速度跟不上生产速度。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 19:10:04（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789296363000,
@@ -11536,7 +11536,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 20:09:33\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 20:21:33（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789301372000,
@@ -11586,7 +11586,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-13 15:52:38\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 16:25:38（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789285957000,
@@ -11636,7 +11636,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值91.7,阈值下限:10\n告警时间：2026-09-14 23:08:17\n现象描述：文件系统使用率达到91.7%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约239GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:19:17（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789398496000,
@@ -11693,7 +11693,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-平均耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值2430.0,阈值下限:50\n告警时间：2026-09-13 02:33:54\n现象描述：99线响应时间升至2430.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 02:56:54（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789238033000,
@@ -11743,7 +11743,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_settle",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-12 02:12:36\n现象描述：作业执行时长超出历史基线335%，且仍未执行完成\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:56:36（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789150355000,
@@ -11807,7 +11807,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 23:26:24\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:51:24（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789399583000,
@@ -11857,7 +11857,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-13 18:33:12\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：high\n备注：丢包为间歇性，持续约19分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:40:12（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789295591000,
@@ -11914,7 +11914,7 @@ let analyzeRes = {
           metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 22:45:43\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 23:03:43（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789137942000,
@@ -11964,7 +11964,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-12 15:04:28\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:21:28（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789196667000,
@@ -12021,7 +12021,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 12:30:34\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：近7天内同类告警3次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计6450笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:52:34（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273833000,
@@ -12085,7 +12085,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-交易笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-11 02:49:16\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约8303笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 03:12:16（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789066155000,
@@ -12149,7 +12149,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 21:50:16\n现象描述：消费笔数在10分钟内持续低于阈值下限，且无回升迹象\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约2759笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 22:35:16（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789393815000,
@@ -12199,7 +12199,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 00:02:37\n现象描述：数据库会话数使用率升至96.8%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：high\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 00:32:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789056156000,
@@ -12256,7 +12256,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 07:45:04\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计45天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 07:58:04（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789170303000,
@@ -12306,7 +12306,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 16:51:35\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609128057引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:14:35（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789203094000,
@@ -12370,7 +12370,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-13 18:13:46\n现象描述：消费组堆积量达到153280.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:19:46（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789294425000,
@@ -12420,7 +12420,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0042",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 13:28:25\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：应用节点bjb-dasp-app\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 13:53:25（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789277304000,
@@ -12470,7 +12470,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0012",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0012,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-11 21:48:52\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:19:52（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789134531000,
@@ -12527,7 +12527,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-14 04:42:53\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约157GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:20:53（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789332172000,
@@ -12577,7 +12577,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-99线耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-12 04:49:35\n现象描述：99线响应时间升至1860.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：同期QPS较基线增长约436%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 05:34:35（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789159774000,
@@ -12634,7 +12634,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_interest",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-12 23:17:44\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：上游数据文件到位时间延迟约31分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 23:38:44（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789226263000,
@@ -12691,7 +12691,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值88.9,阈值下限:10\n告警时间：2026-09-11 23:31:52\n现象描述：缓存内存使用率达到88.9%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 00:01:52（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789140711000,
@@ -12755,7 +12755,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-11 21:34:21\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约30分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:07:21（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789133660000,
@@ -12812,7 +12812,7 @@ let analyzeRes = {
           metric: "CANAL-同步延迟-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-同步延迟-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 16:45:02\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:29:02（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789375501000,
@@ -12876,7 +12876,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值21.0,阈值下限:30\n告警时间：2026-09-14 16:09:22\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：证书签发CA\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共2512张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 16:50:22（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789373361000,
@@ -12933,7 +12933,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-11 12:49:24\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计5353笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 13:16:24（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789102163000,
@@ -12997,7 +12997,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 21:16:26\n现象描述：联机交易量跌至1024.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：medium\n备注：变更单CHG-202609104269已关联，变更内容为账户查询逻辑调整。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6387笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:53:26（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789305385000,
@@ -13061,7 +13061,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 04:49:34\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约639笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:24:34（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789332573000,
@@ -13111,7 +13111,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-14 14:52:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 15:19:21（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789368740000,
@@ -13161,7 +13161,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-14 01:50:46\n现象描述：表空间使用率达到92.1%，超过阈值上限90%，存在写满风险\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：近7天表空间日增量约168GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 02:35:46（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789321845000,
@@ -13225,7 +13225,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-14 00:37:37\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 01:09:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789317456000,
@@ -13282,7 +13282,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-12 17:12:18\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：消费端实例在线数正常，无节点宕机。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:31:18（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789204337000,
@@ -13346,7 +13346,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 03:34:15\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 03:58:15（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789241654000,
@@ -13396,7 +13396,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-14 22:51:35\n现象描述：节点内存使用率升至98.1%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：HeapDump分析显示存在大对象缓存未及时释放，判定为缓存实现缺陷导致内存持续增长。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:12:35（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789397494000,
@@ -13446,7 +13446,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值89.2,阈值下限:10\n告警时间：2026-09-13 05:30:57\n现象描述：文件系统使用率持续高于阈值上限，日志与临时目录占用增长明显\n\n### 根因定位\n根因组件：服务器bjc-dasp-hive文件系统/var\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：清理后空间可释放，但会在数日内再次增长。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 06:03:57（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789248656000,
@@ -13499,7 +13499,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
           receiveTime: 1728782402851,
@@ -13549,7 +13549,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-13 12:18:09\n现象描述：网联银联交易成功率降为0（实际值0.02），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计4534笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:47:09（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273088000,
@@ -13613,7 +13613,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 16:29:18\n现象描述：联机交易量在5分钟内由3600笔/分钟降至865.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心数据库ORACLE-core01\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2367笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:07:18（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789374557000,
@@ -13677,7 +13677,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-12 06:03:23\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约5306笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 06:23:23（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789164202000,
@@ -13727,7 +13727,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_card01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_card01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-13 23:22:27\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 23:57:27（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789312946000,
@@ -13784,7 +13784,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 02:03:09\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计40天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：近7天表空间日增量约115GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:38:09（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789149788000,
@@ -13848,7 +13848,7 @@ let analyzeRes = {
           metric: "ORACLE-慢SQL数量-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 18:21:49\n现象描述：慢SQL数量达到342.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：定位为新增查询语句未命中索引，执行计划发生全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 18:39:49（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789208508000,
@@ -13898,7 +13898,7 @@ let analyzeRes = {
           metric: "KAFKA-消费组堆积量-dasp-core-group",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-13 18:46:04\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费线程数配置偏低，突发流量下消费速度跟不上生产速度。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 19:10:04（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789296363000,
@@ -13962,7 +13962,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 20:09:33\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 20:21:33（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789301372000,
@@ -14012,7 +14012,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-13 15:52:38\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 16:25:38（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789285957000,
@@ -14062,7 +14062,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值91.7,阈值下限:10\n告警时间：2026-09-14 23:08:17\n现象描述：文件系统使用率达到91.7%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约239GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:19:17（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789398496000,
@@ -14119,7 +14119,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-平均耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值2430.0,阈值下限:50\n告警时间：2026-09-13 02:33:54\n现象描述：99线响应时间升至2430.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 02:56:54（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789238033000,
@@ -14169,7 +14169,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_settle",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-12 02:12:36\n现象描述：作业执行时长超出历史基线335%，且仍未执行完成\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:56:36（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789150355000,
@@ -14233,7 +14233,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 23:26:24\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:51:24（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789399583000,
@@ -14283,7 +14283,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-13 18:33:12\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：high\n备注：丢包为间歇性，持续约19分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:40:12（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789295591000,
@@ -14340,7 +14340,7 @@ let analyzeRes = {
           metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 22:45:43\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 23:03:43（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789137942000,
@@ -14390,7 +14390,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-12 15:04:28\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:21:28（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789196667000,
@@ -14447,7 +14447,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 12:30:34\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：近7天内同类告警3次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计6450笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:52:34（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273833000,
@@ -14511,7 +14511,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-交易笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-11 02:49:16\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约8303笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 03:12:16（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789066155000,
@@ -14575,7 +14575,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 21:50:16\n现象描述：消费笔数在10分钟内持续低于阈值下限，且无回升迹象\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约2759笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 22:35:16（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789393815000,
@@ -14625,7 +14625,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 00:02:37\n现象描述：数据库会话数使用率升至96.8%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：high\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 00:32:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789056156000,
@@ -14682,7 +14682,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 07:45:04\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计45天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 07:58:04（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789170303000,
@@ -14732,7 +14732,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 16:51:35\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609128057引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:14:35（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789203094000,
@@ -14796,7 +14796,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-13 18:13:46\n现象描述：消费组堆积量达到153280.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:19:46（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789294425000,
@@ -14846,7 +14846,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0042",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 13:28:25\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：应用节点bjb-dasp-app\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 13:53:25（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789277304000,
@@ -14896,7 +14896,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0012",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0012,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-11 21:48:52\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:19:52（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789134531000,
@@ -14953,7 +14953,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-14 04:42:53\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约157GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:20:53（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789332172000,
@@ -15003,7 +15003,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-99线耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-12 04:49:35\n现象描述：99线响应时间升至1860.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：同期QPS较基线增长约436%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 05:34:35（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789159774000,
@@ -15060,7 +15060,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_interest",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-12 23:17:44\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：上游数据文件到位时间延迟约31分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 23:38:44（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789226263000,
@@ -15117,7 +15117,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值88.9,阈值下限:10\n告警时间：2026-09-11 23:31:52\n现象描述：缓存内存使用率达到88.9%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 00:01:52（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789140711000,
@@ -15181,7 +15181,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-11 21:34:21\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约30分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:07:21（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789133660000,
@@ -15238,7 +15238,7 @@ let analyzeRes = {
           metric: "CANAL-同步延迟-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-同步延迟-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 16:45:02\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:29:02（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789375501000,
@@ -15302,7 +15302,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值21.0,阈值下限:30\n告警时间：2026-09-14 16:09:22\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：证书签发CA\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共2512张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 16:50:22（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789373361000,
@@ -15359,7 +15359,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-11 12:49:24\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计5353笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 13:16:24（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789102163000,
@@ -15423,7 +15423,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 21:16:26\n现象描述：联机交易量跌至1024.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：medium\n备注：变更单CHG-202609104269已关联，变更内容为账户查询逻辑调整。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6387笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:53:26（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789305385000,
@@ -15487,7 +15487,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 04:49:34\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约639笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:24:34（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789332573000,
@@ -15537,7 +15537,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-14 14:52:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 15:19:21（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789368740000,
@@ -15587,7 +15587,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-14 01:50:46\n现象描述：表空间使用率达到92.1%，超过阈值上限90%，存在写满风险\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：近7天表空间日增量约168GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 02:35:46（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789321845000,
@@ -15651,7 +15651,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-14 00:37:37\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 01:09:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789317456000,
@@ -15708,7 +15708,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-12 17:12:18\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：消费端实例在线数正常，无节点宕机。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:31:18（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789204337000,
@@ -15772,7 +15772,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 03:34:15\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 03:58:15（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789241654000,
@@ -15822,7 +15822,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-14 22:51:35\n现象描述：节点内存使用率升至98.1%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：HeapDump分析显示存在大对象缓存未及时释放，判定为缓存实现缺陷导致内存持续增长。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:12:35（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789397494000,
@@ -15872,7 +15872,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值89.2,阈值下限:10\n告警时间：2026-09-13 05:30:57\n现象描述：文件系统使用率持续高于阈值上限，日志与临时目录占用增长明显\n\n### 根因定位\n根因组件：服务器bjc-dasp-hive文件系统/var\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：清理后空间可释放，但会在数日内再次增长。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 06:03:57（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789248656000,
@@ -15925,7 +15925,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
           receiveTime: 1728782402851,
@@ -15975,7 +15975,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-13 12:18:09\n现象描述：网联银联交易成功率降为0（实际值0.02），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计4534笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:47:09（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273088000,
@@ -16039,7 +16039,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 16:29:18\n现象描述：联机交易量在5分钟内由3600笔/分钟降至865.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心数据库ORACLE-core01\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2367笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:07:18（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789374557000,
@@ -16103,7 +16103,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-12 06:03:23\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约5306笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 06:23:23（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789164202000,
@@ -16153,7 +16153,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_card01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_card01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-13 23:22:27\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 23:57:27（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789312946000,
@@ -16210,7 +16210,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 02:03:09\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计40天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：近7天表空间日增量约115GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:38:09（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789149788000,
@@ -16274,7 +16274,7 @@ let analyzeRes = {
           metric: "ORACLE-慢SQL数量-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 18:21:49\n现象描述：慢SQL数量达到342.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：定位为新增查询语句未命中索引，执行计划发生全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 18:39:49（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789208508000,
@@ -16324,7 +16324,7 @@ let analyzeRes = {
           metric: "KAFKA-消费组堆积量-dasp-core-group",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-13 18:46:04\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费线程数配置偏低，突发流量下消费速度跟不上生产速度。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 19:10:04（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789296363000,
@@ -16388,7 +16388,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 20:09:33\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 20:21:33（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789301372000,
@@ -16438,7 +16438,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-13 15:52:38\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 16:25:38（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789285957000,
@@ -16488,7 +16488,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值91.7,阈值下限:10\n告警时间：2026-09-14 23:08:17\n现象描述：文件系统使用率达到91.7%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约239GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:19:17（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789398496000,
@@ -16545,7 +16545,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-平均耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值2430.0,阈值下限:50\n告警时间：2026-09-13 02:33:54\n现象描述：99线响应时间升至2430.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 02:56:54（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789238033000,
@@ -16595,7 +16595,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_settle",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-12 02:12:36\n现象描述：作业执行时长超出历史基线335%，且仍未执行完成\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:56:36（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789150355000,
@@ -16659,7 +16659,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 23:26:24\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:51:24（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789399583000,
@@ -16709,7 +16709,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-13 18:33:12\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：high\n备注：丢包为间歇性，持续约19分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:40:12（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789295591000,
@@ -16766,7 +16766,7 @@ let analyzeRes = {
           metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 22:45:43\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 23:03:43（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789137942000,
@@ -16816,7 +16816,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-12 15:04:28\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:21:28（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789196667000,
@@ -16873,7 +16873,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 12:30:34\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：近7天内同类告警3次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计6450笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:52:34（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273833000,
@@ -16937,7 +16937,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-交易笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-11 02:49:16\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约8303笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 03:12:16（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789066155000,
@@ -17001,7 +17001,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 21:50:16\n现象描述：消费笔数在10分钟内持续低于阈值下限，且无回升迹象\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约2759笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 22:35:16（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789393815000,
@@ -17051,7 +17051,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 00:02:37\n现象描述：数据库会话数使用率升至96.8%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：high\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 00:32:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789056156000,
@@ -17108,7 +17108,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 07:45:04\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计45天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 07:58:04（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789170303000,
@@ -17158,7 +17158,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 16:51:35\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609128057引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:14:35（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789203094000,
@@ -17222,7 +17222,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-13 18:13:46\n现象描述：消费组堆积量达到153280.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:19:46（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789294425000,
@@ -17272,7 +17272,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0042",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 13:28:25\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：应用节点bjb-dasp-app\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 13:53:25（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789277304000,
@@ -17322,7 +17322,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0012",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0012,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-11 21:48:52\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:19:52（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789134531000,
@@ -17379,7 +17379,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-14 04:42:53\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约157GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:20:53（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789332172000,
@@ -17429,7 +17429,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-99线耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-12 04:49:35\n现象描述：99线响应时间升至1860.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：同期QPS较基线增长约436%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 05:34:35（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789159774000,
@@ -17486,7 +17486,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_interest",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-12 23:17:44\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：上游数据文件到位时间延迟约31分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 23:38:44（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789226263000,
@@ -17543,7 +17543,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值88.9,阈值下限:10\n告警时间：2026-09-11 23:31:52\n现象描述：缓存内存使用率达到88.9%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 00:01:52（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789140711000,
@@ -17607,7 +17607,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-11 21:34:21\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约30分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:07:21（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789133660000,
@@ -17664,7 +17664,7 @@ let analyzeRes = {
           metric: "CANAL-同步延迟-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-同步延迟-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 16:45:02\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:29:02（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789375501000,
@@ -17728,7 +17728,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值21.0,阈值下限:30\n告警时间：2026-09-14 16:09:22\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：证书签发CA\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共2512张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 16:50:22（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789373361000,
@@ -17785,7 +17785,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-11 12:49:24\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计5353笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 13:16:24（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789102163000,
@@ -17849,7 +17849,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 21:16:26\n现象描述：联机交易量跌至1024.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：medium\n备注：变更单CHG-202609104269已关联，变更内容为账户查询逻辑调整。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6387笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:53:26（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789305385000,
@@ -17913,7 +17913,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 04:49:34\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约639笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:24:34（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789332573000,
@@ -17963,7 +17963,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-14 14:52:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 15:19:21（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789368740000,
@@ -18013,7 +18013,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-14 01:50:46\n现象描述：表空间使用率达到92.1%，超过阈值上限90%，存在写满风险\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：近7天表空间日增量约168GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 02:35:46（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789321845000,
@@ -18077,7 +18077,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-14 00:37:37\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 01:09:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789317456000,
@@ -18134,7 +18134,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-12 17:12:18\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：消费端实例在线数正常，无节点宕机。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:31:18（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789204337000,
@@ -18198,7 +18198,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 03:34:15\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 03:58:15（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789241654000,
@@ -18248,7 +18248,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-14 22:51:35\n现象描述：节点内存使用率升至98.1%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：HeapDump分析显示存在大对象缓存未及时释放，判定为缓存实现缺陷导致内存持续增长。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:12:35（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789397494000,
@@ -18298,7 +18298,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值89.2,阈值下限:10\n告警时间：2026-09-13 05:30:57\n现象描述：文件系统使用率持续高于阈值上限，日志与临时目录占用增长明显\n\n### 根因定位\n根因组件：服务器bjc-dasp-hive文件系统/var\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：清理后空间可释放，但会在数日内再次增长。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 06:03:57（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789248656000,
@@ -18351,7 +18351,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
           receiveTime: 1728782402851,
@@ -18401,7 +18401,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-13 12:18:09\n现象描述：网联银联交易成功率降为0（实际值0.02），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计4534笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:47:09（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273088000,
@@ -18465,7 +18465,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 16:29:18\n现象描述：联机交易量在5分钟内由3600笔/分钟降至865.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心数据库ORACLE-core01\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2367笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:07:18（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789374557000,
@@ -18529,7 +18529,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-12 06:03:23\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约5306笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 06:23:23（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789164202000,
@@ -18579,7 +18579,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_card01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_card01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-13 23:22:27\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 23:57:27（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789312946000,
@@ -18636,7 +18636,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 02:03:09\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计40天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：近7天表空间日增量约115GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:38:09（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789149788000,
@@ -18700,7 +18700,7 @@ let analyzeRes = {
           metric: "ORACLE-慢SQL数量-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 18:21:49\n现象描述：慢SQL数量达到342.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：定位为新增查询语句未命中索引，执行计划发生全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 18:39:49（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789208508000,
@@ -18750,7 +18750,7 @@ let analyzeRes = {
           metric: "KAFKA-消费组堆积量-dasp-core-group",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-13 18:46:04\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费线程数配置偏低，突发流量下消费速度跟不上生产速度。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 19:10:04（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789296363000,
@@ -18814,7 +18814,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 20:09:33\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 20:21:33（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789301372000,
@@ -18864,7 +18864,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-13 15:52:38\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 16:25:38（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789285957000,
@@ -18914,7 +18914,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值91.7,阈值下限:10\n告警时间：2026-09-14 23:08:17\n现象描述：文件系统使用率达到91.7%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约239GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:19:17（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789398496000,
@@ -18971,7 +18971,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-平均耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值2430.0,阈值下限:50\n告警时间：2026-09-13 02:33:54\n现象描述：99线响应时间升至2430.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 02:56:54（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789238033000,
@@ -19021,7 +19021,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_settle",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-12 02:12:36\n现象描述：作业执行时长超出历史基线335%，且仍未执行完成\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 02:56:36（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789150355000,
@@ -19085,7 +19085,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 23:26:24\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:51:24（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789399583000,
@@ -19135,7 +19135,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-13 18:33:12\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：high\n备注：丢包为间歇性，持续约19分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:40:12（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789295591000,
@@ -19192,7 +19192,7 @@ let analyzeRes = {
           metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 22:45:43\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 23:03:43（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789137942000,
@@ -19242,7 +19242,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-12 15:04:28\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:21:28（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789196667000,
@@ -19299,7 +19299,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 12:30:34\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：近7天内同类告警3次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计6450笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 12:52:34（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789273833000,
@@ -19363,7 +19363,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-交易笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-11 02:49:16\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约8303笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 03:12:16（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789066155000,
@@ -19427,7 +19427,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 21:50:16\n现象描述：消费笔数在10分钟内持续低于阈值下限，且无回升迹象\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约2759笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 22:35:16（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789393815000,
@@ -19477,7 +19477,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 00:02:37\n现象描述：数据库会话数使用率升至96.8%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：high\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 00:32:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789056156000,
@@ -19534,7 +19534,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-12 07:45:04\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计45天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 07:58:04（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789170303000,
@@ -19584,7 +19584,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-12 16:51:35\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609128057引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:14:35（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789203094000,
@@ -19648,7 +19648,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-13 18:13:46\n现象描述：消费组堆积量达到153280.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:19:46（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789294425000,
@@ -19698,7 +19698,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0042",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 13:28:25\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：应用节点bjb-dasp-app\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 13:53:25（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789277304000,
@@ -19748,7 +19748,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0012",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0012,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-11 21:48:52\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:19:52（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789134531000,
@@ -19805,7 +19805,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-14 04:42:53\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：/var目录占用最大，约157GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:20:53（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789332172000,
@@ -19855,7 +19855,7 @@ let analyzeRes = {
           metric: "交易响应时间-DERIVATIVE-99线耗时-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-12 04:49:35\n现象描述：99线响应时间升至1860.0ms，超时请求比例同步上升\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：同期QPS较基线增长约436%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 05:34:35（交易响应时间已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
           receiveTime: 1789159774000,
@@ -19912,7 +19912,7 @@ let analyzeRes = {
           metric: "批量作业执行时长-job_dasp_interest",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "作业超时告警",
+          misinfoReason: "作业超时告警",
           output:
             "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-12 23:17:44\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：上游数据文件到位时间延迟约31分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 23:38:44（批量作业执行时长已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
           receiveTime: 1789226263000,
@@ -19969,7 +19969,7 @@ let analyzeRes = {
           metric: "REDIS-连接数使用率-redis-dasp-01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-连接数使用率-redis-dasp-01,升为超限,阈值上限:80,实际值88.9,阈值下限:10\n告警时间：2026-09-11 23:31:52\n现象描述：缓存内存使用率达到88.9%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：high\n备注：连接数曲线随请求量同步上升。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 00:01:52（REDIS已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
           receiveTime: 1789140711000,
@@ -20033,7 +20033,7 @@ let analyzeRes = {
           metric: "网络链路时延-BJ-NFX~HZ-ZB",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "连通性告警",
+          misinfoReason: "连通性告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-11 21:34:21\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约30分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 22:07:21（网络链路时延已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
           receiveTime: 1789133660000,
@@ -20090,7 +20090,7 @@ let analyzeRes = {
           metric: "CANAL-同步延迟-bjb-dasp-canal-kzx",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-同步延迟-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 16:45:02\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 17:29:02（CANAL已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
           receiveTime: 1789375501000,
@@ -20154,7 +20154,7 @@ let analyzeRes = {
           metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值21.0,阈值下限:30\n告警时间：2026-09-14 16:09:22\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：证书签发CA\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共2512张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 16:50:22（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
           receiveTime: 1789373361000,
@@ -20211,7 +20211,7 @@ let analyzeRes = {
           metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-11 12:49:24\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计5353笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 13:16:24（网联银联交易成功率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
           receiveTime: 1789102163000,
@@ -20275,7 +20275,7 @@ let analyzeRes = {
           metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 21:16:26\n现象描述：联机交易量跌至1024.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：medium\n备注：变更单CHG-202609104269已关联，变更内容为账户查询逻辑调整。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6387笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:53:26（联机交易量已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
           receiveTime: 1789305385000,
@@ -20339,7 +20339,7 @@ let analyzeRes = {
           metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-14 04:49:34\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约639笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 05:24:34（消费笔数已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
           receiveTime: 1789332573000,
@@ -20389,7 +20389,7 @@ let analyzeRes = {
           metric: "ORACLE-会话数使用率-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-14 14:52:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：近2小时会话数呈阶梯式上升。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 15:19:21（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
           receiveTime: 1789368740000,
@@ -20439,7 +20439,7 @@ let analyzeRes = {
           metric: "ORACLE-表空间使用率-TS_DASP_DATA",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-14 01:50:46\n现象描述：表空间使用率达到92.1%，超过阈值上限90%，存在写满风险\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：批量作业产生的中间表未按策略清理，占用大量表空间，导致使用率超过阈值。\n置信度：high\n备注：近7天表空间日增量约168GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 02:35:46（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
           receiveTime: 1789321845000,
@@ -20503,7 +20503,7 @@ let analyzeRes = {
           metric: "ORACLE-平均执行时间-db_core01",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值342.0,阈值下限:0\n告警时间：2026-09-14 00:37:37\n现象描述：平均执行时间升至342.0ms，超过阈值上限，联机交易响应时间随之上涨\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 01:09:37（ORACLE已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
           receiveTime: 1789317456000,
@@ -20560,7 +20560,7 @@ let analyzeRes = {
           metric: "KAFKA-生产延迟-ms-dasp-core-topic",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "性能指标告警",
+          misinfoReason: "性能指标告警",
           output:
             "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值286400.0,阈值下限:0\n告警时间：2026-09-12 17:12:18\n现象描述：消费组堆积量达到286400.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：消费端实例在线数正常，无节点宕机。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:31:18（KAFKA已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
           receiveTime: 1789204337000,
@@ -20624,7 +20624,7 @@ let analyzeRes = {
           metric: "CPU使用率-bjb-dasp-app-0057",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值97.4,阈值下限:10\n告警时间：2026-09-13 03:34:15\n现象描述：节点CPU使用率升至97.4%，超过阈值上限85%，处理能力接近饱和\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 03:58:15（CPU使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
           receiveTime: 1789241654000,
@@ -20674,7 +20674,7 @@ let analyzeRes = {
           metric: "内存使用率-bjc-dasp-gw-0028",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-          misInfoReason: "资源使用率告警",
+          misinfoReason: "资源使用率告警",
           output:
             "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-14 22:51:35\n现象描述：节点内存使用率升至98.1%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：HeapDump分析显示存在大对象缓存未及时释放，判定为缓存实现缺陷导致内存持续增长。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 23:12:35（内存使用率已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
           receiveTime: 1789397494000,
@@ -20724,7 +20724,7 @@ let analyzeRes = {
           metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
           metric_link:
             "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-          misInfoReason: "容量告警",
+          misinfoReason: "容量告警",
           output:
             "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值89.2,阈值下限:10\n告警时间：2026-09-13 05:30:57\n现象描述：文件系统使用率持续高于阈值上限，日志与临时目录占用增长明显\n\n### 根因定位\n根因组件：服务器bjc-dasp-hive文件系统/var\n根因描述：应用日志未配置轮转策略，单文件持续增长导致使用率超阈值。\n置信度：high\n备注：清理后空间可释放，但会在数日内再次增长。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 06:03:57（Filesystem space available已连续3个检测周期回到阈值区间内，人工确认业务恢复正常）\n\n### 处置建议\n告警处置结果：人工关单（业务指标已恢复，由值班人员确认后手动关闭）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
           receiveTime: 1789248656000,
@@ -20794,7 +20794,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
         receiveTime: 1728782402851,
@@ -20852,7 +20852,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-99线耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-13 04:31:37\n现象描述：平均响应时间升至1860.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：medium\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 04:37:37（交易响应时间已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（权限校验失败：应用账号 agent-bot 无该告警源的关单权限），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 自动关闭失败原因需定位：权限校验失败：应用账号 agent-bot 无该告警源的关单权限\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789245096000,
@@ -20910,7 +20910,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_interest",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-13 18:09:32\n现象描述：批量作业执行时长达到6450.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：上游数据未按时就绪，作业长时间处于等待状态，实际执行时间被拉长。\n置信度：high\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:49:32（批量作业执行时长已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 需确认批量结果数据是否影响当日开门营业",
         receiveTime: 1789294171000,
@@ -20968,7 +20968,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值96.2,阈值下限:10\n告警时间：2026-09-12 17:29:41\n现象描述：缓存节点连接数使用率达到96.2%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：medium\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:37:41（REDIS已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789205380000,
@@ -21019,7 +21019,7 @@ let analyzeRes = {
         metric: "网络链路丢包率-BJ-DB~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路丢包率-BJ-DB~HZ-ZB,升为超限,阈值上限:1,实际值4.2,阈值下限:0\n告警时间：2026-09-12 12:40:41\n现象描述：链路丢包率达到4.2%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约21分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 12:55:41（网络链路丢包率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 需运营商出具线路质量报告",
         receiveTime: 1789188040000,
@@ -21084,7 +21084,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 08:06:20\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 08:31:20（CANAL已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认延迟期间是否需要重新同步",
         receiveTime: 1789085179000,
@@ -21135,7 +21135,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值8.0,阈值下限:30\n告警时间：2026-09-12 15:28:47\n现象描述：证书剩余有效期仅8.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共1869张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 16:09:47（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（工单系统返回 409 Conflict：存在关联处置工单未闭环），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 自动关闭失败原因需定位：工单系统返回 409 Conflict：存在关联处置工单未闭环\n2. 需将证书统一纳入到期提醒清单",
         receiveTime: 1789198126000,
@@ -21200,7 +21200,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-12 15:32:11\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：结合交易链路日志与调用链，定位为总行变更窗口内网联通道配置下发异常，导致交易成功率降为零；已关联变更单CHG-202609103831。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计181笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:54:11（网联银联交易成功率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（权限校验失败：应用账号 agent-bot 无该告警源的关单权限），已转人工处理\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 自动关闭失败原因需定位：权限校验失败：应用账号 agent-bot 无该告警源的关单权限\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789198330000,
@@ -21251,7 +21251,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值412.0,阈值下限:3000\n告警时间：2026-09-13 07:19:20\n现象描述：联机交易量在5分钟内由3600笔/分钟降至412.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约4379笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 07:34:20（联机交易量已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认积压交易是否需要补录处理",
         receiveTime: 1789255159000,
@@ -21302,7 +21302,7 @@ let analyzeRes = {
         metric: "消费笔数-DERIVATIVE-借记卡消费-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-借记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-13 10:54:37\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约1815笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 11:28:37（消费笔数已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需评估受影响消费交易的补处理方案",
         receiveTime: 1789268076000,
@@ -21367,7 +21367,7 @@ let analyzeRes = {
         metric: "ORACLE-会话数使用率-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 07:36:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 08:03:21（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（关单接口调用超时（3000ms），已重试 2 次仍失败），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 自动关闭失败原因需定位：关单接口调用超时（3000ms），已重试 2 次仍失败\n2. 需确认是否存在会话泄漏",
         receiveTime: 1789083380000,
@@ -21418,7 +21418,7 @@ let analyzeRes = {
         metric: "ORACLE-表空间使用率-TS_DASP_DATA",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值94.6,阈值下限:30\n告警时间：2026-09-14 21:26:46\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计11天内写满\n\n### 根因定位\n根因组件：数据仓库表空间TS_DASP_DATA\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 21:57:46（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 建议对归档任务增加失败告警",
         receiveTime: 1789392405000,
@@ -21483,7 +21483,7 @@ let analyzeRes = {
         metric: "ORACLE-平均执行时间-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值231.0,阈值下限:0\n告警时间：2026-09-11 06:40:29\n现象描述：慢SQL数量达到231.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 07:09:29（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 需在上线前完成SQL审核",
         receiveTime: 1789080028000,
@@ -21541,7 +21541,7 @@ let analyzeRes = {
         metric: "KAFKA-消费组堆积量-dasp-core-group",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-11 21:00:47\n现象描述：生产延迟升至153280.0ms，消息投递时延明显增大\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 21:14:47（KAFKA已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认堆积期间是否存在消息丢失",
         receiveTime: 1789131646000,
@@ -21592,7 +21592,7 @@ let analyzeRes = {
         metric: "CPU使用率-bjb-dasp-app-0057",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值92.8,阈值下限:10\n告警时间：2026-09-13 21:16:30\n现象描述：CPU使用率持续高于阈值上限达3883分钟，负载指标同步升高\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:41:30（CPU使用率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 建议对该应用设置CPU超阈值的持续时长告警",
         receiveTime: 1789305389000,
@@ -21645,7 +21645,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
         receiveTime: 1728782402851,
@@ -21710,7 +21710,7 @@ let analyzeRes = {
         metric: "内存使用率-bjc-dasp-gw-0028",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-13 23:51:22\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：重启后内存可回落，但数小时内再次升高。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测内存使用率始终为98.1，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
         receiveTime: 1789314681000,
@@ -21768,7 +21768,7 @@ let analyzeRes = {
         metric: "Filesystem space available-使用率-bjc-dasp-hive-0085",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0085,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-12 03:13:04\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：Hive临时数据目录未按作业结束清理，长期累积占用大量磁盘空间。\n置信度：high\n备注：/var目录占用最大，约272GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测Filesystem space available始终为96.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
         receiveTime: 1789153983000,
@@ -21826,7 +21826,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-平均耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值1250.0,阈值下限:50\n告警时间：2026-09-12 16:40:06\n现象描述：平均响应时间升至1250.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测交易响应时间始终为1250.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789202405000,
@@ -21877,7 +21877,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_settle",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-13 19:43:27\n现象描述：批量作业执行时长达到6450.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：high\n备注：上游数据文件到位时间延迟约19分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测批量作业执行时长始终为6450.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
         receiveTime: 1789299806000,
@@ -21935,7 +21935,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值96.2,阈值下限:10\n告警时间：2026-09-11 07:47:08\n现象描述：缓存内存使用率达到96.2%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：medium\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测REDIS始终为96.2，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789084027000,
@@ -22000,7 +22000,7 @@ let analyzeRes = {
         metric: "网络链路时延-BJ-NFX~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值12.4,阈值下限:0\n告警时间：2026-09-14 19:34:53\n现象描述：链路时延升至12.4ms，明显高于基线，跨机房访问出现超时\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约39分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网络链路时延始终为12.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
         receiveTime: 1789385692000,
@@ -22065,7 +22065,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值263.0,阈值下限:0\n告警时间：2026-09-13 08:07:28\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CANAL始终为263.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
         receiveTime: 1789258047000,
@@ -22116,7 +22116,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值8.0,阈值下限:30\n告警时间：2026-09-14 23:25:57\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测SSL证书剩余有效期始终为8.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
         receiveTime: 1789399556000,
@@ -22167,7 +22167,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-网联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-网联总笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-12 14:11:20\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.02，交易链路已不可用\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：结合交易链路日志与调用链，定位为总行变更窗口内网联通道配置下发异常，导致交易成功率降为零；已关联变更单CHG-202609114740。\n置信度：medium\n备注：近7天内同类告警6次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计8040笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网联银联交易成功率始终为0.02，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789193479000,
@@ -22232,7 +22232,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-交易笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 07:02:46\n现象描述：联机交易量跌至865.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2415笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测联机交易量始终为865.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
         receiveTime: 1789340565000,
@@ -22283,7 +22283,7 @@ let analyzeRes = {
         metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值578.0,阈值下限:1800\n告警时间：2026-09-14 12:48:00\n现象描述：贷记卡消费笔数降至578.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：变更单CHG-202609105928涉及渠道报文模板调整。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约7036笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测消费笔数始终为578.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
         receiveTime: 1789361279000,
@@ -22341,7 +22341,7 @@ let analyzeRes = {
         metric: "ORACLE-会话数使用率-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值93.4,阈值下限:20\n告警时间：2026-09-13 22:43:34\n现象描述：数据库会话数使用率升至93.4%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为93.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
         receiveTime: 1789310613000,
@@ -22392,7 +22392,7 @@ let analyzeRes = {
         metric: "ORACLE-表空间使用率-TS_DASP_DATA",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-11 23:18:03\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计6天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：medium\n备注：近7天表空间日增量约272GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为92.1，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
         receiveTime: 1789139882000,
@@ -22450,7 +22450,7 @@ let analyzeRes = {
         metric: "ORACLE-慢SQL数量-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值186.0,阈值下限:0\n告警时间：2026-09-13 06:06:11\n现象描述：慢SQL数量达到186.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609109095引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为186.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
         receiveTime: 1789250770000,
@@ -22515,7 +22515,7 @@ let analyzeRes = {
         metric: "KAFKA-生产延迟-ms-dasp-core-topic",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值96330.0,阈值下限:0\n告警时间：2026-09-12 19:54:47\n现象描述：消费组堆积量达到96330.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测KAFKA始终为96330.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
         receiveTime: 1789214086000,
@@ -22573,7 +22573,7 @@ let analyzeRes = {
         metric: "CPU使用率-bjb-dasp-app-0042",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值94.2,阈值下限:10\n告警时间：2026-09-11 08:34:46\n现象描述：CPU使用率持续高于阈值上限达7877分钟，负载指标同步升高\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CPU使用率始终为94.2，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
         receiveTime: 1789086885000,
@@ -22624,7 +22624,7 @@ let analyzeRes = {
         metric: "内存使用率-bjc-dasp-gw-0028",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-12 13:42:04\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测内存使用率始终为95.6，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
         receiveTime: 1789191723000,
@@ -22682,7 +22682,7 @@ let analyzeRes = {
         metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-13 22:12:47\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：Hive临时数据目录未按作业结束清理，长期累积占用大量磁盘空间。\n置信度：high\n备注：/var目录占用最大，约127GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测Filesystem space available始终为96.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
         receiveTime: 1789308766000,
@@ -22740,7 +22740,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-99线耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-11 16:16:43\n现象描述：平均响应时间升至1860.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：medium\n备注：同期QPS较基线增长约393%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测交易响应时间始终为1860.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789114602000,
@@ -22791,7 +22791,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_settle",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-14 17:19:13\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测批量作业执行时长始终为7820.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
         receiveTime: 1789377552000,
@@ -22849,7 +22849,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 13:49:02\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测REDIS始终为93.7，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789364941000,
@@ -22907,7 +22907,7 @@ let analyzeRes = {
         metric: "网络链路丢包率-BJ-DB~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路丢包率-BJ-DB~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-14 14:20:44\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约43分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网络链路丢包率始终为8.6，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
         receiveTime: 1789366843000,
@@ -22965,7 +22965,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 18:17:17\n现象描述：同步延迟达到486.0秒，超过阈值上限30秒，源库与目标库数据不一致\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CANAL始终为486.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
         receiveTime: 1789381036000,
@@ -23023,7 +23023,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.cncb-inner",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.cncb-inner,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-13 08:59:03\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：同批次证书共3864张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测SSL证书剩余有效期始终为12.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
         receiveTime: 1789261142000,
@@ -23074,7 +23074,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 07:58:44\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：近7天内同类告警6次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计2615笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网联银联交易成功率始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789257523000,
@@ -23139,7 +23139,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 19:56:38\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6500笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测联机交易量始终为1024.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
         receiveTime: 1789300597000,
@@ -23194,7 +23194,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
         receiveTime: 1728782402851,
@@ -23252,7 +23252,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-99线耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-13 04:31:37\n现象描述：平均响应时间升至1860.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：medium\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 04:37:37（交易响应时间已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（权限校验失败：应用账号 agent-bot 无该告警源的关单权限），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 自动关闭失败原因需定位：权限校验失败：应用账号 agent-bot 无该告警源的关单权限\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789245096000,
@@ -23310,7 +23310,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_interest",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-13 18:09:32\n现象描述：批量作业执行时长达到6450.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：上游数据未按时就绪，作业长时间处于等待状态，实际执行时间被拉长。\n置信度：high\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:49:32（批量作业执行时长已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 需确认批量结果数据是否影响当日开门营业",
         receiveTime: 1789294171000,
@@ -23368,7 +23368,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值96.2,阈值下限:10\n告警时间：2026-09-12 17:29:41\n现象描述：缓存节点连接数使用率达到96.2%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：medium\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:37:41（REDIS已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789205380000,
@@ -23419,7 +23419,7 @@ let analyzeRes = {
         metric: "网络链路丢包率-BJ-DB~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路丢包率-BJ-DB~HZ-ZB,升为超限,阈值上限:1,实际值4.2,阈值下限:0\n告警时间：2026-09-12 12:40:41\n现象描述：链路丢包率达到4.2%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约21分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 12:55:41（网络链路丢包率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 需运营商出具线路质量报告",
         receiveTime: 1789188040000,
@@ -23484,7 +23484,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 08:06:20\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 08:31:20（CANAL已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认延迟期间是否需要重新同步",
         receiveTime: 1789085179000,
@@ -23535,7 +23535,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值8.0,阈值下限:30\n告警时间：2026-09-12 15:28:47\n现象描述：证书剩余有效期仅8.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共1869张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 16:09:47（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（工单系统返回 409 Conflict：存在关联处置工单未闭环），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 自动关闭失败原因需定位：工单系统返回 409 Conflict：存在关联处置工单未闭环\n2. 需将证书统一纳入到期提醒清单",
         receiveTime: 1789198126000,
@@ -23600,7 +23600,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-12 15:32:11\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：结合交易链路日志与调用链，定位为总行变更窗口内网联通道配置下发异常，导致交易成功率降为零；已关联变更单CHG-202609103831。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计181笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:54:11（网联银联交易成功率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（权限校验失败：应用账号 agent-bot 无该告警源的关单权限），已转人工处理\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 自动关闭失败原因需定位：权限校验失败：应用账号 agent-bot 无该告警源的关单权限\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789198330000,
@@ -23651,7 +23651,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值412.0,阈值下限:3000\n告警时间：2026-09-13 07:19:20\n现象描述：联机交易量在5分钟内由3600笔/分钟降至412.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约4379笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 07:34:20（联机交易量已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认积压交易是否需要补录处理",
         receiveTime: 1789255159000,
@@ -23702,7 +23702,7 @@ let analyzeRes = {
         metric: "消费笔数-DERIVATIVE-借记卡消费-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-借记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-13 10:54:37\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约1815笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 11:28:37（消费笔数已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需评估受影响消费交易的补处理方案",
         receiveTime: 1789268076000,
@@ -23767,7 +23767,7 @@ let analyzeRes = {
         metric: "ORACLE-会话数使用率-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 07:36:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 08:03:21（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（关单接口调用超时（3000ms），已重试 2 次仍失败），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 自动关闭失败原因需定位：关单接口调用超时（3000ms），已重试 2 次仍失败\n2. 需确认是否存在会话泄漏",
         receiveTime: 1789083380000,
@@ -23818,7 +23818,7 @@ let analyzeRes = {
         metric: "ORACLE-表空间使用率-TS_DASP_DATA",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值94.6,阈值下限:30\n告警时间：2026-09-14 21:26:46\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计11天内写满\n\n### 根因定位\n根因组件：数据仓库表空间TS_DASP_DATA\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 21:57:46（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 建议对归档任务增加失败告警",
         receiveTime: 1789392405000,
@@ -23883,7 +23883,7 @@ let analyzeRes = {
         metric: "ORACLE-平均执行时间-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值231.0,阈值下限:0\n告警时间：2026-09-11 06:40:29\n现象描述：慢SQL数量达到231.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 07:09:29（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 需在上线前完成SQL审核",
         receiveTime: 1789080028000,
@@ -23941,7 +23941,7 @@ let analyzeRes = {
         metric: "KAFKA-消费组堆积量-dasp-core-group",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-11 21:00:47\n现象描述：生产延迟升至153280.0ms，消息投递时延明显增大\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 21:14:47（KAFKA已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认堆积期间是否存在消息丢失",
         receiveTime: 1789131646000,
@@ -23992,7 +23992,7 @@ let analyzeRes = {
         metric: "CPU使用率-bjb-dasp-app-0057",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值92.8,阈值下限:10\n告警时间：2026-09-13 21:16:30\n现象描述：CPU使用率持续高于阈值上限达3883分钟，负载指标同步升高\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:41:30（CPU使用率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 建议对该应用设置CPU超阈值的持续时长告警",
         receiveTime: 1789305389000,
@@ -24045,7 +24045,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
         receiveTime: 1728782402851,
@@ -24110,7 +24110,7 @@ let analyzeRes = {
         metric: "内存使用率-bjc-dasp-gw-0028",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-13 23:51:22\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：重启后内存可回落，但数小时内再次升高。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测内存使用率始终为98.1，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
         receiveTime: 1789314681000,
@@ -24168,7 +24168,7 @@ let analyzeRes = {
         metric: "Filesystem space available-使用率-bjc-dasp-hive-0085",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0085,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-12 03:13:04\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：Hive临时数据目录未按作业结束清理，长期累积占用大量磁盘空间。\n置信度：high\n备注：/var目录占用最大，约272GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测Filesystem space available始终为96.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
         receiveTime: 1789153983000,
@@ -24226,7 +24226,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-平均耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值1250.0,阈值下限:50\n告警时间：2026-09-12 16:40:06\n现象描述：平均响应时间升至1250.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测交易响应时间始终为1250.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789202405000,
@@ -24277,7 +24277,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_settle",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-13 19:43:27\n现象描述：批量作业执行时长达到6450.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：high\n备注：上游数据文件到位时间延迟约19分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测批量作业执行时长始终为6450.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
         receiveTime: 1789299806000,
@@ -24335,7 +24335,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值96.2,阈值下限:10\n告警时间：2026-09-11 07:47:08\n现象描述：缓存内存使用率达到96.2%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：medium\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测REDIS始终为96.2，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789084027000,
@@ -24400,7 +24400,7 @@ let analyzeRes = {
         metric: "网络链路时延-BJ-NFX~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值12.4,阈值下限:0\n告警时间：2026-09-14 19:34:53\n现象描述：链路时延升至12.4ms，明显高于基线，跨机房访问出现超时\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约39分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网络链路时延始终为12.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
         receiveTime: 1789385692000,
@@ -24465,7 +24465,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值263.0,阈值下限:0\n告警时间：2026-09-13 08:07:28\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CANAL始终为263.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
         receiveTime: 1789258047000,
@@ -24516,7 +24516,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值8.0,阈值下限:30\n告警时间：2026-09-14 23:25:57\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测SSL证书剩余有效期始终为8.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
         receiveTime: 1789399556000,
@@ -24567,7 +24567,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-网联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-网联总笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-12 14:11:20\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.02，交易链路已不可用\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：结合交易链路日志与调用链，定位为总行变更窗口内网联通道配置下发异常，导致交易成功率降为零；已关联变更单CHG-202609114740。\n置信度：medium\n备注：近7天内同类告警6次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计8040笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网联银联交易成功率始终为0.02，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789193479000,
@@ -24632,7 +24632,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-交易笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 07:02:46\n现象描述：联机交易量跌至865.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2415笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测联机交易量始终为865.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
         receiveTime: 1789340565000,
@@ -24683,7 +24683,7 @@ let analyzeRes = {
         metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值578.0,阈值下限:1800\n告警时间：2026-09-14 12:48:00\n现象描述：贷记卡消费笔数降至578.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：变更单CHG-202609105928涉及渠道报文模板调整。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约7036笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测消费笔数始终为578.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
         receiveTime: 1789361279000,
@@ -24741,7 +24741,7 @@ let analyzeRes = {
         metric: "ORACLE-会话数使用率-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值93.4,阈值下限:20\n告警时间：2026-09-13 22:43:34\n现象描述：数据库会话数使用率升至93.4%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为93.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
         receiveTime: 1789310613000,
@@ -24792,7 +24792,7 @@ let analyzeRes = {
         metric: "ORACLE-表空间使用率-TS_DASP_DATA",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-11 23:18:03\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计6天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：medium\n备注：近7天表空间日增量约272GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为92.1，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
         receiveTime: 1789139882000,
@@ -24850,7 +24850,7 @@ let analyzeRes = {
         metric: "ORACLE-慢SQL数量-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值186.0,阈值下限:0\n告警时间：2026-09-13 06:06:11\n现象描述：慢SQL数量达到186.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609109095引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为186.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
         receiveTime: 1789250770000,
@@ -24915,7 +24915,7 @@ let analyzeRes = {
         metric: "KAFKA-生产延迟-ms-dasp-core-topic",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值96330.0,阈值下限:0\n告警时间：2026-09-12 19:54:47\n现象描述：消费组堆积量达到96330.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测KAFKA始终为96330.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
         receiveTime: 1789214086000,
@@ -24973,7 +24973,7 @@ let analyzeRes = {
         metric: "CPU使用率-bjb-dasp-app-0042",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值94.2,阈值下限:10\n告警时间：2026-09-11 08:34:46\n现象描述：CPU使用率持续高于阈值上限达7877分钟，负载指标同步升高\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CPU使用率始终为94.2，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
         receiveTime: 1789086885000,
@@ -25024,7 +25024,7 @@ let analyzeRes = {
         metric: "内存使用率-bjc-dasp-gw-0028",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-12 13:42:04\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测内存使用率始终为95.6，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
         receiveTime: 1789191723000,
@@ -25082,7 +25082,7 @@ let analyzeRes = {
         metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-13 22:12:47\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：Hive临时数据目录未按作业结束清理，长期累积占用大量磁盘空间。\n置信度：high\n备注：/var目录占用最大，约127GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测Filesystem space available始终为96.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
         receiveTime: 1789308766000,
@@ -25140,7 +25140,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-99线耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-11 16:16:43\n现象描述：平均响应时间升至1860.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：medium\n备注：同期QPS较基线增长约393%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测交易响应时间始终为1860.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789114602000,
@@ -25191,7 +25191,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_settle",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-14 17:19:13\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测批量作业执行时长始终为7820.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
         receiveTime: 1789377552000,
@@ -25249,7 +25249,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 13:49:02\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测REDIS始终为93.7，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789364941000,
@@ -25307,7 +25307,7 @@ let analyzeRes = {
         metric: "网络链路丢包率-BJ-DB~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路丢包率-BJ-DB~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-14 14:20:44\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约43分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网络链路丢包率始终为8.6，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
         receiveTime: 1789366843000,
@@ -25365,7 +25365,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 18:17:17\n现象描述：同步延迟达到486.0秒，超过阈值上限30秒，源库与目标库数据不一致\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CANAL始终为486.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
         receiveTime: 1789381036000,
@@ -25423,7 +25423,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.cncb-inner",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.cncb-inner,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-13 08:59:03\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：同批次证书共3864张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测SSL证书剩余有效期始终为12.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
         receiveTime: 1789261142000,
@@ -25474,7 +25474,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 07:58:44\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：近7天内同类告警6次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计2615笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网联银联交易成功率始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789257523000,
@@ -25539,7 +25539,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 19:56:38\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6500笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测联机交易量始终为1024.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
         receiveTime: 1789300597000,
@@ -25594,7 +25594,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
         receiveTime: 1728782402851,
@@ -25652,7 +25652,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-99线耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-13 04:31:37\n现象描述：平均响应时间升至1860.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：medium\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 04:37:37（交易响应时间已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（权限校验失败：应用账号 agent-bot 无该告警源的关单权限），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 自动关闭失败原因需定位：权限校验失败：应用账号 agent-bot 无该告警源的关单权限\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789245096000,
@@ -25710,7 +25710,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_interest",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_interest,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-13 18:09:32\n现象描述：批量作业执行时长达到6450.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：上游数据未按时就绪，作业长时间处于等待状态，实际执行时间被拉长。\n置信度：high\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 18:49:32（批量作业执行时长已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 需确认批量结果数据是否影响当日开门营业",
         receiveTime: 1789294171000,
@@ -25768,7 +25768,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值96.2,阈值下限:10\n告警时间：2026-09-12 17:29:41\n现象描述：缓存节点连接数使用率达到96.2%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：medium\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 17:37:41（REDIS已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789205380000,
@@ -25819,7 +25819,7 @@ let analyzeRes = {
         metric: "网络链路丢包率-BJ-DB~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路丢包率-BJ-DB~HZ-ZB,升为超限,阈值上限:1,实际值4.2,阈值下限:0\n告警时间：2026-09-12 12:40:41\n现象描述：链路丢包率达到4.2%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约21分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 12:55:41（网络链路丢包率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 需运营商出具线路质量报告",
         receiveTime: 1789188040000,
@@ -25884,7 +25884,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-11 08:06:20\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：CANAL实例解析线程出现阻塞，定位为源库大事务导致解析耗时增加。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 08:31:20（CANAL已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认延迟期间是否需要重新同步",
         receiveTime: 1789085179000,
@@ -25935,7 +25935,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值8.0,阈值下限:30\n告警时间：2026-09-12 15:28:47\n现象描述：证书剩余有效期仅8.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：证书未纳入统一续期管理，临近到期未触发自动续签流程。\n置信度：medium\n备注：同批次证书共1869张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 16:09:47（SSL证书剩余有效期已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（工单系统返回 409 Conflict：存在关联处置工单未闭环），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 自动关闭失败原因需定位：工单系统返回 409 Conflict：存在关联处置工单未闭环\n2. 需将证书统一纳入到期提醒清单",
         receiveTime: 1789198126000,
@@ -26000,7 +26000,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联消费笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联消费笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-12 15:32:11\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.0，交易链路已不可用\n\n### 根因定位\n根因组件：授权交易系统AUTH-网联银联通道\n根因描述：结合交易链路日志与调用链，定位为总行变更窗口内网联通道配置下发异常，导致交易成功率降为零；已关联变更单CHG-202609103831。\n置信度：medium\n备注：已关联总行变更窗口，建议变更负责人确认配置下发结果。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计181笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-12 15:54:11（网联银联交易成功率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（权限校验失败：应用账号 agent-bot 无该告警源的关单权限），已转人工处理\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 自动关闭失败原因需定位：权限校验失败：应用账号 agent-bot 无该告警源的关单权限\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789198330000,
@@ -26051,7 +26051,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值412.0,阈值下限:3000\n告警时间：2026-09-13 07:19:20\n现象描述：联机交易量在5分钟内由3600笔/分钟降至412.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：应用节点在线率正常但交易分发线程池全部阻塞，定位为数据库连接获取超时导致交易积压。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约4379笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 07:34:20（联机交易量已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认积压交易是否需要补录处理",
         receiveTime: 1789255159000,
@@ -26102,7 +26102,7 @@ let analyzeRes = {
         metric: "消费笔数-DERIVATIVE-借记卡消费-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-借记卡消费-0,降为等零,阈值上限:2600,实际值233.0,阈值下限:1800\n告警时间：2026-09-13 10:54:37\n现象描述：贷记卡消费笔数降至233.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：渠道侧限流策略命中，交易被批量拒绝，判定为渠道侧流控导致。\n置信度：high\n备注：与银联通道告警时间高度重合。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约1815笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 11:28:37（消费笔数已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需评估受影响消费交易的补处理方案",
         receiveTime: 1789268076000,
@@ -26167,7 +26167,7 @@ let analyzeRes = {
         metric: "ORACLE-会话数使用率-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值96.8,阈值下限:20\n告警时间：2026-09-11 07:36:21\n现象描述：会话数使用率持续高于阈值上限，新增连接请求开始出现排队\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：自动巡检任务与联机交易共用连接池，巡检任务频繁启动占用大量会话。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 08:03:21（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（关单接口调用超时（3000ms），已重试 2 次仍失败），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 自动关闭失败原因需定位：关单接口调用超时（3000ms），已重试 2 次仍失败\n2. 需确认是否存在会话泄漏",
         receiveTime: 1789083380000,
@@ -26218,7 +26218,7 @@ let analyzeRes = {
         metric: "ORACLE-表空间使用率-TS_DASP_DATA",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值94.6,阈值下限:30\n告警时间：2026-09-14 21:26:46\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计11天内写满\n\n### 根因定位\n根因组件：数据仓库表空间TS_DASP_DATA\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：high\n备注：归档任务近3天执行失败。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-14 21:57:46（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 建议对归档任务增加失败告警",
         receiveTime: 1789392405000,
@@ -26283,7 +26283,7 @@ let analyzeRes = {
         metric: "ORACLE-平均执行时间-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-平均执行时间-db_core01,升为超限,阈值上限:50,实际值231.0,阈值下限:0\n告警时间：2026-09-11 06:40:29\n现象描述：慢SQL数量达到231.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：medium\n备注：慢SQL集中在同一SQL_ID，来源为账户查询服务。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 07:09:29（ORACLE已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（配置中心连接中断，无法读取关单白名单），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 自动关闭失败原因需定位：配置中心连接中断，无法读取关单白名单\n2. 需在上线前完成SQL审核",
         receiveTime: 1789080028000,
@@ -26341,7 +26341,7 @@ let analyzeRes = {
         metric: "KAFKA-消费组堆积量-dasp-core-group",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-消费组堆积量-dasp-core-group,升为超限,阈值上限:10000,实际值153280.0,阈值下限:0\n告警时间：2026-09-11 21:00:47\n现象描述：生产延迟升至153280.0ms，消息投递时延明显增大\n\n### 根因定位\n根因组件：消费方应用dasp-plat-canal-server\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：high\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-11 21:14:47（KAFKA已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（告警状态已变更（当前状态：人工处理中），不允许自动关闭），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 自动关闭失败原因需定位：告警状态已变更（当前状态：人工处理中），不允许自动关闭\n2. 需确认堆积期间是否存在消息丢失",
         receiveTime: 1789131646000,
@@ -26392,7 +26392,7 @@ let analyzeRes = {
         metric: "CPU使用率-bjb-dasp-app-0057",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0057,升为超限,阈值上限:85,实际值92.8,阈值下限:10\n告警时间：2026-09-13 21:16:30\n现象描述：CPU使用率持续高于阈值上限达3883分钟，负载指标同步升高\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：high\n备注：同宿主机CPU总使用率同样超过阈值。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：是\n恢复时间：2026-09-13 21:41:30（CPU使用率已连续3个检测周期回到阈值区间内，恢复条件已满足）\n\n### 处置建议\n告警处置结果：Agent自动关闭失败（接口返回 code=500，告警平台关单服务不可用），已转人工处理\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 自动关闭失败原因需定位：接口返回 code=500，告警平台关单服务不可用\n2. 建议对该应用设置CPU超阈值的持续时长告警",
         receiveTime: 1789305389000,
@@ -26445,7 +26445,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 05:21:42\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：未知（根因不明）\n根因描述：现有数据不足以定位根因。告警根因分析专家因告警源（186）不在任何适用skill范围内，无法执行分析，未能输出根因定位。\n置信度：low\n备注：根因分析专家无适用skill，无法提供根因分析结果\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，所有相关交易失败\n连带影响：无（其他组件影响未知）\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测value始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复且根因不明，不符合关闭条件）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 持续监控交易成功率指标，待恢复后重新评估告警关闭条件\n\n### 待跟进项\n1. 根因不明，需人工介入排查交易成功率降为零的根本原因\n2. 告警源186不在当前根因分析覆盖范围内，建议补充该告警源的根因分析能力",
         receiveTime: 1728782402851,
@@ -26510,7 +26510,7 @@ let analyzeRes = {
         metric: "内存使用率-bjc-dasp-gw-0028",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值98.1,阈值下限:10\n告警时间：2026-09-13 23:51:22\n现象描述：内存使用率持续攀升且无回落，已触发多次minor GC\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：high\n备注：重启后内存可回落，但数小时内再次升高。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测内存使用率始终为98.1，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
         receiveTime: 1789314681000,
@@ -26568,7 +26568,7 @@ let analyzeRes = {
         metric: "Filesystem space available-使用率-bjc-dasp-hive-0085",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0085,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-12 03:13:04\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：Hive临时数据目录未按作业结束清理，长期累积占用大量磁盘空间。\n置信度：high\n备注：/var目录占用最大，约272GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测Filesystem space available始终为96.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
         receiveTime: 1789153983000,
@@ -26626,7 +26626,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-平均耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-平均耗时-0,升为超限,阈值上限:500,实际值1250.0,阈值下限:50\n告警时间：2026-09-12 16:40:06\n现象描述：平均响应时间升至1250.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：网关服务dasp-plat-gw-server\n根因描述：网关自身处理耗时正常，耗时集中在等待下游新核心响应，判定为下游变慢。\n置信度：high\n备注：下游服务响应时间同步上涨。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测交易响应时间始终为1250.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789202405000,
@@ -26677,7 +26677,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_settle",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值6450.0,阈值下限:600\n告警时间：2026-09-13 19:43:27\n现象描述：批量作业执行时长达到6450.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：high\n备注：上游数据文件到位时间延迟约19分钟。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测批量作业执行时长始终为6450.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
         receiveTime: 1789299806000,
@@ -26735,7 +26735,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值96.2,阈值下限:10\n告警时间：2026-09-11 07:47:08\n现象描述：缓存内存使用率达到96.2%，超过阈值上限，存在淘汰风险\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：应用侧连接未复用、短连接频繁创建，导致连接数持续增长。\n置信度：medium\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测REDIS始终为96.2，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789084027000,
@@ -26800,7 +26800,7 @@ let analyzeRes = {
         metric: "网络链路时延-BJ-NFX~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路时延-BJ-NFX~HZ-ZB,升为超限,阈值上限:1,实际值12.4,阈值下限:0\n告警时间：2026-09-14 19:34:53\n现象描述：链路时延升至12.4ms，明显高于基线，跨机房访问出现超时\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约39分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网络链路时延始终为12.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
         receiveTime: 1789385692000,
@@ -26865,7 +26865,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值263.0,阈值下限:0\n告警时间：2026-09-13 08:07:28\n现象描述：位点滞后量持续增长，数据同步链路已明显滞后\n\n### 根因定位\n根因组件：CANAL实例bjb-dasp-canal-kzx\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：同期目标端数据库存在慢SQL。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CANAL始终为263.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
         receiveTime: 1789258047000,
@@ -26916,7 +26916,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.eprod-kzx1.cncb",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.eprod-kzx1.cncb,低于阈值下限,阈值上限:90,实际值8.0,阈值下限:30\n告警时间：2026-09-14 23:25:57\n现象描述：证书剩余有效期低于阈值下限，到期后将导致服务不可用\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：到期后内外部访问均会失败。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测SSL证书剩余有效期始终为8.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
         receiveTime: 1789399556000,
@@ -26967,7 +26967,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-网联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-网联总笔数-0,降为等零,阈值上限:160,实际值0.02,阈值下限:1\n告警时间：2026-09-12 14:11:20\n现象描述：网联银联交易成功率在3分钟内由98.6%快速跌落至0.02，交易链路已不可用\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：结合交易链路日志与调用链，定位为总行变更窗口内网联通道配置下发异常，导致交易成功率降为零；已关联变更单CHG-202609114740。\n置信度：medium\n备注：近7天内同类告警6次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计8040笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网联银联交易成功率始终为0.02，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789193479000,
@@ -27032,7 +27032,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-交易笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-交易笔数-0,降为等零,阈值上限:4200,实际值865.0,阈值下限:3000\n告警时间：2026-09-14 07:02:46\n现象描述：联机交易量跌至865.0笔/分钟，远低于阈值下限3000，交易受理能力大幅下降\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：medium\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约2415笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测联机交易量始终为865.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
         receiveTime: 1789340565000,
@@ -27083,7 +27083,7 @@ let analyzeRes = {
         metric: "消费笔数-DERIVATIVE-贷记卡消费-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统信用卡_卡账户,指标:消费笔数-DERIVATIVE-贷记卡消费-0,降为等零,阈值上限:2600,实际值578.0,阈值下限:1800\n告警时间：2026-09-14 12:48:00\n现象描述：贷记卡消费笔数降至578.0笔，远低于阈值下限1800，消费类交易异常\n\n### 根因定位\n根因组件：信用卡交易前置CHANNEL\n根因描述：消费交易请求集中在报文解析阶段失败，定位为渠道报文格式变更未同步至本端。\n置信度：medium\n备注：变更单CHG-202609105928涉及渠道报文模板调整。\n\n### 影响分析\n直接影响：贷记卡消费交易受理失败，影响统计口径内约7036笔消费\n连带影响：账单计算与积分累计数据可能出现偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测消费笔数始终为578.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）确认消费笔数下降的具体渠道分布\n2. 核对渠道报文模板与本地解析规则是否一致\n3. 联系渠道方确认是否触发限流策略\n\n### 待跟进项\n1. 需评估受影响消费交易的补处理方案\n2. 建议增加按渠道维度的消费笔数监控",
         receiveTime: 1789361279000,
@@ -27141,7 +27141,7 @@ let analyzeRes = {
         metric: "ORACLE-会话数使用率-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-会话数使用率-db_core01,升为超限,阈值上限:85,实际值93.4,阈值下限:20\n告警时间：2026-09-13 22:43:34\n现象描述：数据库会话数使用率升至93.4%，超过阈值上限85%，连接资源接近耗尽\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：会话集中来自应用连接池，连接池最大连接数与数据库processes参数不匹配，导致会话堆积。\n置信度：medium\n备注：同期CPU使用率无明显升高，排除计算资源瓶颈。\n\n### 影响分析\n直接影响：数据库可用连接资源紧张，新增交易连接建立成功率下降\n连带影响：批量作业连接获取超时风险升高\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为93.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看会话来源分布，定位占用最高的应用\n2. 核对应用连接池配置与数据库processes参数，评估扩容需求\n3. 对长时间空闲会话执行清理，释放连接资源\n\n### 待跟进项\n1. 需确认是否存在会话泄漏\n2. 建议将会话数使用率纳入数据库容量水位基线",
         receiveTime: 1789310613000,
@@ -27192,7 +27192,7 @@ let analyzeRes = {
         metric: "ORACLE-表空间使用率-TS_DASP_DATA",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_表空间TS_DASP_DATA,指标:ORACLE-表空间使用率-TS_DASP_DATA,升为超限,阈值上限:90,实际值92.1,阈值下限:30\n告警时间：2026-09-11 23:18:03\n现象描述：表空间使用率持续攀升且日增量异常，按当前增速预计6天内写满\n\n### 根因定位\n根因组件：批量作业数据落地目录\n根因描述：数据保留策略未生效，历史分区数据未按期归档。\n置信度：medium\n备注：近7天表空间日增量约272GB，明显高于基线。\n\n### 影响分析\n直接影响：表空间可用容量不足，批量写入存在失败风险\n连带影响：数据仓库批量作业整体延期风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为92.1，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认表空间增长趋势与占用对象\n2. 清理超期中间表并执行表空间收缩\n3. 核对数据保留策略与归档任务执行记录，修复归档失败问题\n\n### 待跟进项\n1. 需评估表空间扩容方案\n2. 建议对归档任务增加失败告警",
         receiveTime: 1789139882000,
@@ -27250,7 +27250,7 @@ let analyzeRes = {
         metric: "ORACLE-慢SQL数量-db_core01",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_数据库实例db_core01,指标:ORACLE-慢SQL数量-db_core01,升为超限,阈值上限:50,实际值186.0,阈值下限:0\n告警时间：2026-09-13 06:06:11\n现象描述：慢SQL数量达到186.0条/分钟，超过阈值上限50，数据库响应明显劣化\n\n### 根因定位\n根因组件：数据库实例db_core01\n根因描述：统计信息过期导致执行计划劣化，同一SQL由索引扫描退化为全表扫描。\n置信度：high\n备注：变更单CHG-202609109095引入该查询语句。\n\n### 影响分析\n直接影响：数据库响应时间上升，联机交易平均耗时同步上涨\n连带影响：批量作业窗口被压缩，存在延期风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测ORACLE始终为186.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）获取慢SQL TOP清单与执行计划\n2. 对高频慢SQL评估索引补充或SQL改写方案\n3. 刷新相关表统计信息后复测执行计划\n\n### 待跟进项\n1. 需在上线前完成SQL审核\n2. 建议对核心表补充统计信息定期收集任务",
         receiveTime: 1789250770000,
@@ -27315,7 +27315,7 @@ let analyzeRes = {
         metric: "KAFKA-生产延迟-ms-dasp-core-topic",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_KAFKA集群kafka-core,指标:KAFKA-生产延迟-ms-dasp-core-topic,升为超限,阈值上限:10000,实际值96330.0,阈值下限:0\n告警时间：2026-09-12 19:54:47\n现象描述：消费组堆积量达到96330.0条，超过阈值上限10000，消息处理严重滞后\n\n### 根因定位\n根因组件：KAFKA集群kafka-core\n根因描述：消费端实例因版本升级窗口内批量重连，消费能力下降导致堆积。\n置信度：medium\n备注：堆积发生在版本升级窗口内。\n\n### 影响分析\n直接影响：下游数据处理延迟，实时指标与业务处理存在滞后\n连带影响：依赖该topic的对账、通知类任务可能延迟\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测KAFKA始终为96330.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看消费组堆积趋势与消费速率\n2. 临时提升消费线程数或扩容消费实例以加快消化\n3. 确认升级窗口结束后消费端是否已恢复稳定消费\n\n### 待跟进项\n1. 需确认堆积期间是否存在消息丢失\n2. 建议对消费堆积设置分级告警阈值",
         receiveTime: 1789214086000,
@@ -27373,7 +27373,7 @@ let analyzeRes = {
         metric: "CPU使用率-bjb-dasp-app-0042",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjb-dasp-app,指标:CPU使用率-bjb-dasp-app-0042,升为超限,阈值上限:85,实际值94.2,阈值下限:10\n告警时间：2026-09-11 08:34:46\n现象描述：CPU使用率持续高于阈值上限达7877分钟，负载指标同步升高\n\n### 根因定位\n根因组件：同宿主机其他应用进程\n根因描述：同宿主机上其他应用进程占用大量CPU，导致本应用资源被挤占。\n置信度：medium\n备注：应用响应时间同步上涨。\n\n### 影响分析\n直接影响：节点处理能力饱和，接口响应时间上升\n连带影响：同宿主机其他应用性能受连带影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CPU使用率始终为94.2，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认节点CPU与负载趋势\n2. 登录节点使用top/pidstat定位高消耗进程，确认是否为同宿主机资源竞争\n3. 评估应用实例扩容或将高消耗进程迁移至其他宿主机\n\n### 待跟进项\n1. 需确认宿主机资源分配是否合理\n2. 建议对该应用设置CPU超阈值的持续时长告警",
         receiveTime: 1789086885000,
@@ -27424,7 +27424,7 @@ let analyzeRes = {
         metric: "内存使用率-bjc-dasp-gw-0028",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_应用节点bjc-dasp-gw,指标:内存使用率-bjc-dasp-gw-0028,升为超限,阈值上限:90,实际值95.6,阈值下限:10\n告警时间：2026-09-12 13:42:04\n现象描述：节点内存使用率升至95.6%，超过阈值上限90%，存在OOM风险\n\n### 根因定位\n根因组件：应用进程dasp-plat-gw-server\n根因描述：进程内存随请求量线性增长，疑似存在连接对象未释放。\n置信度：medium\n备注：内存曲线呈锯齿状上行，符合缓慢泄漏特征。\n\n### 影响分析\n直接影响：节点可用内存不足，存在进程被杀或OOM风险\n连带影响：同宿主机其他应用存在连带影响风险\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测内存使用率始终为95.6，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看内存趋势与GC次数\n2. 导出HeapDump分析内存占用TOP对象，定位泄漏点\n3. 必要时先重启实例恢复服务，并同步排查代码问题\n\n### 待跟进项\n1. 需定位并修复内存泄漏代码\n2. 建议为应用进程配置OOM主动告警",
         receiveTime: 1789191723000,
@@ -27482,7 +27482,7 @@ let analyzeRes = {
         metric: "Filesystem space available-使用率-bjc-dasp-hive-0086",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统数据仓库_服务器bjc-dasp-hive,指标:Filesystem space available-使用率-bjc-dasp-hive-0086,升为超限,阈值上限:85,实际值96.4,阈值下限:10\n告警时间：2026-09-13 22:12:47\n现象描述：文件系统使用率达到96.4%，超过阈值上限85%，剩余空间不足\n\n### 根因定位\n根因组件：HADOOP临时数据目录\n根因描述：Hive临时数据目录未按作业结束清理，长期累积占用大量磁盘空间。\n置信度：high\n备注：/var目录占用最大，约127GB。\n\n### 影响分析\n直接影响：文件系统可用空间不足，作业写入存在失败风险\n连带影响：同节点其他服务日志写入可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测Filesystem space available始终为96.4，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认磁盘使用率趋势与目录分布\n2. 使用du定位占用最大的目录，清理超期临时文件与日志\n3. 为应用日志配置轮转策略，为Hive临时目录增加定期清理任务\n\n### 待跟进项\n1. 需评估文件系统扩容需求\n2. 建议将磁盘水位纳入容量规划基线",
         receiveTime: 1789308766000,
@@ -27540,7 +27540,7 @@ let analyzeRes = {
         metric: "交易响应时间-DERIVATIVE-99线耗时-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_网关服务,指标:交易响应时间-DERIVATIVE-99线耗时-0,升为超限,阈值上限:500,实际值1860.0,阈值下限:50\n告警时间：2026-09-11 16:16:43\n现象描述：平均响应时间升至1860.0ms，超过阈值上限500ms，服务体验明显下降\n\n### 根因定位\n根因组件：下游新核心服务\n根因描述：网关线程池配置偏小，突发流量下请求排队，导致响应时间上涨。\n置信度：medium\n备注：同期QPS较基线增长约393%。\n\n### 影响分析\n直接影响：网关整体响应时间上涨，超时请求增加\n连带影响：上游渠道侧调用成功率可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测交易响应时间始终为1860.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）对比网关耗时与下游服务耗时\n2. 检查网关线程池、连接池配置与下游服务健康状态\n3. 必要时对非核心接口实施限流，优先保障关键交易\n\n### 待跟进项\n1. 需确认流量突增来源并评估限流策略\n2. 建议补充网关响应时间的分位值告警",
         receiveTime: 1789114602000,
@@ -27591,7 +27591,7 @@ let analyzeRes = {
         metric: "批量作业执行时长-job_dasp_settle",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "作业超时告警",
+        misinfoReason: "作业超时告警",
         output:
           "### 告警概述\n告警内容：系统新核心_批量作业job_dasp_interest,指标:批量作业执行时长-job_dasp_settle,升为超限,阈值上限:3600,实际值7820.0,阈值下限:600\n告警时间：2026-09-14 17:19:13\n现象描述：批量作业执行时长达到7820.0秒，超过阈值上限3600秒，作业已超时\n\n### 根因定位\n根因组件：批量作业job_dasp_interest\n根因描述：作业执行SQL未使用分区裁剪，全表扫描导致执行时间大幅延长。\n置信度：medium\n备注：同期数据库慢SQL数量同步升高。\n\n### 影响分析\n直接影响：批量作业超时未完成，影响当日业务数据就绪时间\n连带影响：下游依赖该批量的对账、报表作业将顺延\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测批量作业执行时长始终为7820.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...）查看作业执行日志与当前进度\n2. 检查上游数据就绪情况与作业依赖关系，确认等待点\n3. 评估人工干预方案，必要时拆分作业并调整并行度\n\n### 待跟进项\n1. 需确认批量结果数据是否影响当日开门营业\n2. 建议增加批量作业上下游依赖就绪监控",
         receiveTime: 1789377552000,
@@ -27649,7 +27649,7 @@ let analyzeRes = {
         metric: "REDIS-内存使用率-redis-dasp-02",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "资源使用率告警",
+        misinfoReason: "资源使用率告警",
         output:
           "### 告警概述\n告警内容：系统新核心_REDIS集群redis-dasp,指标:REDIS-内存使用率-redis-dasp-02,升为超限,阈值上限:80,实际值93.7,阈值下限:10\n告警时间：2026-09-14 13:49:02\n现象描述：缓存节点连接数使用率达到93.7%，超过阈值上限80%，接近最大连接数\n\n### 根因定位\n根因组件：应用连接池dasp-app-mgr-d5c7\n根因描述：缓存键未设置过期时间，内存持续增长触发超阈值告警。\n置信度：high\n备注：缓存命中率无明显下降，业务影响可控。\n\n### 影响分析\n直接影响：缓存连接资源紧张，新建连接成功率下降\n连带影响：依赖缓存的查询类交易响应时间可能上升\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测REDIS始终为93.7，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）查看连接数来源与缓存内存分布\n2. 优化应用侧连接池配置，改用长连接复用\n3. 梳理无过期时间的大key并补充过期策略\n\n### 待跟进项\n1. 需确认是否存在连接泄漏\n2. 建议对缓存连接数与内存水位设置分级告警",
         receiveTime: 1789364941000,
@@ -27707,7 +27707,7 @@ let analyzeRes = {
         metric: "网络链路丢包率-BJ-DB~HZ-ZB",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "连通性告警",
+        misinfoReason: "连通性告警",
         output:
           "### 告警概述\n告警内容：系统数据服务网关_跨机房链路,指标:网络链路丢包率-BJ-DB~HZ-ZB,升为超限,阈值上限:1,实际值8.6,阈值下限:0\n告警时间：2026-09-14 14:20:44\n现象描述：链路丢包率达到8.6%，超过阈值上限1%，网络传输质量劣化\n\n### 根因定位\n根因组件：核心交换机CE-01\n根因描述：交换机端口存在CRC错包增长，定位为端口或光模块异常。\n置信度：medium\n备注：丢包为间歇性，持续约43分钟。\n\n### 影响分析\n直接影响：跨机房访问时延上升，部分请求超时\n连带影响：数据同步与批量传输效率下降\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网络链路丢包率始终为8.6，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=2&attrName=...）确认链路质量趋势\n2. 检查两端交换机端口错包与光模块告警\n3. 联系网络运营商确认线路侧是否存在抖动或割接\n\n### 待跟进项\n1. 需运营商出具线路质量报告\n2. 建议补充跨机房链路的时延与丢包双指标告警",
         receiveTime: 1789366843000,
@@ -27765,7 +27765,7 @@ let analyzeRes = {
         metric: "CANAL-位点滞后量-bjb-dasp-canal-kzx",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_CANAL集群bjb-dasp-canal-kzx,指标:CANAL-位点滞后量-bjb-dasp-canal-kzx,升为超限,阈值上限:30,实际值486.0,阈值下限:0\n告警时间：2026-09-14 18:17:17\n现象描述：同步延迟达到486.0秒，超过阈值上限30秒，源库与目标库数据不一致\n\n### 根因定位\n根因组件：目标端数据仓库写入\n根因描述：目标端写入速度低于源端变更速度，定位为下游批量写入压力过大。\n置信度：medium\n备注：延迟与下游批量作业窗口高度重合。\n\n### 影响分析\n直接影响：源库与目标库数据不一致，下游分析数据滞后\n连带影响：依赖同步数据的报表与指标计算结果可能存在偏差\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测CANAL始终为486.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=3&attrName=...）确认同步延迟趋势与位点状态\n2. 检查CANAL实例日志与目标端写入性能\n3. 必要时调整目标端写入并行度，或在批量窗口内降低同步优先级\n\n### 待跟进项\n1. 需确认延迟期间是否需要重新同步\n2. 建议增加同步延迟的数据一致性校验",
         receiveTime: 1789381036000,
@@ -27823,7 +27823,7 @@ let analyzeRes = {
         metric: "SSL证书剩余有效期-*.cncb-inner",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=4&attrName=...",
-        misInfoReason: "容量告警",
+        misinfoReason: "容量告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_SSL证书,指标:SSL证书剩余有效期-*.cncb-inner,低于阈值下限,阈值上限:90,实际值12.0,阈值下限:30\n告警时间：2026-09-13 08:59:03\n现象描述：证书剩余有效期仅12.0天，低于阈值下限30天，即将到期\n\n### 根因定位\n根因组件：应用网关证书*.eprod-kzx1.cncb\n根因描述：续签申请已提交但因审批流程未完成，证书未完成替换。\n置信度：high\n备注：同批次证书共3864张存在相同问题。\n\n### 影响分析\n直接影响：证书到期后相关域名访问将失败\n连带影响：依赖该域名的上下游调用链路全部中断\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测SSL证书剩余有效期始终为12.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=5&attrName=...）确认即将到期的证书清单\n2. 联系证书管理员推进续签与替换流程，优先处理15天内到期的证书\n3. 在业务低峰窗口完成证书替换并验证\n\n### 待跟进项\n1. 需将证书统一纳入到期提醒清单\n2. 建议补充到期前60/30/15天的分级提醒",
         receiveTime: 1789261142000,
@@ -27874,7 +27874,7 @@ let analyzeRes = {
         metric: "网联银联交易成功率-DERIVATIVE-银联总笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统授权交易_关键交易码PAYBNK,指标:网联银联交易成功率-DERIVATIVE-银联总笔数-0,降为等零,阈值上限:160,实际值0.0,阈值下限:1\n告警时间：2026-09-13 07:58:44\n现象描述：网联银联交易成功率降为0（实际值0.0），远低于阈值下限1，交易完全中断\n\n### 根因定位\n根因组件：应用/dasp-app-mgr-授权交易代理层\n根因描述：网联侧返回码集中为RC-9999（通道侧异常），本端交易请求已正常发出，判定为上游通道故障导致成功率降为0。\n置信度：high\n备注：近7天内同类告警6次，均为变更窗口内触发。\n\n### 影响分析\n直接影响：授权交易_关键交易码PAYBNK的网联银联交易成功率降为零，累计2615笔交易失败\n连带影响：关联的授权交易链路（AUTH→网联银联）全部受影响，其他交易码影响待评估\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测网联银联交易成功率始终为0.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 立即人工介入排查：登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）查看详细指标数据，确认交易链路各环节状态\n2. 检查授权交易系统（AUTH）及关联的网联/银联通道是否正常，排查网络、中间件、数据库等基础设施\n3. 联系总行变更负责人核对变更窗口内的通道配置，确认是否存在下发异常\n\n### 待跟进项\n1. 根因指向变更窗口内的配置下发，需变更负责人确认回退方案\n2. 建议对授权交易关键交易码补充成功率骤降的分钟级监控告警",
         receiveTime: 1789257523000,
@@ -27939,7 +27939,7 @@ let analyzeRes = {
         metric: "联机交易量-DERIVATIVE-账户查询笔数-0",
         metric_link:
           "http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...",
-        misInfoReason: "性能指标告警",
+        misinfoReason: "性能指标告警",
         output:
           "### 告警概述\n告警内容：系统新核心_账户处理,指标:联机交易量-DERIVATIVE-账户查询笔数-0,降为等零,阈值上限:4200,实际值1024.0,阈值下限:3000\n告警时间：2026-09-13 19:56:38\n现象描述：联机交易量在5分钟内由3600笔/分钟降至1024.0笔/分钟，降幅超85%\n\n### 根因定位\n根因组件：新核心应用集群dasp-app-mgr\n根因描述：结合数据库ASH报告，定位为总行变更引入的新SQL未走索引，导致大量会话堆积、联机交易量骤降。\n置信度：high\n备注：近1小时内交易量呈持续下降趋势，未见自愈。\n\n### 影响分析\n直接影响：新核心_联机交易受理能力下降，累计受影响交易约6500笔\n连带影响：下游对账、清算批量作业的数据完整性可能受影响\n\n### 恢复状态\n是否已恢复：否\n恢复时间：未恢复（5轮检测联机交易量始终为1024.0，从未满足恢复条件）\n\n### 处置建议\n告警处置结果：暂不关闭（告警未恢复，不符合关闭条件，已推送人工跟进）\n1. 登录异常检测平台（http://pm.eprod-kzx1.cncb/pm-frontend/config/reportdata?currentTab=1&attrName=...）核对交易量与响应时间趋势，确认下降拐点\n2. 检查新核心数据库会话数、慢SQL与锁等待情况，必要时kill阻塞会话\n3. 联系变更负责人评估账户查询逻辑变更的回退方案\n\n### 待跟进项\n1. 需确认积压交易是否需要补录处理\n2. 建议对核心联机交易量设置分钟级下跌告警",
         receiveTime: 1789300597000,

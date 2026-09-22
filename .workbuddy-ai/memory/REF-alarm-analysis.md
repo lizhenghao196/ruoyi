@@ -21,16 +21,44 @@ shapeOf(v) → metrics | table | nested | duplicate | rows | empty | mixed
 - `raw`：兜底，原样 JSON 预览
 
 `buildSections(payload)` → `{ metricGroups, sections }`：
-- **所有 `metrics` 型 key 合并成「一条」指标条**（P1 + P2 在一行里，靠 chip 标签分组区分）
+- **所有 `metrics` 型 key 合并成「一条」指标条**（2026-09-21 起**不再按 P1/P2 分组**，`metricGroups` 恒为 0 或 1 组）
 - 其余按 **key 顺序**出区块
 - **不返回的 key 不产出区块**（如 `重复性分析` 可能整个不返回）→ **页面零特判**
 
+## ⚠️ 指标：数据层照旧 P1/P2，**只在前端合并 + 重排**（2026-09-21）
+
+用户原话：「虽然数据返回 P1 和 P2，但是我们在页面上不这么分了，然后字段展示的顺序是
+AI处置量 AI处置率 AI关闭 AI关单率 人工关闭 人工关单率 自动化关闭 自动化关单率 AI未纳管 告警总量」。
+
+- **接口 / mock 数据一个字节都不用改**（`P1` / `P2` 照旧）。
+  ⚠️ 我第一版把 mock 里 P1+P2 合并成了一个 `指标` key，**被用户打回**：「不要改 mockData 里面的数据呀」。
+  **要改展示就只改展示层。**
+- 顺序常量 `METRIC_ORDER` 写在 `shape.js`，`orderMetrics()` 做**稳定排序**；`buildSections` 里
+  所有 metrics 型 key 的值先汇进同一个 `metrics` 池（mixed 分支的标量也进池），最后排一次序。
+- **顺序的唯一来源就是 `METRIC_ORDER`，页面里不许再抄一份**（反向断言 `!/AI处置量/.test(idxCode)`）。
+- 未列入 `METRIC_ORDER` 的指标（后端新增）统一排在最后，且保持传入相对顺序 —— 不丢、不乱。
+- 因为只认这张表，**后端拆几个 key、按什么顺序返回都无所谓**（实测 `{P2:{...}, P1:{...}}` 也能正确合并排序）。
+
 ## 指标条 `components/MetricCards.vue`
 
-- props 是 `groups: [{ name, metrics: [{ key, display, tone }] }]`（**不是单个 metrics 对象**）
+- props 仍是 `groups: [{ name, metrics: [{ key, display, tone }] }]`，但实际恒为 **1 组**
+  （保留数组是为了组件契约稳定 + 万一后端再返回多个 metrics key）。
+- **`v-if="groups.length > 1"` 才渲染 `.mc__tag` 分组标签** —— 合并成一条后不再显示 P1/P2 chip。
+- 单组时模板给 `.mc__group.is-only`，CSS 去掉右侧 `padding-right: 14px`，让 10 项铺满整行。
 - ⚠️ **`flex-grow` 用内联按「本组条数」给**：`:style="{ flexGrow: Math.max(1, group.metrics.length) }"`，CSS 打底 `flex: 0 1 auto`。
-  写死 `flex: 1 1 auto` 会让 2 项的 P2 和 7 项的 P1 **平分宽度**，每条指标被拉得很空（实测 105px vs 238px）。
+  写死 `flex: 1 1 auto` 会让项数不同的组**平分宽度**，条目少的组被拉得很空（实测 105px vs 238px）。
 - 容器 `flex-wrap: nowrap` + `overflow-x: auto`：指标再多也在一行，装不下就横滚。
+  验收看 `scrollWidth === clientWidth`（不靠滚动条藏数据）。
+
+## 概览区的「告警总量」——已知重名，**用户暂不处理**
+
+筛选栏右侧概览区写着「告警总量」（= 页面实际渲染出的明细行数，mock 里 428），
+指标条里也有「告警总量」（= 后端统计值，mock 里 530）→ **同名不同值**。
+
+- 我第一版把它改名「明细条数」（computed `totalCount` → `detailCount`），**随第一版一起被用户回退了**。
+- 用户的要求很明确：本次只做「不区分 P1/P2 + 指标顺序」。
+  **不要再顺手改概览**（断言 `/告警总量/.test(idxTpl)` 钉住「本次不动概览」）。
+- 想提就只在回复里提一句，让用户决定。
 
 ## `AI处置`（nested 型）`components/NestedGroups.vue`
 
@@ -59,9 +87,42 @@ shapeOf(v) → metrics | table | nested | duplicate | rows | empty | mixed
 - ⚠️ **`levelTone` 的判定顺序是「成功 → 失败 → 重放 → 其它」，不能换**：
   `HANDLED_ERROR_REPLAY` 含 `ERROR` 但不含成功/失败，换顺序就会落到 `bad`。
 
-## `buildQueryParams`：系统 ID 是选填
+## `buildQueryParams`：systemId 选填，teamName 始终带（2026-09-21）
 
-**用户不填系统 ID 时，参数里压根不能有 `systemId` 这个 key**（不是空串、不是 `null`）。
+- **用户不填系统 ID 时，参数里压根不能有 `systemId` 这个 key**（不是空串、不是 `null`）。
+- **`teamName` 相反，始终带上**：下拉框默认「不限定组别」，它本身就是「不按组别过滤」这个有效语义。
+  默认值直接写死字符串 `'不限定组别'`（= 字典 `dict_system_group` 第一项，label 与 value 相同）。
+
+## 组别字典 `dict_system_group`（2026-09-21）
+
+- SQL：`sql/dict_system_group.sql`（照 `release_execute_status_dict.sql` 的写法，delete + insert，可重复执行）。
+- 三项：**不限定组别**（is_default=Y）/ **全量** / **基础平台域**。
+- ⚠️ **dict_label 与 dict_value 完全相同**（都是中文）—— 前端 el-select 绑的就是中文，
+  `teamName` 的默认值才能和第一项对上。**别把 value 改成拼音/英文码。**
+- 页面：`dicts: ['dict_system_group']`，el-select 放在系统 ID 输入框**后面**（`.aa-bar__team`，150px）。
+- ⚠️ **截至 2026-09-21 收尾，数据库里还没这个字典**（`/dev-api/system/dict/data/type/dict_system_group`
+  返回 `{"code":200,"rows":[]}`）→ 下拉框展开是空的，等用户执行 SQL。
+
+## 表格列 / 字段名 / 外部跳转（2026-09-21）
+
+`components/AlarmTable.vue` 的列（**顺序即此**）：
+`alertKey` / `summary` / `misinfoReason` / `alertReasonDesc` / AgentTrace / output / more
+
+- ⚠️ **字段名是 `misinfoReason`，i 是小写**（不是 `misInfoReason`）。mock 已同步改过（428 处）。
+  写断言时注意：「模板里没有 misInfoReason」要**只匹配属性值**（`prop="misInfoReason"`），
+  因为注释里为了提醒「别写错」会把这个串写出来，全串匹配会假红。
+- **`alertSource` / `closedBy` 不展示**：表格列删了，`FieldDialog` 里也进了 `HIDDEN_KEYS`（弹窗里也不列）。
+- 按钮改名：output 列「告警报告」→ **「告警详情」**（弹窗标题同步）；more 列「更多字段」→ **「查看简报」**。
+  ⚠️ **「更多字段」弹窗（`type === 'more'`）因此没有入口了**，代码留着没删，需要时能接回来。
+- **两个外部跳转**（常量写在 AlarmTable 顶部，都是新开 tab）：
+
+  | 触发 | 字段 | 地址 |
+  |---|---|---|
+  | alertKey 列的值（`<a target="_blank">`） | `alertKey` | `http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<alertKey>` |
+  | more 列「查看简报」按钮 | `runId` | `http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>` |
+
+  - ⚠️ 判空用 `=== undefined || === null || === ''`，**不要用 `||`**（`runId: 0` 会被当空）。
+  - 缺 `alertKey` → 值退化成纯文本（不出死链）；缺 `runId` → 按钮 `disabled`。
 
 ## ⚠️ 全局元素选择器会漏进 scoped 组件
 
@@ -98,11 +159,25 @@ Element 的 `.el-table--border { border-right: none; border-bottom: none }` **�
 
 ## 校验脚本
 
-- `C:/Users/lenovo/AppData/Local/Temp/test_alarm_analysis.mjs`（**241 条**，node）
-  8 个分组：shape.js 纯函数 / 真实 mock 跑 buildSections / 「不返回就不渲染」与容错 / SFC 模板+script /
-  SCSS 产物 / 页面级集成（抠 index.vue 跑真实 mock）/ NestedGroups 组件行为 / MetricCards。
+- `C:/Users/lenovo/AppData/Local/Temp/test_alarm_analysis.mjs`（**309 条**，node）
+  9 个分组：shape.js 纯函数 / 真实 mock 跑 buildSections / 「不返回就不渲染」与容错 / SFC 模板+script /
+  SCSS 产物 / 页面级集成（抠 index.vue 跑真实 mock）/ NestedGroups 组件行为 / MetricCards /
+  **[9] 列·字段名·外部链接·组别字典**。
   ⚠️ 里面有**反向断言**：`!/el-tabs/` + `!/el-radio-group/` 钉住「不许退回横向 tab / 单行分段」；
-  `!/p1Data|p2Data|p3Data/`；`!/\bres\.data\b|\bres\.rows\b/`。
+  `!/p1Data|p2Data|p3Data/`；`!/\bres\.data\b|\bres\.rows\b/`；
+  `!/AI处置量/`（页面不许抄指标顺序）；`/告警总量/.test(idxTpl)`（本次不动概览）。
+  MetricCards 的「单组不渲染标签」用 `compiler.compileToFunctions(...).render` 拿 vnode 数 `.mc__tag`，**不需要浏览器**。
+- `C:/Users/lenovo/AppData/Local/Temp/aa_fields_verify.mjs`（**新增 2026-09-21**，playwright + 本机 Chrome）
+  专测本次 6 条需求：下拉位置/默认值/选项/选中后 `form.teamName` 变化、查询参数带 teamName 且 systemId 仍不填不带、
+  列名与按钮文案、alertKey 是 `<a target=_blank>` 且 href 拼对、点「查看简报」拦截 `window.open` 验证链接。
+  ⚠️ 页面有 **4 个 `.at` 表格**（AI处置/P3/人工关单/自动化关单），选列时必须只取第一个，否则断言被 4 份重复撑爆。
+  ⚠️ 前端代理前缀是 **`/dev-api`**（不是 `/prod-api`）。
+  ⚠️ 字典没配时**注入一份字典数据**到 `aa.dict.type` 再验证选项渲染（不改数据库）。
+- `C:/Users/lenovo/AppData/Local/Temp/aa_metric_verify.mjs`（**新增 2026-09-21**，playwright + 本机 Chrome）
+  专测指标条：10 项 / 顺序 / 数值 / 无 `.mc__tag` / 只有 1 组 / 同一行（`offsetTop` 去重后 = 1）/
+  `scrollWidth === clientWidth` / 末项右边界 ≤ 容器右边界 / 概览不重名 / 无 JS 报错。
+  ⚠️ 要过滤 `[WDS] Disconnected!`（dev-server HMR 的正常日志）和
+  `Failed to load resource`（外部字体/CDN 超时，网络抖动就会冒出来）—— 都不是业务报错。
 - `C:/Users/lenovo/AppData/Local/Temp/aa_fix_verify.mjs`（**29 条**，playwright + 本机 Chrome，像素级）
   验「表格底部横线真的画出来了」「导航与右侧等高（gap === 0）」「压力 15 个一级」「窄屏 1000px」。
   配套 `png_pixels.mjs`（自写极简 PNG 解码器）。

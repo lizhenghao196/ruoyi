@@ -4,11 +4,12 @@
       v-for="(group, gi) in groups"
       :key="group.name"
       class="mc__group"
-      :class="{ 'is-first': gi === 0 }"
+      :class="{ 'is-first': gi === 0, 'is-only': groups.length === 1 }"
       :style="{ flexGrow: Math.max(1, group.metrics.length) }"
     >
-      <!-- 分组标签：把 P1 / P2 … 区分开，同时所有指标仍挤在同一行 -->
-      <span class="mc__tag" :title="group.name">{{ group.name }}</span>
+      <!-- 分组标签：只有多个指标组时才需要。指标已合并成一条（不再区分 P1/P2）时不再显示，
+           见 shape.js 的 buildSections / METRIC_ORDER -->
+      <span v-if="groups.length > 1" class="mc__tag" :title="group.name">{{ group.name }}</span>
 
       <div class="mc__items">
         <div
@@ -71,6 +72,11 @@ $divider-weak: #f0f2f5;
   flex: 0 1 auto;
   min-width: 0; // 空间不足时优先压缩，而不是把整行撑破
   padding-right: 14px;
+
+  // 只有一条指标条时（指标已合并、不再分组）：不要右侧留白，让指标铺满整行
+  &.is-only {
+    padding-right: 0;
+  }
 
   // 组与组之间：比组内分割线更明显的一条竖线
   &:not(.is-first) {

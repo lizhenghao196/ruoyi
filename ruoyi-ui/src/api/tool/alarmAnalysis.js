@@ -7,8 +7,8 @@ import { analyzeRes } from '../../../mockData/res'
  * 页面按形态动态渲染（形态判定与区块构建见 `views/tool/alarmAnalysis/shape.js`）。
  *
  * 当前 mockData/res.js 里的 analyzeRes 覆盖了这几种形态：
- *   P1: { 指标名: 值 }                              指标型 → 与 P2 合并成一行，按 key 分组展示
- *   P2: { 指标名: 值 }                              指标型
+ *   P1: { 指标名: 值 }                              指标型 ┐ 后端仍按 P1/P2 拆 key 返回，
+ *   P2: { 指标名: 值 }                              指标型 ┘ 但页面把它们**合并成一条**指标条展示
  *   P3 / 人工关单 / 自动化关单:
  *        { 分类名: [ 告警行 ] }                      表格型 → 单分类直接出表，多分类用 tab
  *   AI处置:
@@ -16,14 +16,23 @@ import { analyzeRes } from '../../../mockData/res'
  *   重复性分析: [ { data: [ { alertKey, 内容, 原因 } ], 重复性说明 } ]
  *                                                  重复型 → 分组纵向合并单元格
  *
+ * ⚠️ **数据层不动**：接口照旧返回 P1 / P2；「不区分 P1/P2」只发生在展示层 ——
+ * 所有「指标型」key 会被合并成同一条，顺序由 `views/tool/alarmAnalysis/shape.js` 的
+ * `METRIC_ORDER` 决定（AI处置量 → AI处置率 → … → 告警总量），
+ * 因此后端把指标拆成几个 key、按什么顺序返回，都不影响页面展示。
+ *
  * 「重复性分析」这类 key 后端**可能不返回** —— 页面按 key 存在与否决定是否渲染，
  * 因此不返回就是不渲染，不需要页面做特判。
  *
- * 告警行字段：表格直接展示 alertKey / summary / misInfoReason / alertReasonDesc /
- * alertSource / closedBy，AgentTrace 与 output 通过按钮弹窗查看，其余字段在「更多」弹窗中展示。
+ * 告警行字段：表格直接展示 alertKey / summary / misinfoReason（⚠️ i 是小写）/ alertReasonDesc；
+ * alertSource / closedBy **不展示**；AgentTrace 通过「使用到的智能体」弹窗查看，
+ * output 通过「告警详情」弹窗查看（按 markdown 渲染）。
+ * alertKey 的值可点击、新开 tab 跳到外部告警详情页；「查看简报」按钮用 runId 跳外部简报页。
  *
- * 查询条件（页面上的 systemId / startDate / endDate）只做透传，Mock 数据不做任何筛选，
+ * 查询条件（页面上的 systemId / teamName / startDate / endDate）只做透传，Mock 数据不做任何筛选，
  * 无论传什么条件都返回全量示例数据；真实接口由后端按这些条件过滤。
+ * ⚠️ `systemId` 选填（不填时参数里压根没有这个 key）；`teamName` 有默认值「不限定组别」（字典
+ * `dict_system_group` 的第一项），始终带上 —— 它本身就是「不按组别过滤」这个有效语义。
  */
 
 /**

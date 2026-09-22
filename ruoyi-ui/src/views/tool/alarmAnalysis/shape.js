@@ -6,7 +6,7 @@
  * 后端返回的载荷是「按顶层 key 分块」的，**每块的形态可能不同**，页面不再硬编码 P1/P2/P3，
  * 而是按形态动态渲染：
  *
- *   metrics    指标型：{ 指标名: 标量 }                 → 所有指标型 key 合并成「一行」指标条，按 key 分组
+ *   metrics    指标型：{ 指标名: 标量 }                 → 所有指标型 key **合并成一条**指标条（不再按 P1/P2 分组）
  *   table      表格型：{ 分类名: [告警行] }              → 一张表 / 多分类 el-tabs
  *   nested     两级型：{ 一级: { 二级: [告警行] } }      → 一级 el-tabs + 二级切换 + 表格（本项目 = AI处置）
  *   duplicate  重复型：[ { data: [...], 重复性说明 } ]   → 重复性分析表
@@ -28,6 +28,58 @@ const ICONS = {
 
 /** 合并指标条在 collapsed 里的固定 key（指标不是 payload 的某个 key） */
 export const METRICS_KEY = '__metrics__'
+
+/** 合并后那唯一一条指标条的名字（只有一个分组，界面上不再显示分组标签） */
+export const METRIC_GROUP_NAME = '指标'
+
+/**
+ * 指标展示顺序 —— **唯一来源**。
+ *
+ * 后端仍然按 P1 / P2 拆 key 返回，但**页面上不再区分**：所有指标合并成一条，
+ * 顺序以本表为准，**与接口返回的 key 顺序无关**。
+ * 表里没列到的指标（后端新增）排在已列出指标之后，并保持它们之间的接口返回顺序（稳定排序）。
+ */
+export const METRIC_ORDER = [
+  'AI处置量',
+  'AI处置率',
+  'AI关闭',
+  'AI关单率',
+  '人工关闭',
+  '人工关单率',
+  '自动化关闭',
+  '自动化关单率',
+  'AI未纳管',
+  '告警总量'
+]
+
+/** 指标名 → 顺序位次（未列出的指标统一排在最后） */
+const METRIC_INDEX = METRIC_ORDER.reduce((map, name, index) => {
+  map[name] = index
+  return map
+}, {})
+
+/**
+ * 按 METRIC_ORDER 给指标排序（稳定排序）。
+ *
+ * 未列入 METRIC_ORDER 的指标统一视作同一档「最后」，按传入顺序原样排在后面，
+ * 不会因为排序而丢失，也不会打乱后端新增指标之间的相对次序。
+ *
+ * @param {Array<{key: string}>} metrics toMetrics 的产物
+ * @returns {Array} 新数组（不改原数组）
+ */
+export function orderMetrics(metrics) {
+  const fallback = METRIC_ORDER.length
+  return (metrics || [])
+    .map((metric, index) => ({ metric: metric, index: index }))
+    .sort((a, b) => {
+      const ia = METRIC_INDEX[a.metric.key]
+      const ib = METRIC_INDEX[b.metric.key]
+      const ra = ia === undefined ? fallback : ia
+      const rb = ib === undefined ? fallback : ib
+      return ra === rb ? a.index - b.index : ra - rb
+    })
+    .map((item) => item.metric)
+}
 
 const SCALAR_TYPES = ['string', 'number', 'boolean']
 
@@ -162,17 +214,22 @@ function makeDuplicateSection(key, groups) {
 }
 
 /**
- * 把接口载荷拆成「指标组 + 区块列表」。
+ * 把接口载荷拆成「指标条 + 区块列表」。
  *
  * 指标永远排在最前面（看板习惯：先总览后明细），其余区块保持 payload 里的 key 顺序。
+ *
+ * ⚠️ 指标**不再按 key 分组**：后端照旧返回 P1 / P2 两个（或更多）指标型 key，
+ * 但这里会把它们全部合并成**同一条**，顺序由 `METRIC_ORDER` 决定 ——
+ * 所以后端怎么拆 key、按什么顺序返回，都不影响页面展示。
  *
  * @param {Object} payload 接口载荷
  * @returns {{ metricGroups: Array<{name, metrics}>, sections: Array<Object> }}
  */
 export function buildSections(payload) {
-  const metricGroups = []
   const sections = []
-  if (!isPlain(payload)) return { metricGroups: metricGroups, sections: sections }
+  // 合并用的指标池：跨 key 累积（P1 + P2 …），最后统一排序成一条
+  const metrics = {}
+  if (!isPlain(payload)) return { metricGroups: [], sections: sections }
 
   const pushList = (key, lists) => {
     const section = makeTableSection(key, lists)
@@ -190,7 +247,9 @@ export function buildSections(payload) {
     if (shape === 'empty' || shape === 'raw') return
 
     if (shape === 'metrics') {
-      metricGroups.push({ name: key, metrics: toMetrics(value) })
+      Object.keys(value).forEach((name) => {
+        metrics[name] = value[name]
+      })
       return
     }
     if (shape === 'table') {
@@ -211,7 +270,6 @@ export function buildSections(payload) {
     }
 
     // mixed：同一个 key 下混着标量 / 数组 / 两级对象 —— 逐子项拆到对应位置，不丢数据
-    const metrics = {}
     const lists = []
     const nested = {}
     Object.keys(value).forEach((subKey) => {
@@ -224,13 +282,13 @@ export function buildSections(payload) {
         nested[subKey] = sub
       }
     })
-    if (Object.keys(metrics).length > 0) {
-      metricGroups.push({ name: key, metrics: toMetrics(metrics) })
-    }
     if (lists.length > 0) pushList(key, lists)
     if (Object.keys(nested).length > 0) pushNested(key, nested)
   })
 
+  // 所有指标合并成唯一一条（不再分组），顺序按 METRIC_ORDER
+  const merged = orderMetrics(toMetrics(metrics))
+  const metricGroups = merged.length > 0 ? [{ name: METRIC_GROUP_NAME, metrics: merged }] : []
   return { metricGroups: metricGroups, sections: sections }
 }
 
@@ -281,6 +339,9 @@ export function flattenLevel(level, filter) {
  * 组装查询参数。
  *
  * ⚠️ 系统 ID 是**选填**的：用户没填时**不要带 `systemId` 字段**（不是空串，是压根没有这个 key）。
+ *
+ * 组别 `teamName` 相反 —— 下拉框有默认值「不限定组别」（字典 `dict_system_group` 的第一项），
+ * 它本身就是一个有效的筛选语义（= 不按组别过滤），所以**始终带上**，不做「空就不带」的处理。
  */
 export function buildQueryParams(form) {
   const src = form || {}
@@ -288,6 +349,7 @@ export function buildQueryParams(form) {
   const params = {}
   const systemId = String(src.systemId === undefined || src.systemId === null ? '' : src.systemId).trim()
   if (systemId) params.systemId = systemId
+  params.teamName = String(src.teamName === undefined || src.teamName === null ? '' : src.teamName).trim()
   params.startDate = range[0] || ''
   params.endDate = range[1] || ''
   return params
@@ -313,6 +375,8 @@ export function levelTone(name) {
 
 export default {
   METRICS_KEY,
+  METRIC_GROUP_NAME,
+  METRIC_ORDER,
   ALL_GROUPS,
   isPlain,
   isScalar,
@@ -322,6 +386,7 @@ export default {
   shapeOf,
   metricTone,
   toMetrics,
+  orderMetrics,
   buildSections,
   sectionRowCount,
   levelRowCount,

@@ -17,9 +17,25 @@
 ## 告警分析（alarmAnalysis）
 - **页面不认 P1/P2/P3，只认「形态」**：唯一判定处 `views/tool/alarmAnalysis/shape.js`（纯函数）。所有 `metrics` 型 key 合并成**一条**指标条，
   其余按 key 顺序出区块，**不返回的 key 不产出区块**（如 重复性分析），页面零特判。
+- **指标顺序的唯一来源是 `shape.js` 的 `METRIC_ORDER`**（2026-09-21 起页面不再区分 P1/P2，10 项固定顺序，
+  `orderMetrics` 稳定排序，表里没有的排最后）。**页面不许再抄一份顺序**；后端拆几个 key、按什么顺序返回都无所谓。
+- ⚠️ **接口/mock 数据不要擅自改**：用户要的是「页面上不这么分」，不是「数据层合并」。
+  第一版把 mock 里 P1+P2 合并成一个 key，被用户打回（「不要改 mockData 里面的数据呀」）。
+  **要改展示就只改展示层**；但**用户点名要改的**（如「顺便改 mock 字段名」）照做 —— 分清这两种。
+- 表格列 = `alertKey / summary / misinfoReason / alertReasonDesc / AgentTrace / output / more`。
+  ⚠️ **`misinfoReason` 的 i 是小写**（mock 已同步）；`alertSource` / `closedBy` **不展示**。
+- 两个外部跳转（都新开 tab，常量在 `AlarmTable.vue` 顶部）：`alertKey` 列的值 →
+  `http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<alertKey>`；more 列「查看简报」→
+  `http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>`。判空别用 `||`（`runId: 0` 会被当空）。
+  ⚠️ 「更多字段」弹窗因此**没了入口**（代码留着）。
+- **组别下拉**：字典 `dict_system_group`（label 与 value 相同：不限定组别/全量/基础平台域），
+  SQL 在 `sql/dict_system_group.sql`；`form.teamName` 默认「不限定组别」且**始终进请求参数**（systemId 仍是不填不带）。
+  ⚠️ 数据库里当时还没这个字典，下拉展开是空的 —— 需用户执行 SQL。
+- 概览区的「告警总量」（明细行数）与指标条里的「告警总量」（后端统计值）**同名不同值**，
+  用户已知、明确不动 —— **别再顺手改概览**。
 - `AI处置` = nested 型，**两级数量都不固定（各可能十几二十个）**：一级用左侧竖排导航，二级用可换行 chip（默认**「全部」**，是**筛选**不是切换）。
 - `buildQueryParams`：**系统 ID 选填 —— 不填时参数里压根没有 `systemId` 这个 key**（不是空串）。
-- **细节与坑（`levelTone` 顺序、`flattenLevel` 兜底、窄屏降级、两个校验脚本）→ `REF-alarm-analysis.md`，改这个页面前必读。**
+- **细节与坑（`levelTone` 顺序、`flattenLevel` 兜底、窄屏降级、三个校验脚本）→ `REF-alarm-analysis.md`，改这个页面前必读。**
 
 ## 执行页面 / 明细弹窗
 - 最容易踩的都在 REF 里，**动手前必读**：轮询必须静默 / 横滚在每条流内部 / 页头进度算法 / 哑组件契约 / `type="expand"` 不能加 `fixed`。
