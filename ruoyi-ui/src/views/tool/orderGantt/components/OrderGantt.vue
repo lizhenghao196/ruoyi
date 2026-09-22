@@ -840,13 +840,19 @@ export default {
 
   /* ---- 分组配色：**AUTO = 蓝，手动 / 其他 = 绿** ----
      两组都是「浅 → 中」的渐变，深端只到 400 档（原来用了 600 档，观感偏浓）。
-     深端再浅就压不住白字了，所以文字补了一层更实的投影（见 .og-bar__text）。 */
+     ⚠️ 底色浅到这个程度，**柱体上的白字是读不出来的**：
+        白 on #a7f3d0 只有 1.44:1、白 on #34d399 只有 1.92:1（连 3:1 都不到）。
+     所以文字改用同色系的深色 --og-*-ink，沿渐变从浅端走到深端：
+        手动 5.99 → 4.00，自动 7.29 → 3.73，全程 >= 3.7，是原来白字的三倍左右。
+     两个 ink 的感知亮度刻意贴近（WCAG 相对亮度 0.087 / 0.051，差 0.035），两组并排时不会一边重一边轻。 */
   --og-manual-a: #a7f3d0; /* 薄荷浅 */
   --og-manual-b: #34d399; /* 绿 · 主色 */
+  --og-manual-ink: #065f46; /* 柱体文字 · 深祖母绿 */
   --og-manual-soft: rgba(52, 211, 153, 0.055); /* 分组底色 */
 
   --og-auto-a: #bfdbfe; /* 天蓝浅 */
   --og-auto-b: #5b9cf8; /* 蓝 · 主色 */
+  --og-auto-ink: #1e3a8a; /* 柱体文字 · 深靛蓝 */
   --og-auto-soft: rgba(91, 156, 248, 0.05);
 
   /* 时间轴 / 日期带的强调色（跟分组色无关，是「今天 / 整点」这类结构线） */
@@ -1173,14 +1179,19 @@ export default {
     inset 0 0 0 1px rgba(255, 255, 255, 0.34);
   transition: box-shadow 0.16s ease, transform 0.16s ease, filter 0.16s ease;
 
+  /* 兜底：模板里 bar 必带 is-manual / is-auto 之一，这里只是防止以后加第三种分组时文字变透明 */
+  --og-bar-text: var(--og-text-2);
+
   &.is-manual {
     --og-bar-a: var(--og-manual-a);
     --og-bar-b: var(--og-manual-b);
+    --og-bar-text: var(--og-manual-ink);
   }
 
   &.is-auto {
     --og-bar-a: var(--og-auto-a);
     --og-bar-b: var(--og-auto-b);
+    --og-bar-text: var(--og-auto-ink);
   }
 
   /* 太窄的矩形用大圆角会变成「药丸」，缩成 3px */
@@ -1202,12 +1213,12 @@ export default {
     line-height: 1;
     font-weight: 500;
     letter-spacing: 0.2px;
-    color: rgba(255, 255, 255, 0.96);
+    /* 深色同色系文字（--og-*-ink），柱体再浅也压得住。
+       不再需要投影：原来的 text-shadow 是给白字救场的，换成深字后反而会把边缘糊脏。 */
+    color: var(--og-bar-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* 柱体调淡之后白字对比度变低，投影要更实一点才读得清 */
-    text-shadow: 0 1px 2px rgba(15, 23, 42, 0.32);
   }
 }
 

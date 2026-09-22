@@ -43,7 +43,7 @@
 
 ## 工单甘特图（orderGantt，2026-09-21 新增）
 - 页面 `views/tool/orderGantt/index.vue`（单按钮「查看」+ el-dialog）→ 组件 `components/OrderGantt.vue`（props `orders`）→ **纯函数 `ganttLayout.js`**（可 node 断言）。
-- **三条硬规则**（改动时最容易破）：
+- **五条硬规则**（改动时最容易破）：
   1. **行装箱从下往上**（`packRows(items, {fromBottom:true})`，两遍：先求最优行数再定向）。方向反了用户一眼就看出「这条明明能往下挪」。
   2. **弹窗定高 + 按可用高度反推行高**（`fitRowPlan(rowPlan, availableHeight)`），目标是**不出现滚动条、一眼看全**。
      ⚠️ `containerHeight` 必须量**组件根节点 `.og`**，**绝不能量 `.og__plotwrap`** —— 后者的高度正是被行高决定的，会形成循环依赖。
@@ -51,6 +51,9 @@
      ⚠️ 弹窗选择器写 `.el-dialog.ogp-dialog`（0,2,0），单独 `.ogp-dialog` 压不过 element-ui 的 `margin`（同特异性只看打包顺序）。
   3. **配色：AUTO = 蓝，手动 / 其他 = 绿**（`--og-auto-*` / `--og-manual-*`，图例/气泡/柱体全走变量）。
      改动时别把两组调换回去 —— `og_scss.mjs` 按**色相 + 明度**钉住了。
+     ⚠️ **柱体上不能放白字**（2026-09-22）：底色是浅→中的渐变，白字对比度只有 1.4~1.9，用户反馈过两次。
+     文字色走 `--og-manual-ink: #065f46` / `--og-auto-ink: #1e3a8a`（`.og-bar.is-manual/.is-auto` 里映射到 `--og-bar-text`），
+     沿渐变最差 4.00 / 3.73，是白字的 3 倍。深色字**不要再挂 text-shadow**（白字时代才需要，会把边缘糊脏）。
   4. **悬浮气泡必须紧贴矩形、鼠标能走到气泡上**（气泡里有 JsonViewer，走不过去等于白做）：
      - 定位读**渲染后量到的真实高度** `tipSize.h`（估算常量只当兜底）—— 用估算值算 `top`，矮气泡会离矩形 150px。
        模板 `.og-tip` 上**必须有 `ref="tip"`**，否则量不到尺寸；`ResizeObserver` 跟住 JSON 展开导致的高度变化。
@@ -67,7 +70,10 @@
 - **任何「有宽度的东西」都不能画在 `x === plotWidth` 上**：`alignDomain` 保证最后一个刻度恰好落在 plotWidth，
   1px 宽的网格线右边缘顶到 plotWidth+1 → `overflow-x: auto` 就冒出一根横向滚动条。网格线/刻度短线走 `gridTicks`（过滤过），**标签仍用完整 `ticks`**。
 - 时间域跨度大时**不横向撑开**（`plotWidth = max(360, 容器宽)`）；真到 3 天时矩形被压窄但保证 ≥8px 仍可悬浮。
-- 校验：`og_verify.mjs`（全量，须 FAILURES:0）+ `og_scss.mjs`（编译 + 配色色相）+ `og_rows.mjs`（方向）+ `og_diag.mjs`（数值体检）+ `og_preview.mjs`（静态预览 HTML）+ **`og_verify_browser.mjs`（真实浏览器：`scrollWidth===clientWidth` 才算「不滚动」）** + **`og_verify_tip.mjs`（气泡可达性）**。
+- 校验：`og_verify.mjs`（全量，须 FAILURES:0）+ `og_scss.mjs`（编译 + 配色色相 + **柱体文字对比度/白字回归防线**）+ `og_rows.mjs`（方向）+ `og_diag.mjs`（数值体检）+ `og_preview.mjs`（静态预览 HTML）+ **`og_verify_browser.mjs`（真实浏览器：`scrollWidth===clientWidth` 才算「不滚动」）** + **`og_verify_tip.mjs`（气泡可达性）**。
+  ⚠️ `og_verify.mjs` §4 造数断言**必须给 `buildOrderList` 注入 `now`**：默认取 `Date.now()`，而窗口断言用固定日期，
+  不注入就隔天必报「主窗口 0 条」+「同种子不一致」两条假失败（2026-09-22 踩过）。
+- 视觉验收：`og_shot_ink.mjs`（开预览 HTML 截柱体文字，`deviceScaleFactor:2`；预览页 `.og__plotwrap` 只有 ~192px 高，蓝条会被裁在视口外，截图前先撑开）。
 - 其余细节（矩形宽度判定只此一处、AUTO 分组置底、尾部外溢要偏置、`packRows` 副本坑、对齐后要重校验格数）见 `2026-09-21.md`。
 
 ## 校验 / 协作
