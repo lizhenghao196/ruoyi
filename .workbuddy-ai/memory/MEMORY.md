@@ -1,7 +1,7 @@
 # MEMORY.md — RuoYi-Vue 工作台长期备忘
 
 > 只留「不知道就会做错」的。**动手前先读对应 REF**：
-> 告警分析 → `REF-alarm-analysis.md`；执行页面/流布局/右键菜单/节点操作 → `REF-exec-page.md`；「查看明细」弹窗 → `REF-exec-detail.md`。历史见 `2026-09-*.md`。
+> 告警分析 → `REF-alarm-analysis.md`；执行页面/流布局/右键菜单/节点操作 → `REF-exec-page.md`；「查看明细」弹窗 → `REF-exec-detail.md`；执行界面简版（execPlanList / execPageSimple）→ `REF-exec-simple.md`。历史见 `2026-09-*.md`。
 
 ## 项目约定
 - 新页面 = `views/tool/<n>/index.vue` + `api/tool/<n>.js` + `sql/<n>_menu.sql`；菜单走数据库动态路由，**不写** `router/index.js`。Mock 放 `mockData/res.js`，演示数据在 `api/tool/_demo*.js`。
@@ -40,6 +40,23 @@
 ## 执行页面 / 明细弹窗
 - 最容易踩的都在 REF 里，**动手前必读**：轮询必须静默 / 横滚在每条流内部 / 页头进度算法 / 哑组件契约 / `type="expand"` 不能加 `fixed`。
   → `REF-exec-page.md`（执行页面、流布局、右键菜单、节点操作）、`REF-exec-detail.md`（查看明细弹窗）。
+
+## 执行界面简版（execPlanList / execPageSimple，2026-09-22 新增）
+- 两个页面：`views/tool/execPlanList/index.vue`（计划列表，带 `type="expand"` 展开列）+ `views/tool/execPageSimple/index.vue`（全屏新标签页）。
+- **与 execPage 代码零共享**（用户硬要求），只共用 `mockData/res.js`。接口层 `api/tool/execPageSimple.js`
+  + 独立开关 `_mockFlagSimple.js`；**改两边不要互相 import，也不要顺手同步**。
+- ⚠️ **复制 API 层时最容易漏改的是动态 import**：`mockApi()` 里 `import("./_mockApi")` 若没改成
+  `./_mockApiSimple`，页面**照常工作、零报错**，实际整条链路跑的是 execPage 那套 mock，零共享已破。
+  暴露方式只有「运行时报错路径出现不该出现的文件」。`esp_verify.mjs` [C] 段已钉住。
+- ⚠️ 简版 `flowLayout.js` 是**纵向**版：层 = 行、并行组内成员**横向**并排 + 横线、`links` 为 `{y,x1,x2}`
+  （横向版是 `{x,y1,y2}`）、常量 `ROW_GAP`/`GROUP_COL_GAP`。主轴方向 = 执行方向。
+- 页面二两级选择：`envList`（按 URL `ids` 顺序）→ `envFlows` → `currentFlow`（唯一算 `layoutFlow` 处）；
+  根 class `.esp`，**模板里不能用 `<label>`/`<aside>`**（全局样式会漏进来），左右栏用 `<section>`。
+- 路由白名单 `permission.js` 的 `STANDALONE_PATHS` 已加 `/tool/execPageSimple`（匹配的是**相对 path**，
+  所以 `'/tool/execPageSimple'` 和 `'execPageSimple'` 两个值都要在）；菜单 SQL
+  `sql/execPageSimple_menu.sql`（1073/1074）**已于 2026-09-22 执行进 `ry-vue` 库，别重复跑**。
+  库连接信息在 `ruoyi-admin/src/main/resources/application-druid.yml`；菜单树无 `@Cacheable`，改完刷新页面即生效。
+- 校验：`esp_verify.mjs`（六段，期望 `FAILURES: 0`），细节全在 `REF-exec-simple.md`。
 
 ## 工单甘特图（orderGantt，2026-09-21 新增）
 - 页面 `views/tool/orderGantt/index.vue`（单按钮「查看」+ el-dialog）→ 组件 `components/OrderGantt.vue`（props `orders`）→ **纯函数 `ganttLayout.js`**（可 node 断言）。

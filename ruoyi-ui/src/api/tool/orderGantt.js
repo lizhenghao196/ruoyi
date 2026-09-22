@@ -66,7 +66,70 @@ function mockApi(name, ...args) {
  */
 export function getOrderList(params) {
   if (USE_MOCK) {
-    return mockApi("getOrderList", params);
+    // return mockApi("getOrderList", params);
+    return {
+      code: 200,
+      msg: "查询成功",
+      data: [
+        {
+          orderId: "CHGU-20260909-0086",
+          total_cost: 115, // 耗时 - 分钟
+          beginTime: "2026-09-17 18:00:00", // 开始时间
+          endTime: "2026-09-17 23:00:00",
+          mode: "AUTO", // AUTO:自动，MANUAL:手动
+          detail: [
+            {
+              type: "容器云工程发布/重启",
+              count: 2,
+              type_cost: 30,
+            },
+            {
+              type: "数据库发布",
+              count: 1,
+              type_cost: 15,
+            },
+            {
+              type: "配置发布",
+              count: 1,
+              type_cost: 5,
+            },
+          ],
+        },
+        {
+          orderId: "CHGU-20260909-0087",
+          total_cost: 135, // 耗时 - 分钟
+          beginTime: "2026-09-17 18:00:00", // 开始时间
+          endTime: "2026-09-17 22:00:00",
+          mode: "MANUAL", // AUTO:自动，MANUAL:手动
+          detail: [
+            {
+              type: "配置发布",
+              count: 1,
+              type_cost: 5,
+            },
+          ],
+        },
+        {
+          orderId: "CHGU-20260916-0047",
+          total_cost: 135, // 耗时 - 分钟
+          beginTime: "2026-09-18 00:00:00", // 开始时间
+          endTime: "2026-09-18 06:00:00",
+          mode: "MANUAL", // AUTO:自动，MANUAL:手动
+          detail: [
+            {
+              type: "ITSM_原子变更_YUM包更新",
+              count: 5,
+              type_cost: 50,
+            },
+            {
+              type: "ITSM_屏蔽告警",
+              count: 1,
+              type_cost: 5,
+            },
+          ],
+        },
+      ],
+    };
   }
   return request({
     url: "/python/api/cicd/orderList",

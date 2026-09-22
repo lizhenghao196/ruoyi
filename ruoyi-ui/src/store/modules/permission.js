@@ -55,7 +55,15 @@ const permission = {
 // 新标签页打开的路由（菜单原始 path 与拼接后的完整 path 都要匹配）
 const OPEN_TAB_PATHS = ['/tool/overview', 'overview']
 // 新标签页打开且独立全屏展示的路由（隐藏侧边栏、顶栏、页签栏）
-const STANDALONE_PATHS = ['/tool/orchestration', 'orchestration', '/tool/execPage', 'execPage']
+const STANDALONE_PATHS = [
+  '/tool/orchestration',
+  'orchestration',
+  '/tool/execPage',
+  'execPage',
+  // 执行界面简版（由「变更计划列表」页在新标签页打开，独立全屏）
+  '/tool/execPageSimple',
+  'execPageSimple'
+]
 
 // 标记路由打开方式：openTab=新标签页打开，standalone=独立全屏展示
 function markOpenMode(route) {

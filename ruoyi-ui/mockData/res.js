@@ -44639,8 +44639,8 @@ let orderRes = {
     {
       orderId: "CHGU-20260909-0086",
       total_cost: 115, // 耗时 - 分钟
-      beginTime: "2026-09-17 22:00:00", // 开始时间
-      endTime: "2026-09-17 22:00:00",
+      beginTime: "2026-09-17 18:00:00", // 开始时间
+      endTime: "2026-09-17 23:00:00",
       mode: "AUTO", // AUTO:自动，MANUAL:手动
       detail: [
         {
