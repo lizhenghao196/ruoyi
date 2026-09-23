@@ -55,11 +55,12 @@ function mockApi(name, ...args) {
  *                   sum(type_cost) <= total_cost；type_cost 是 5 的整数倍
  *
  * ⚠️ `total_cost` 与 `beginTime`/`endTime` 在样例里是**打架**的：
- *      样例 1  `beginTime === endTime` 但 `total_cost: 115`
+ *      样例 1  起止跨 5 小时（300 分钟）但 `total_cost: 115`
  *      样例 3  起止跨 6 小时（360 分钟）但 `total_cost: 135`
  *    所以「矩形多宽」不能直接信某一个字段 —— 判定规则统一放在
- *    `views/tool/orderGantt/ganttLayout.js` 的 resolveSpan()：**优先起止时间之差，
- *    起止无效（缺字段 / end <= begin）才回退到 total_cost**。要改规则只改那一处。
+ *    `views/tool/orderGantt/ganttLayout.js` 的 resolveSpan()：
+ *    **以 total_cost 为准（beginTime + total_cost 分钟），endTime 仅作兜底**。
+ *    `endTime` 不代表工单实际占用的时间，只按它画会把矩形拉长一倍多。要改规则只改那一处。
  *
  * @param {Object} [params] 查询参数
  * @returns {Promise<{code, msg, data}>}
@@ -73,7 +74,7 @@ export function getOrderList(params) {
       data: [
         {
           orderId: "CHGU-20260909-0086",
-          total_cost: 115, // 耗时 - 分钟
+          total_cost: 30, // 耗时 - 分钟
           beginTime: "2026-09-17 18:00:00", // 开始时间
           endTime: "2026-09-17 23:00:00",
           mode: "AUTO", // AUTO:自动，MANUAL:手动

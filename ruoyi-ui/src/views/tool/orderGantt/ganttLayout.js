@@ -7,9 +7,9 @@
  *   组件（components/OrderGantt.vue）只负责把算好的数字贴到 style 上。
  *
  * 三条不能改的规则
- *   1. **矩形宽度优先取起止时间之差**，起止无效才回退到 total_cost。
- *      样例里这两个字段本来就打架（见 api/tool/orderGantt.js 的说明），
- *      判定只此一处，别在组件里再写一遍。
+ *   1. **矩形宽度以 `total_cost` 为准**（`beginTime + total_cost 分钟`），
+ *      `endTime` 只是 total_cost 缺失时的兜底。样例里这两个字段本来就打架
+ *      （见 api/tool/orderGantt.js 的说明），判定只此一处，别在组件里再写一遍。
  *   2. **AUTO 工单排在下方（贴近 x 轴）**，其余（含 MANUAL 和任何未知 mode）排在上面。
  *      两组各自贪心装箱；两组之间留一条带标签的分隔带。
  *   3. **x 轴跨度自适应**：12 小时 ~ 3 天都能画，刻度步长从候选表里挑，
@@ -135,14 +135,20 @@ export function normalizeMode(mode) {
  *
  * 规则（顺序是刻意的）：
  *   1. beginTime 解析不出来  → 返回 null，这条不画（调用方计入 invalidCount）
- *   2. endTime 有效且 > beginTime → 时长 = 两者之差
- *   3. 否则 total_cost > 0     → 时长 = total_cost 分钟
- *   4. 都没有                   → 时长 = DEFAULT_DURATION_MIN
+ *   2. total_cost > 0        → 时长 = total_cost 分钟  ← **主判据**
+ *   3. 否则 endTime > beginTime → 时长 = 两者之差（兜底）
+ *   4. 都没有                 → 时长 = DEFAULT_DURATION_MIN
  *
- * 第 2 步优先于第 3 步：起止时间是业务事实，total_cost 是统计值，冲突时以事实为准。
+ * 第 2 步优先于第 3 步：`endTime` 在这份数据里**不代表工单实际占用的时间**，
+ * 只按 total_cost 画。样例 3 起止跨 6 小时（360 分钟）但 total_cost 只有 135，
+ * 按 endTime 画出来的矩形会凭空长出一倍多，用户看到的「结束时间」是错的。
+ *
+ * 第 3 步留着是纯兜底：total_cost 缺失时，宁可退回起止时间差，
+ * 也不要给所有工单都画成固定 30 分钟 —— 那才是彻底看不出信息。
  *
  * @param {Object} item
  * @returns {{start:number, end:number, durationMinutes:number, fromCost:boolean}|null}
+ *          fromCost = 时长不是由起止时间差算出来的（total_cost 或兜底宽度）
  */
 export function resolveSpan(item) {
   const start = parseTime(item && item.beginTime)
@@ -154,11 +160,11 @@ export function resolveSpan(item) {
 
   let durationMinutes
   let fromCost = false
-  if (end !== null && end > start) {
-    durationMinutes = (end - start) / MINUTE_MS
-  } else if (cost !== null) {
+  if (cost !== null) {
     durationMinutes = cost
     fromCost = true
+  } else if (end !== null && end > start) {
+    durationMinutes = (end - start) / MINUTE_MS
   } else {
     durationMinutes = DEFAULT_DURATION_MIN
     fromCost = true
