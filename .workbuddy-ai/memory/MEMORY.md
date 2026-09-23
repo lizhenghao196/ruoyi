@@ -24,7 +24,7 @@
 - **动手前必读**（三个 REF）：轮询必须静默 / 横滚在每条流内部 / 页头进度算法 / 哑组件契约 / `type="expand"` 不能加 `fixed`；execPlanList / execPageSimple 与 execPage **代码零共享**，别互相 import。
 
 ## 工单甘特图（orderGantt）
-- ⚠️ **矩形宽度只认 `total_cost`**：结束时间 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求），判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`。**改这个页面前读 `REF-order-gantt.md`**（五条硬规则、气泡可达性、边缘不溢出、九个校验脚本）。
+- ⚠️ **矩形宽度只认 `total_cost`**：结束时间 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求），判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`。**改这个页面前读 `REF-order-gantt.md`**（硬规则 7 条、气泡可达性、分组标签条 chip、柱体文字「完整或没有」、11 个校验脚本）。
 
 ## 校验 / 协作
 - node 校验：`cd C:/Users/lenovo/AppData/Local/Temp && node --experimental-loader ./resolve_ext_loader.mjs ./test_xxx.mjs`；浏览器像素校验见技能 `ruoyi-ui-node-verify`。**dev server 日志认人**：根目录 `frontend.log` 是旧的，真正在写的是 `ruoyi-ui/npm-dev.log`。

@@ -6,14 +6,17 @@
  *   这些全是纯函数 —— 可以在 node 里直接断言，不用起浏览器、不用开 webpack。
  *   组件（components/OrderGantt.vue）只负责把算好的数字贴到 style 上。
  *
- * 三条不能改的规则
+ * 四条不能改的规则
  *   1. **矩形宽度以 `total_cost` 为准**（`beginTime + total_cost 分钟`），
  *      `endTime` 只是 total_cost 缺失时的兜底。样例里这两个字段本来就打架
  *      （见 api/tool/orderGantt.js 的说明），判定只此一处，别在组件里再写一遍。
  *   2. **AUTO 工单排在下方（贴近 x 轴）**，其余（含 MANUAL 和任何未知 mode）排在上面。
- *      两组各自贪心装箱；两组之间留一条带标签的分隔带。
+ *      两组各自贪心装箱；**每个分组上方都有一条带标签的「标签条」**（`chipTop`），
+ *      两组之间额外画一条虚线分隔带（`separatorTop`，只有两组都在时才画）。
  *   3. **x 轴跨度自适应**：12 小时 ~ 3 天都能画，刻度步长从候选表里挑，
  *      保证刻度数不超过 maxTicks。
+ *   4. **柱体上的文字要么完整、要么不显示**（`canFitLabel`）：放不下就整条不写，
+ *      不做截断 —— 半截工单号（后四位）看着像另一个东西，完整信息在悬浮气泡里。
  *
  * 行分配算法
  *   贪心区间装箱：把工单按开始时间排序，逐个塞进「最后一个 bar 已经结束」的一行；
@@ -427,10 +430,44 @@ export const GROUP_GAP_RANGE = { min: 14, max: 32 }
 const BAR_INSET = 6
 
 /**
+ * 分组标签（「MANUAL 手动 · 12 条」那个小胶囊）的高度。
+ * **必须和 OrderGantt.vue 里 `.og__sep-chip` 的 height 一致**（项目是全局 border-box，
+ * 所以 18 就是含边框的总高），否则标签会被预留的空间切掉。
+ */
+export const CHIP_HEIGHT = 18
+/** 标签条 = 标签 + 上下各 2px 呼吸 */
+export const CHIP_STRIP_HEIGHT = CHIP_HEIGHT + 4
+
+/**
+ * 每个分组的「标签条」占多高 —— **行高反推（fitRowPlan）和实际布局（buildLayout）
+ * 必须共用这一个函数**：两边各算一套的话，组件以为的高度和画出来的对不上，
+ * 整图会超出容器、被 `overflow-y: hidden` 裁掉底部的工单。
+ *
+ * MANUAL 组的标签条是**新增的独立空间**（原来手动组顶上什么都没有，标签直接压在第一行上）。
+ * AUTO 组的标签条就是两组之间的那条缝（groupGap）—— 标签本来就画在缝里，不额外占高度；
+ * 只有 AUTO 单独存在、没有缝可借时才单独留一条。
+ *
+ * @param {number} manualRows
+ * @param {number} autoRows
+ * @param {number} groupGap 两组之间的缝（只有两组都在时才有意义）
+ * @returns {{manual:number, auto:number}} 各组标签条的高度
+ */
+export function groupStripHeights(manualRows, autoRows, groupGap) {
+  const hasManual = manualRows > 0
+  const hasAuto = autoRows > 0
+  const both = hasManual && hasAuto
+  return {
+    manual: hasManual ? CHIP_STRIP_HEIGHT : 0,
+    auto: hasAuto ? (both ? groupGap : CHIP_STRIP_HEIGHT) : 0
+  }
+}
+
+/**
  * 按**可用高度**反推行高 —— 「不滚动、一眼看全所有工单」的核心算法。
  *
  * 思路：行数只跟数据有关（见 measureRowPlan），所以可以「先算行数、再定行高」，
- * 让 rowCount × rowHeight + 分隔带 正好塞进可用高度。这样就没有纵向滚动条。
+ * 让 `标签条 + rowCount × rowHeight + 组间缝` 正好塞进可用高度。这样就没有纵向滚动条。
+ * 固定开销（标签条 / 组间缝）与布局共用 `groupStripHeights`，别在这里另算一套。
  *
  * ⚠️ **行高不取整**（原来 `Math.floor` 过，是错的）：
  *    取整会留下最多 `行数 × 1px` 的余量 —— 19 行就是 12px 空白，白花花地挂在时间轴下面，
@@ -444,13 +481,16 @@ const BAR_INSET = 6
  * 第 3 级是兜底：并发行数太多时宁可出现滚动条，也不能把工单裁掉。
  * 正常数据（100 条 / 20 行内）走不到第 3 级。
  *
- * @param {{rowCount:number, bothGroups:boolean}|null} rowPlan measureRowPlan 的结果
+ * @param {{rowCount:number, manualRows:number, autoRows:number, bothGroups:boolean}|null} rowPlan
+ *        measureRowPlan 的结果（manualRows / autoRows 用来算标签条）
  * @param {number} availableHeight 绘图区可用高度（组件已扣掉页头 / 日期带 / 时间轴 / 边框）
  * @returns {{rowHeight:number, barHeight:number, groupGap:number, scrollY:boolean}}
  */
 export function fitRowPlan(rowPlan, availableHeight) {
   const rows = rowPlan && rowPlan.rowCount > 0 ? rowPlan.rowCount : 0
   const both = !!(rowPlan && rowPlan.bothGroups)
+  const manualRows = rowPlan && rowPlan.manualRows > 0 ? rowPlan.manualRows : 0
+  const autoRows = rowPlan && rowPlan.autoRows > 0 ? rowPlan.autoRows : 0
   const avail = isFinite(availableHeight) && availableHeight > 0 ? availableHeight : 0
 
   if (!rows) {
@@ -462,8 +502,13 @@ export function fitRowPlan(rowPlan, availableHeight) {
     }
   }
 
-  // 两位小数：足够精确，又不会让 style 里出现一长串浮点尾数
-  const fit = (gap) => Math.round(((avail - gap) / rows) * 100) / 100
+  // 两位小数：足够精确，又不会让 style 里出现一长串浮点尾数。
+  // ⚠️ 标签条也要从可用高度里扣掉（见 groupStripHeights）—— 它和行高一样是「固定开销」，
+  //    不扣的话行高会偏大，整图正好多出一条标签条的高度，底部工单被裁掉。
+  const fit = (gap) => {
+    const strips = groupStripHeights(manualRows, autoRows, gap)
+    return Math.round(((avail - strips.manual - strips.auto) / rows) * 100) / 100
+  }
 
   let groupGap = both ? GROUP_GAP_RANGE.max : 0
   let rowHeight = Math.min(ROW_HEIGHT_RANGE.max, fit(groupGap))
@@ -653,12 +698,21 @@ export function buildLayout(items, options) {
   const manualPack = packRows(manual, { fromBottom })
   const autoPack = packRows(auto, { fromBottom })
 
-  // AUTO 组永远在下面（y 更大）→ 贴近 x 轴
-  const manualTop = 0
+  // AUTO 组永远在下面（y 更大）→ 贴近 x 轴。
+  // 每个分组前面先让出一段「标签条」（画「MANUAL 手动 · N 条」那个胶囊用），
+  // 高度与 fitRowPlan 反推行高时用的是同一套（groupStripHeights）。
+  const strips = groupStripHeights(manualPack.rowCount, autoPack.rowCount, groupGap)
+  const manualStripTop = 0
+  const manualStripHeight = strips.manual
+  const manualTop = manualStripTop + manualStripHeight
   const manualHeight = manualPack.rowCount * rowHeight
-  const autoTop = manualPack.rowCount > 0 ? manualHeight + groupGap : 0
+  const autoStripTop = manualTop + manualHeight
+  const autoStripHeight = strips.auto
+  const autoTop = autoStripTop + autoStripHeight
   const autoHeight = autoPack.rowCount * rowHeight
   const totalHeight = Math.max(rowHeight, autoTop + autoHeight)
+  /** 标签条里垂直居中放标签 */
+  const chipTopOf = (stripTop, stripHeight) => stripTop + (stripHeight - CHIP_HEIGHT) / 2
 
   const span = domain.end - domain.start
   const toX = (ts) => ((ts - domain.start) / span) * plotWidth
@@ -708,12 +762,16 @@ export function buildLayout(items, options) {
   if (manualPack.rowCount > 0) {
     groups.push({
       key: 'manual',
-      label: '手动 / 其他',
+      // 用户要求：绿色那组的叫法从「手动 / 其他」改成「MANUAL 手动」（和气泡里的 mode 用词对齐）
+      label: 'MANUAL 手动',
       tone: 'manual',
       top: manualTop,
       height: manualHeight,
       rowCount: manualPack.rowCount,
       count: manual.length,
+      /** 分组标签（胶囊）的 y —— 贴在本分组**上方**的标签条里 */
+      chipTop: chipTopOf(manualStripTop, manualStripHeight),
+      // 分隔虚线只画在两组之间，手动组上方没有「上一组」，所以不画
       separatorTop: null
     })
   }
@@ -726,8 +784,9 @@ export function buildLayout(items, options) {
       height: autoHeight,
       rowCount: autoPack.rowCount,
       count: auto.length,
+      chipTop: chipTopOf(autoStripTop, autoStripHeight),
       // 两组都在时才画分隔带；只有 AUTO 时没必要
-      separatorTop: manualPack.rowCount > 0 ? autoTop - groupGap / 2 : null
+      separatorTop: manualPack.rowCount > 0 ? autoStripTop + autoStripHeight / 2 : null
     })
   }
 
@@ -785,6 +844,50 @@ export function buildLayout(items, options) {
       spanText: formatSpan(span)
     }
   }
+}
+
+/* --------------------------------------------------------- 柱体文字容量 */
+
+/** 矩形内的左右内边距 —— 与 `.og-bar` 的 `padding: 0 7px` 对齐 */
+export const BAR_LABEL_PAD_X = 7
+/** 窄矩形（`.og-bar.is-narrow`）会把左右内边距去掉 —— 必须和模板里的 `bar.width < 18` 一致 */
+export const BAR_NARROW_WIDTH = 18
+/** 文字两侧再留的余量：子像素渲染可能差零点几像素，宁可少显示一条 */
+export const BAR_LABEL_SAFE = 2
+
+/**
+ * 矩形里能放文字的宽度。
+ * 窄矩形走 `is-narrow`（`padding: 0`），所以内边距是 0 —— 这个分支必须和 CSS 一致，
+ * 否则窄矩形上会多算 14px，放不下的工单号照样被截成「…」。
+ */
+export function barTextCapacity(barWidth) {
+  const w = Number(barWidth)
+  if (!isFinite(w) || w <= 0) {
+    return 0
+  }
+  const pad = w < BAR_NARROW_WIDTH ? 0 : BAR_LABEL_PAD_X
+  return Math.max(0, w - pad * 2)
+}
+
+/**
+ * 柱体上的工单号能不能**完整**显示。
+ *
+ * 用户明确要求：**不能完全展示就不展示**。原来的做法是「宽 148 以上写全号、
+ * 52~148 写后四位、再窄不写」—— 后四位看着像另一个工单号，信息量反而更低，
+ * 而且 `text-overflow: ellipsis` 还会把长号截成「CHGU-20260909-0…」，
+ * 那种半截号比不写更容易误读。完整信息本来就在悬浮气泡里。
+ *
+ * 文字宽度由组件用 canvas 量出来（纯函数量不了字体），这里只管判定。
+ *
+ * @param {number} textWidth 文字的真实宽度（px）
+ * @param {number} barWidth 矩形宽度（px）
+ */
+export function canFitLabel(textWidth, barWidth) {
+  const t = Number(textWidth)
+  if (!isFinite(t) || t <= 0) {
+    return false
+  }
+  return t + BAR_LABEL_SAFE <= barTextCapacity(barWidth)
 }
 
 /* ------------------------------------------------------------- 格式化 */

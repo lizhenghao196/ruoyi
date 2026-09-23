@@ -17,7 +17,7 @@
       <div class="og__legend">
         <span class="og__legend-item">
           <i class="og__legend-dot is-manual" />
-          手动 / 其他 · {{ stats.manual }}
+          MANUAL 手动 · {{ stats.manual }}
         </span>
         <span class="og__legend-item">
           <i class="og__legend-dot is-auto" />
@@ -91,15 +91,25 @@
             :style="{ left: t.x + 'px' }"
           />
 
-          <!-- 分组分隔带（AUTO 组贴 x 轴，靠这条带和上面区分开） -->
+          <!-- 分组分隔带（虚线）：只在两组都在时画，位置是两组之间那条缝的中线 -->
           <div
             v-for="g in separators"
             :key="'sep-' + g.key"
             class="og__sep"
             :style="{ top: g.separatorTop + 'px' }"
+          />
+
+          <!-- 分组标签：每个分组**上方**一条「MANUAL 手动 · N 条」/「AUTO 自动 · N 条」。
+               y 由 ganttLayout 算好（chipTop）—— 组件不自己算，否则和行高反推对不上。
+               z-index 比矩形高，保证标签永远压得住底下的柱体。 -->
+          <span
+            v-for="g in chips"
+            :key="'chip-' + g.key"
+            class="og__sep-chip"
+            :style="{ top: g.chipTop + 'px' }"
           >
-            <span class="og__sep-chip">{{ g.label }} · {{ g.count }} 条</span>
-          </div>
+            {{ g.label }} · {{ g.count }} 条
+          </span>
 
           <!-- 「现在」竖线 -->
           <div v-if="nowX !== null" class="og__now" :style="{ left: nowX + 'px' }">
@@ -221,7 +231,8 @@ import {
   measureRowPlan,
   fitRowPlan,
   formatDateTimeShort,
-  formatDuration
+  formatDuration,
+  canFitLabel
 } from '../ganttLayout'
 
 /** 刻度格数上限（标签数 = 格数 + 1） */
@@ -317,6 +328,31 @@ const TIP_CLOSE_DELAY = 220
  */
 const TIP_KEEP_PAD = 10
 const EDGE = 8
+
+/* ------------------------------------------------------- 柱体文字量宽
+ * 柱体上的工单号「要么完整、要么不显示」（用户明确要求），所以必须知道文字的
+ * **真实宽度**，不能拿柱体宽度猜。
+ * 量法：canvas.measureText —— 纯计算，不碰 DOM。
+ *   为什么不用「塞一个隐藏节点量 offsetWidth」：柱体最多上百根，每根都要量一次，
+ *   每次「改文字 + 读宽度」都会强制同步重排，100 条就是 100 次重排，
+ *   打开弹窗时会明显卡一下。canvas 量宽是纯计算，且按文字缓存，一条只量一次。
+ * ------------------------------------------------------------------ */
+/** 与 .og-bar__text 的 CSS 保持一致（改那边记得改这里） */
+const LABEL_FONT_SIZE = 10
+const LABEL_FONT_WEIGHT = 500
+const LABEL_LETTER_SPACING = 0.2
+/**
+ * 还没挂载时（首帧渲染，`$el` 不存在）拿不到计算样式里的字体族，先用这个兜底。
+ * 它就是 assets/styles/index.scss 给 body 设的那一串，所以正常也是同一个字体；
+ * 首帧的结果本来就会被挂载后的重算覆盖（容器宽度从默认值变成实测值会触发重渲染）。
+ */
+const LABEL_FONT_FALLBACK =
+  'Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif'
+/**
+ * 量不出文字宽度时的兜底**每字宽度**（px）。
+ * 取 6px 是刻意偏大的：宁可少显示几条，也不能让工单号被截成半截 —— 那正是这次要修的表现。
+ */
+const LABEL_FALLBACK_CHAR_W = 6
 
 export default {
   name: 'OrderGantt',
@@ -454,12 +490,19 @@ export default {
     separators() {
       return this.groups.filter((g) => g.separatorTop !== null)
     },
+    /**
+     * 分组标签条：每个分组上方一条「MANUAL 手动 · N 条」/「AUTO 自动 · N 条」。
+     * 位置由 ganttLayout 算（chipTop），这里只过滤 —— 组件不自己算几何。
+     */
+    chips() {
+      return this.groups.filter((g) => g.chipTop !== null && g.chipTop !== undefined)
+    },
     statCards() {
       const s = this.stats
+      // 「占用行数」已按用户要求去掉（行数属于内部实现，页面上看着没意义）
       return [
         { key: 'total', label: '工单总数', value: s.total },
-        { key: 'span', label: '时间跨度', value: s.spanText },
-        { key: 'rows', label: '占用行数', value: s.rowCount }
+        { key: 'span', label: '时间跨度', value: s.spanText }
       ]
     },
     /**
@@ -568,6 +611,15 @@ export default {
       this.$nextTick(this.measure)
     }
   },
+  created() {
+    /** 文字宽度缓存：同一条工单号只量一次（工单号数量有限，Map 不会涨） */
+    this._textWidthCache = new Map()
+    /** canvas 量具，以及它当前使用的字体串（字体变了要重建并清缓存） */
+    this._labelCtx = null
+    this._labelFont = ''
+    /** 解析好的字体串，只算一次（getComputedStyle 不能在每次渲染里调上百次） */
+    this._labelFontReady = ''
+  },
   mounted() {
     this.$nextTick(() => {
       this.measure()
@@ -648,15 +700,94 @@ export default {
 
     /* ------------------------------ 渲染辅助 ------------------------------ */
 
-    /** 矩形太窄就不写字，中等宽度只写工单号后四位 */
+    /**
+     * 矩形上显示的文字 —— **只显示完整的工单号**。
+     *
+     * 用户要求：柱体宽度不够时**不显示**，而不是截断。所以这里没有「写后四位」的
+     * 中间档了（原来 52~148px 写后四位）：后四位和完整工单号看着像两个不同的东西，
+     * 而且 `text-overflow: ellipsis` 会把长号截成「CHGU-20260909-0…」，
+     * 半截号比不写更容易误读。完整信息在悬浮气泡里，鼠标一放就有。
+     *
+     * 判定 = 文字真实宽度（canvas 量）+ 矩形可用宽度（纯函数算），都在 canFitLabel 里。
+     */
     barLabel(bar) {
-      if (bar.width >= 148) {
-        return bar.orderId
+      const id = bar.orderId
+      if (!id) {
+        return ''
       }
-      if (bar.width >= 52) {
-        return bar.orderId.slice(-4)
+      return canFitLabel(this.textWidth(id), bar.width) ? id : ''
+    },
+    /**
+     * 量一段文字在**柱体字号**下的真实宽度（px）。
+     *
+     * 字体从根节点的 computed style 里取 —— `.og` 没写 font-family，取到的就是继承值，
+     * 所以量出来的和柱体上真正渲染的是同一个字体。字号 / 字重 / 字距按 .og-bar__text 的
+     * CSS 写死（canvas 的 font 只认这四个），字距 canvas 不认识，手动补。
+     *
+     * 结果按文字缓存：柱子有上百根但工单号只有几十个，量一次就够。
+     */
+    textWidth(text) {
+      const s = String(text)
+      // ⚠️ 必须先拿量具、再查缓存：挂载后字体族才会被真正解析出来，
+      //    而 labelCtx() 检测到字体变了会清空缓存。反过来的话，首帧用兜底字体量出来的宽度
+      //    会被一直复用下去（缓存命中就直接 return，永远走不到重建那一步）。
+      const ctx = this.labelCtx()
+      const cached = this._textWidthCache.get(s)
+      if (cached !== undefined) {
+        return cached
       }
-      return ''
+      let w = ctx ? ctx.measureText(s).width + LABEL_LETTER_SPACING * s.length : 0
+      if (!(w > 0)) {
+        // 量不出来（极端环境没有 canvas）：给个偏大的估算，宁可少显示也不截断
+        w = LABEL_FALLBACK_CHAR_W * s.length
+      }
+      this._textWidthCache.set(s, w)
+      return w
+    },
+    /**
+     * canvas 量具（懒建）。
+     *
+     * 首帧渲染时组件还没挂载（`$el` 不存在），只能先用兜底字体族；挂载后拿到真实字体族
+     * 会重建量具并清掉缓存 —— 不清的话整张图的「放不放得下」都是按兜底字体算的。
+     * 首帧那次算出来的标签本来就会被覆盖：容器宽度要从默认值变成实测值，必然重渲染一次。
+     */
+    labelCtx() {
+      const font = this.labelFont()
+      if (this._labelFont === font) {
+        return this._labelCtx
+      }
+      this._labelFont = font
+      this._labelCtx = null
+      this._textWidthCache = new Map()
+      if (typeof document === 'undefined' || !document.createElement) {
+        return null
+      }
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext ? canvas.getContext('2d') : null
+      if (ctx) {
+        ctx.font = font
+        this._labelCtx = ctx
+      }
+      return this._labelCtx
+    },
+    /**
+     * 柱体文字用的字体串。
+     *
+     * ⚠️ 解析出来的结果**只算一次就缓存**（`_labelFontReady`）：这个方法在每次渲染里会被
+     *    调用上百次（每根柱子都要量），每次都 `getComputedStyle` 会触发上百次样式重算。
+     *    字体族在本项目里是固定的（index.scss 给 body 设的那一串），不做运行时跟换。
+     */
+    labelFont() {
+      if (!this._labelFontReady) {
+        const el = this.$el
+        const fam = el && window.getComputedStyle ? window.getComputedStyle(el).fontFamily : ''
+        if (!fam) {
+          // 还没挂载 / 取不到计算样式：先用兜底，**不写缓存**，挂载后自然会重算
+          return LABEL_FONT_FALLBACK
+        }
+        this._labelFontReady = LABEL_FONT_WEIGHT + ' ' + LABEL_FONT_SIZE + 'px ' + fam
+      }
+      return this._labelFontReady
     },
     /**
      * 单元格显示值。
@@ -838,7 +969,7 @@ export default {
   --og-text-2: #5b6b82;
   --og-text-3: #97a3b6;
 
-  /* ---- 分组配色：**AUTO = 蓝，手动 / 其他 = 绿** ----
+  /* ---- 分组配色：**AUTO = 蓝，MANUAL 手动 = 绿** ----
      两组都是「浅 → 中」的渐变，深端只到 400 档（原来用了 600 档，观感偏浓）。
      ⚠️ 底色浅到这个程度，**柱体上的白字是读不出来的**：
         白 on #a7f3d0 只有 1.44:1、白 on #34d399 只有 1.92:1（连 3:1 都不到）。
@@ -1122,10 +1253,14 @@ export default {
   border-top: 1px dashed var(--og-line-strong);
 }
 
+/* 分组标签（胶囊）：现在是 .og__plot 的直接子元素，y 由 ganttLayout 的 chipTop 内联给出，
+   所以这里不再写 top。z-index 比矩形（5）高，保证标签永远压得住底下的柱体。 */
 .og__sep-chip {
   position: absolute;
   left: 12px;
-  top: -9px;
+  z-index: 6;
+  /* 必须和 ganttLayout.js 的 CHIP_HEIGHT 一致（全局 border-box，18 = 含边框的总高），
+     否则标签会被预留的标签条切掉。 */
   height: 18px;
   padding: 0 9px;
   border: 1px solid var(--og-line-strong);
