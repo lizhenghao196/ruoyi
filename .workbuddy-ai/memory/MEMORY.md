@@ -24,6 +24,7 @@
 - **动手前必读**（三个 REF）：轮询必须静默 / 横滚在每条流内部 / 页头进度算法 / 哑组件契约 / `type="expand"` 不能加 `fixed`；execPlanList / execPageSimple 与 execPage **代码零共享**，别互相 import。
 - 简版画布自动滚动：**只认输入事件（wheel/touchmove/滚动键/mousedown 判滚动条），画布刻意不监听 `scroll`** —— 按 scroll 记会被轮询刷新的程序化滚动误判成「用户刚滚过」，自动滚动永远冻着且不报错。目标节点 `bad > run`；用户滚动后 20s 让位；`anyDialogOpen` 里新增弹窗要记得加。
 - 简版右栏「文档信息」**默认不展示**（流独占整宽）；用户在查看明细表里**双击工单**才展出（工单号 + 多文档 tab + iframe），左右变 6:4。文档地址 = `DOC_VIEW_BASE + file_name`，**不是**接口返回里的 `url` 字段；⚠️ `el-table-column` 的 `class-name` 会同时落到表头 `th` 上。
+- ⚠️ **文档 iframe 是跨源的**（`10.2.64.36:8121`），父页面**碰不到里面**（`contentWindow`/`contentDocument` 被同源策略挡）⇒ 横向滚动只能靠「把 iframe 撑得比容器宽、让父容器出横条」：`.esp-doc__frame { overflow: auto }`（**绝不能**改回 `hidden`）+ `iframe { min-width: 1440px }`。**纵向滚动仍在 iframe 内部**，别想着挪出来。
 
 ## 工单甘特图（orderGantt）
 - ⚠️ **矩形宽度只认 `total_cost`**：结束时间 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求），判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`。**改这个页面前读 `REF-order-gantt.md`**（硬规则 7 条、气泡可达性、分组标签条 chip、柱体文字「完整或没有」、11 个校验脚本）。

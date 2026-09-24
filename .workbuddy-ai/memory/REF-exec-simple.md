@@ -180,6 +180,36 @@ mysql 客户端 `/c/Program Files/MySQL/MySQL Server 8.0/bin/mysql`。
 - ⚠️ 跨域 iframe 被 `X-Frame-Options` 拦时 `load` 事件**照样触发** ⇒ 前端**无法**区分
   「加载成功」和「被拦」。兜底出口是工具栏上常驻的「新窗口打开」。
 
+**横向滚动（2026-09-24 第三轮，用户反馈「内容比视口宽、看不到右边、也没法横拉」）**
+
+根因：`.esp-doc__frame` 原来是 `overflow: hidden` + `iframe { width: 100% }` ——
+iframe 被压到容器宽（实测 609px），里面的宽表格要么被挤成竖条、要么被文档自己的
+`overflow-x` 裁掉，而**父页面这一层根本没有溢出**，所以没有横条可拉。
+
+⚠️ **为什么不能直接管 iframe 里面**：文档是**跨源**内网页（`10.2.64.36:8121`），
+`contentDocument` / `contentWindow` 被同源策略挡死 ⇒ 读不出内容真实宽度、注入不了
+`overflow-x: auto`、也没法把滚轮按比例映射成横向滚动（事件在 iframe 内部就消化掉，不冒泡）。
+**唯一纯前端可行的做法是撑大 iframe 的视口，让溢出出现在父容器上。**
+
+落地（都在 `.esp-doc__frame` 里）：
+
+| 改了什么 | 值 | 为什么 |
+| --- | --- | --- |
+| 容器溢出 | `overflow: hidden` → **`auto`** | 横向滚动条的**唯一来源**，改回 hidden 就前功尽弃 |
+| 滚动条外观 | `::-webkit-scrollbar` 8px + `#cbd5e1` 滑块 | 抄左栏 `.esp-flow__canvas` 那一套，观感统一 |
+| iframe 宽 | `width: 100%; min-width: 1440px` | 撑到桌面设计宽：① 内文档按 1440 布局，宽表格不再被挤；② `scrollWidth > clientWidth` ⇒ 父容器出横条 |
+| iframe 高 | `height: 100%`（不变） | ⚠️ 百分比高度解析的是**扣掉横条后的内容盒**，所以横条出现后 iframe 不会多出 8px 再顶出一条纵向滚动条 |
+| 归零 | `resetDocScroll()` 读 `$refs.docFrame.scrollLeft` | 切 tab 后横向回到最左（旧文档的横拉位置对新文档没意义；遮罩是跟内容滚的，只盖 `scrollLeft = 0` 那一段） |
+
+- 模板上滚动容器挂了 `ref="docFrame"`；`resetDocFrame()` 里调 `resetDocScroll()`。
+- ⚠️ **纵向滚动条仍然在 iframe 内部**（文档自身比视口高，浏览器默认就滚）——
+  这个不用动，也没法挪到父容器（要挪就得知道内容高度，跨源读不到）。
+  所以最终形态是「**横向在父容器、纵向在 iframe 内**」，看着不完全对称，但这是跨源下的极限。
+- 要「像纵向那样顺手」，只有两条路，**都要后端/代理配合**：
+  ① 加 `devServer.proxy` + 后端把 `DOC_VIEW_BASE` 换成相对路径 ⇒ 同源后父页面才能通吃 iframe 内部；
+  ② 让生成文档的模板自己给表格套一层 `overflow-x: auto`（滚动条落在文档内部，治本）。
+- 若某些文档在 1440px 下仍被裁，**只需调 `min-width` 这一个数**。
+
 **删掉的东西**（别再捡回来）：URL 上的 `?docUrl=` 调试后门、`.esp-doc__empty*` 占位空壳、
 `.esp-doc.is-filled` 修饰类（现在有文档才渲染，不需要「有内容」这个状态位）、
 文档区头部的**「刷新」按钮**（2026-09-24 用户要求换成 `×` 收起）。
@@ -255,6 +285,14 @@ E 与横向版对照（纵向 `H>W` vs 横向 `W>H`）/ F mock 链路 + 路由�
   `.esp-doc` 是 `4 1 0` / `min-width: 0` / 无 `width`；旧形态（`.esp-doc__empty*`、`.is-filled`）
   **必须已删干净**；新结构 `__head` / `__order` / `__order-text` / `__tabs` / `__tab.is-active` /
   `__frame` / `__frame-mask` / `__close` 齐全。
+  ⚠️ `__frame` 一组单列（第三轮加的）：`overflow: auto` 且**不能**再有 `overflow: hidden`、
+  有 `::-webkit-scrollbar` / `-thumb`（`#cbd5e1`）、模板挂 `ref="docFrame"`、
+  有 `resetDocScroll` 且改的是 `$refs.docFrame.scrollLeft`、代码里**不出现** `contentWindow`/`contentDocument`。
+  ⚠️ **sass 会把嵌套规则拍平成同级选择器** —— `.esp-doc__frame iframe` 和
+  `.esp-doc__frame::-webkit-scrollbar` 都不在 `.esp-doc__frame { }` 那个块里，
+  必须各自 `ruleBlock(noComment, '.esp-doc__frame iframe')` 取，搜 `frameBlk` 会假红。
+  ⚠️ 判「代码里不读 iframe 内部」前**必须先剥注释**：那几处「跨源拿不到 contentWindow」的
+  说明本身就写在注释里，直接搜必然假红。
 - **D 源码防回归**：`docUrl` 只认 `docFiles`（不许再读 `$route.query`）、没二次 decode、
   没碰返回里的 `url`；头部**不许再有** `@click="resetDocFrame"`（刷新按钮已删）、
   必须有 `esp-doc__close` + `@click="resetDocArea"`；双击链路的每一环（模板接线 /
@@ -266,13 +304,20 @@ E 与横向版对照（纵向 `H>W` vs 横向 `W>H`）/ F mock 链路 + 路由�
 
 **浏览器侧**：`esp_doc_shot.mjs`（playwright + 本机 Chrome，见技能 §17 的配方）。
 node 断言只能证明「规则存在」，**证不了「流真的占满一屏」「左右真的是 6:4」** —— 这几条必须量像素。
-七段：A 默认态（`.esp-flow` 宽 == `.esp-split` 宽、DOM 里没有 `.esp-doc`、画布有节点）/
+八段：A 默认态（`.esp-flow` 宽 == `.esp-split` 宽、DOM 里没有 `.esp-doc`、画布有节点）/
 B 调 `onDetailOrderDblclick` 后（流 915 / 文档 631 = 59.2%、gap 14px、iframe 铺满）/
 C **多文档 tab 切换**（mock 现在每个工单都给 2~3 个，直接断言「切到第 2 / 第 3 个 tab 后 iframe 地址都变」）/
 D **头部按钮与「收起」**（只有 2 个按钮、没有「刷新」、点 `×` 后 `.esp-doc` 从 DOM 消失且流恢复 1560px 满宽）/
 E **真实 UI 双击链路**（dblclick 节点 → 明细弹窗 → dblclick 表格里的工单单元格 → 文档区出现）/
 F **工单列样式**（`getComputedStyle` 量出 `rgb(43,108,255)` / `font-weight: 500` / td 是 pointer 而
-**th 是 auto**）/ G 控制台无 JS 报错（过滤 `[WDS]` / iframe 跨域噪音）。
+**th 是 auto**）/
+G **横向滚动**（`overflowX === 'auto'`、iframe 实测 1440px、`scrollWidth 1440 > clientWidth 609`、
+`scrollLeft = 400` 真能读回 400、`resetDocScroll()` 归零、**视口自身 `scrollHeight == clientHeight`**
+即没被横条顶出第二条纵向滚动条；再 `setViewportSize(2200)` 复查横条仍在）/
+H 控制台无 JS 报错（过滤 `[WDS]` / iframe 跨域噪音）。
+
+⚠️ G 段在**网外也有效**：内网文档加载不出来，但 iframe 元素照样吃 `min-width`，
+横条照样出 —— 所以这段不依赖能不能看到文档内容。
 
 ⚠️ **D 段踩的坑：`class-name` 会同时加到表头 `th` 上**，
 `.add-dialog .add-order-cell` 第一个命中的是表头那个「工单」格子（`cellTag: "TH"`），

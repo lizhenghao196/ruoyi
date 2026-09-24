@@ -431,7 +431,13 @@
             </button>
           </div>
 
-          <div class="esp-doc__frame">
+          <!--
+            文档视口 = 横向滚动容器。
+            ⚠️ 文档是**跨源**内网地址，父页面动不了 iframe 内部（同源策略挡住 contentDocument /
+               contentWindow），所以「横向看全」只能靠这里：iframe 被撑到比容器宽，
+               父容器出现横向滚动条，用户横拉即可。
+          -->
+          <div ref="docFrame" class="esp-doc__frame">
             <!-- key 一换就重建 iframe：src 没变时浏览器不会重新请求，刷新会变成空操作 -->
             <iframe
               :key="docFrameKey"
@@ -1341,6 +1347,24 @@ export default {
       this.docFrameLoaded = false;
       this.docFrameKey += 1;
       this.startDocFrameTimer();
+      // 换文档后把横向位置拉回最左：上一份文档横拉到的位置对这份没有意义，
+      // 而且「加载中」遮罩是跟着内容滚的（只盖住 scrollLeft = 0 那一段）。
+      this.resetDocScroll();
+    },
+
+    /**
+     * 文档视口的横向滚动位置归零。
+     *
+     * ⚠️ 视口比容器宽（见 .esp-doc__frame 注释），滚的是**父容器**，不是 iframe 内部 ——
+     *    所以这里改的是 ref 上的 scrollLeft，不是 contentWindow.scrollTo（跨源根本拿不到）。
+     */
+    resetDocScroll() {
+      const el = this.$refs.docFrame;
+      if (!el) {
+        return;
+      }
+      el.scrollLeft = 0;
+      el.scrollTop = 0;
     },
     // 兜底出口：iframe 嵌不出来（多半是被 X-Frame-Options 拦了）时，让用户能直接看原文
     openDocInNewTab() {
@@ -3246,17 +3270,60 @@ $tone-colors: (
     }
   }
 
-  /* 文档视口：占满头部与 tab 以下的全部高度，随右栏伸缩 */
+  /*
+    文档视口：占满头部与 tab 以下的全部高度，随右栏伸缩。
+
+    ⚠️ **横向滚动条靠这里出**（2026-09-24 用户反馈「内容比视口宽时看不到右边、也没法横拉」）：
+       文档是**跨源**内网页（10.2.64.36:8121），父页面被同源策略挡着，
+       contentDocument / contentWindow 都拿不到 —— 既读不出内容真实宽度，也没法给里面注入
+       overflow-x: auto 或把滚轮按比例映射成横向滚动（事件在 iframe 内部就消化掉了，不冒泡）。
+       唯一纯前端能做的是：**把 iframe 的视口撑得比容器宽**。
+       这样两头都有收益 ——
+         ① iframe 内文档按 1440px 布局，宽表格不再被挤成一条条竖线；
+         ② 父容器 scrollWidth > clientWidth，横向滚动条出现在父页面上，用户可以横拉。
+       ⚠️ 纵向滚动条仍然在 iframe 内部（文档自身比视口高，浏览器默认就滚），这个不用动。
+       要「像纵向那样顺手」，得让文档与页面同源（加 devServer 代理 + 后端返回相对路径），
+       或者让生成文档的模板自己给表格套一层 overflow-x: auto —— 两者都要后端配合。
+  */
   &__frame {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
     border-radius: 8px;
-    overflow: hidden;
+    /* 原 overflow: hidden —— 溢出被藏掉，父容器层面根本不会有横向滚动条 */
+    overflow: auto;
+
+    /* 细滚动条：和左栏画布 .esp-flow__canvas 保持同一套观感 */
+    &::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background: #cbd5e1;
+      background-clip: content-box;
+
+      &:hover {
+        background: #94a3b8;
+        background-clip: content-box;
+      }
+    }
 
     iframe {
       display: block;
+      /* 撑满容器；但**不**低于桌面设计宽度 -> 容器窄于它时出横向滚动条 */
       width: 100%;
+      min-width: 1440px;
+      /*
+        height: 100% 解析的是容器的**内容盒**高度（已扣掉横向滚动条占的 8px），
+        所以横条出现后 iframe 不会多出 8px 把容器再顶出一条纵向滚动条。
+      */
       height: 100%;
       border: 0;
       background: #fff;
