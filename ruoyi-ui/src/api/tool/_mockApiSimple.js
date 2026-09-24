@@ -598,6 +598,65 @@ function isFuncFailed(atom, funcName) {
   )
 }
 
+/* ------------------------- 工单关联文档（演示数据） ------------------------- */
+
+/**
+ * 查询工单关联的自动发布文档。
+ *
+ * 真实返回的文件名形如 `DASP-CHG-20260916-0003_1486122233.html`
+ * （`<工单号>_<秒级时间戳>.html`），这里按同一规则编。
+ *
+ * ⚠️ 文档数按工单号做**稳定**分桶（2~3 个，见 buildDocFiles）：
+ *    ① 每个工单都 ≥ 2 个 —— 演示 tab 切换必须有多个文档才看得到；
+ *    ② 用随机数的话，同一个工单双击两次 tab 数量会变，看着像 bug。
+ */
+export function queryAutoRate({ orderId } = {}) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const files = buildDocFiles(orderId)
+      resolve({
+        code: 0,
+        msg: '成功',
+        data: {
+          order_id: orderId,
+          total_files: files.length,
+          files,
+        },
+      })
+    }, 420)
+  })
+}
+
+/**
+ * 按工单号稳定生成 2~3 个演示文档。
+ *
+ * ⚠️ 故意**不**做成「1 个」：一个工单只给一个文档时 tab 条只有一项，
+ *    看不出切换效果（用户明确要求「搞多个文档我看看 tab 的切换效果」）。
+ *    真实后端确实是「有多少给多少」，这里是为了演示而放大。
+ */
+function buildDocFiles(orderId) {
+  const id = String(orderId || 'DEMO-00000000-0000')
+  let h = 0
+  for (let i = 0; i < id.length; i++) {
+    h = (h * 31 + id.charCodeAt(i)) >>> 0
+  }
+  const count = 2 + (h % 2)
+  const base = 1709534510 + (h % 90000)
+  const files = []
+  for (let i = 0; i < count; i++) {
+    const created = base + i * 137
+    const file_name = `${id}_${created}.html`
+    files.push({
+      created_time: created,
+      file_name,
+      file_path: `/app/data/aspect/release/auto_env/release/auto_cmp/screenshot/rendered/docs/${file_name}`,
+      file_size: 99506 + i * 2048,
+      url: `/api/v1/doc/view/${file_name}`,
+    })
+  }
+  return files
+}
+
 /** 在静态 mock 数据里按 aniInstanceNodeId 找节点 */
 function findNodeById(aniInstanceNodeId) {
   const planIds = Object.keys(executeResMap)

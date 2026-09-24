@@ -56,7 +56,8 @@ mysql 客户端 `/c/Program Files/MySQL/MySQL Server 8.0/bin/mysql`。
 - `.esp-picker` 两行 `.esp-picker__row`：第一行「环境」、第二行「流」，都是 `.esp-chip` 小长方形按钮（选中态 `is-active`）。
 - 主体 `.esp__body` → `.esp-split` 左右两栏，**按 6 : 4 分宽（流 6 成 / 文档 4 成）**：
   - 左 `.esp-flow`（`flex:6 1 0; min-width:0`）= 流头（标题/状态胶囊/meta/暂停·取消·恢复）+ `.esp-flow__canvas` 画 `<flow-graph>`。
-  - 右 `.esp-doc`（`flex:4 1 0; min-width:0`）= 虚线框 + `documentation` 图标占位（**将来放文档信息**）。
+  - 右 `.esp-doc`（`flex:4 1 0; min-width:0`）= **文档信息**（2026-09-24 接入，见 §3.7）。
+    无 `docUrl` 时退回虚线框 + `documentation` 图标的占位空壳。
   - ⚠️ 比例必须用 **`flex: 6 1 0` / `flex: 4 1 0`（basis 归零）**，不能写 `width: 60% / 40%` ——
     `.esp-split` 有 14px 的 gap，百分比会变成 60% + 40% + 14px > 100% 把容器撑破。
     basis 归零后剩余空间按 grow 分配，gap 自动被扣掉，比例是精确的 6:4。
@@ -135,6 +136,58 @@ mysql 客户端 `/c/Program Files/MySQL/MySQL Server 8.0/bin/mysql`。
 - 坐标换算：`.flow-graph` 顶边要用 `getBoundingClientRect` 差值换算到画布滚动坐标系，
   **不能拿 `offsetTop`**（画布有 `padding: 10px 4px 16px`，且 offsetParent 不确定）。
 
+### 3.7 右栏文档信息 = 双击工单查文档 + iframe 嵌后端 HTML（2026-09-24 两次迭代）
+
+**默认不展示**：页面一进来只有左栏，流**独占整宽**（`.esp-flow { flex: 1 1 0 }`）。
+只有用户在「查看明细」表格里**双击工单**、接口真的返回了文档，右栏才出现 ——
+`.esp-split` 带上 `is-doc`，`.esp-split.is-doc .esp-flow { flex: 6 1 0 }` + `.esp-doc { flex: 4 1 0 }`。
+（`flex: 1 1 0` 的默认态 + `is-doc` 覆盖写在样式里，**不是**改 `.esp-doc` 的基座 —— 见下。）
+
+链路（用户指定的顺序）：双击工单 → `POST /python/api/cicd/query_auto_rate {order_id}` →
+拿到 `data.files[]` → **自动关掉查看明细弹窗** → 右栏展出。
+
+| 位置 | 文件 | 要点 |
+| --- | --- | --- |
+| 双击源 | `AtomDetailDialog.vue` | `@row-dblclick` → 只认 `column.property === 'aaiOrderId'` **且非** `isDomainSwitch`（这个 prop 被「指令描述」列共用）；`$emit('order-dblclick', { orderId, row })`，**弹窗不自己调接口** |
+| 接线 | `index.vue` 模板 | `@order-dblclick="onDetailOrderDblclick"` |
+| 请求 | `onDetailOrderDblclick` | `queryAutoRate({ orderId })` → `pickPayload(res)` → `Array.isArray(data.files)`；空数组**不关弹窗**、只 `msgWarning`；`docLoading` 挡重复双击 |
+| 接口 | `api/tool/execPageSimple.js` | `POST /python/api/cicd/query_auto_rate`，入参 `order_id`（**下划线**）；成功码 **0** |
+| mock | `_mockApiSimple.js` 的 `queryAutoRate` | 按工单号**稳定**分桶，**每个工单都给 2~3 个**（`2 + h % 2`）—— 演示 tab 必须有多个文档才看得出切换；用随机数会让 tab 数量来回跳 |
+
+- `files` 是**数组** → 用 tab 切换，`docUrl = DOC_VIEW_BASE + files[docActiveIndex].file_name`。
+- ⚠️ `DOC_VIEW_BASE = 'http://10.2.64.36:8121/api/cicd/doc/view/'`（内网，网外看不到）。
+  **不要**改用返回里的 `files[].url`（那是 `/api/v1/doc/view/...`，另一条路由）。
+  `docUrl` **不要**再 `decodeURIComponent`。
+- tab 文案去掉「工单号_」前缀（工单号在头部单独显示过了），只留时间戳 + 扩展名，多个文档才分得清；
+  前缀对不上就原样显示全名（`docTabLabel`）。只有一个文档时 tab 条**照样保留**（用户要求）。
+- **头部按钮只有两个**：`新窗口打开` + `×`（收起）。⚠️ 2026-09-24 用户明确要求
+  **删掉「刷新」**、加上 `×` —— 别再顺手把刷新加回来。`×` 调 `resetDocArea()`
+  （清 `docFiles` → `docVisible` 变假 → 整栏消失、左栏恢复独占整宽），带 `title="收起文档区"`。
+  ⚠️ `resetDocFrame()` **没有 UI 入口了**，但**不能删**：它是 `watch.docUrl` 的落点
+  （首次展示 / 切 tab 都要靠它重建 iframe 并重盖遮罩）。
+- **「工单」列的可点样式**：值用 `<p class="add-cell is-order">` 渲染（蓝色 `#2b6cff` + 字重 500 +
+  hover 深蓝下划线），外面套 `el-tooltip content="双击查看该工单关联的文档"` ——
+  「双击表格单元格」不是能被猜到的交互，必须显式提示。
+  ⚠️ 因为用了自定义 tooltip，这一列**不能**再挂 `show-overflow-tooltip`（两者会打架）。
+  ⚠️ 工单号为空时渲染普通 `add-cell` 的「—」，**不给** `is-order`（灰色的「—」看着也能点是误导）。
+- ⚠️ **`el-table-column` 的 `class-name` 会同时加到表头的 `th` 上** —— 给「工单」列加的
+  `add-order-cell` 在样式里必须限定成 `td.add-order-cell`，否则表头也显示手型光标（表头不能双击）。
+- 遮罩 / 刷新沿用老版：`DOC_FRAME_TIMEOUT_MS = 8000` 只用来**无条件收遮罩**，**不是**被拦的判据；
+  切 tab 走 `resetDocFrame()`（`docFrameKey += 1`），由 `watch.docUrl` 统一触发；
+  `beforeDestroy` 清 `docFrameTimer`。
+- `rawIds` watcher 里调 `resetDocArea()`：同一标签页再进一次 = 换了另一批计划，
+  右栏那块属于上一个工单的文档要收起来。
+- ⚠️ 跨域 iframe 被 `X-Frame-Options` 拦时 `load` 事件**照样触发** ⇒ 前端**无法**区分
+  「加载成功」和「被拦」。兜底出口是工具栏上常驻的「新窗口打开」。
+
+**删掉的东西**（别再捡回来）：URL 上的 `?docUrl=` 调试后门、`.esp-doc__empty*` 占位空壳、
+`.esp-doc.is-filled` 修饰类（现在有文档才渲染，不需要「有内容」这个状态位）、
+文档区头部的**「刷新」按钮**（2026-09-24 用户要求换成 `×` 收起）。
+
+⚠️ 后端 Flask 把渲染好的 HTML 落在 `rendered_docs/`，由 `cicd_bp` 的 `/doc/view/<filename>`
+用 `send_file(file_path, mimetype='text/html')` 发出来 —— 没传 `as_attachment` / `download_name`
+⇒ 没有 `Content-Disposition: attachment` ⇒ 浏览器原地渲染，iframe 同样渲染。
+
 ## 4. 两个踩过的坑
 
 ### 4.1 动态 import 漏改（真 bug，2026-09-22 已修）
@@ -171,11 +224,62 @@ cd "C:/Users/lenovo/AppData/Local/Temp" && \
 
 六段：A SFC 编译（10 个）/ B JS 语法（14 个）/ C 零共享扫描 / D 纵向几何（真实数据 21 条流、210 节点、53 并行组）/
 E 与横向版对照（纵向 `H>W` vs 横向 `W>H`）/ F mock 链路 + 路由菜单 + expand 无 fixed /
-**H 左右分栏 6:4（编译 SCSS 产物后抠 `.esp-flow` / `.esp-doc` 规则体断言 flex）** /
+**H 主体分栏（2026-09-24 改版：默认 `.esp-flow` 是 `flex: 1 1 0` 独占整宽，
+「有文档」的 6:4 改成断言 `.esp-split.is-doc .esp-flow` + `.esp-doc`，两条一起换算比例）** /
 **I 环境圆点汇总 + 画布自动滚动（2026-09-23 新增，51 条断言：`aggregateTone` 行为、真实数据汇总、
 圆点取 `env.tone`、20s 让位、只认输入事件不认 scroll、弹窗抑制、四档优先级且与 `AGG_TONE_PRIORITY` 交叉一致、
 `anyDialogOpen` 覆盖 6 个弹窗）**。
 **动简版两页任一文件必跑**，期望 `FAILURES: 0`。
 
+⚠️ **A / B 两段的语法检查已从 `node --check` 换成 acorn 进程内解析**：受限环境里
+`execFileSync(process.execPath, ['--check', tmp])` 会抛 `spawnSync ... EBUSY`，
+**表现成「所有文件都语法错误」**（27 条假红），看着像代码全崩了。
+`require('acorn')` 是 webpack 自带依赖，进程内解析没这个坑。
+
 ⚠️ 真实数据里有 1 条**空流**（节点尚未生成）：`layoutFlow([], [])` 返回全 0 空布局，
 页面显示「编排实例已创建，节点尚未生成」占位 —— 断言要跳过它，别当成几何 bug。
+
+### 5.1 右栏文档信息的专用校验（2026-09-24 重写）
+
+**node 侧**：`esp_doc_verify.mjs`（`C:/Users/lenovo/AppData/Local/Temp/`，带解析钩子跑），
+四段，**动右栏文档那块必跑**：
+
+- **A 模板两态渲染**（`compileToFunctions` 直接调 render 拿 VNode，不需要 DOM）：
+  `docVisible: false` → 整块不渲染（无 `.esp-doc` / iframe / 按钮）；
+  `true` → 工单号文本、N 个 tab（第 0 个带 `is-active`）、iframe 的 `src`/`key`/`load`、遮罩。
+- **B 页面实例**：`docVisible` / `docUrl` 初值、`onDetailOrderDblclick` 真跑一遍 mock 接口
+  （断言 `docFiles` 有值 + `closeDetail` 被调 + 弹窗关了）、`selectDoc` 边界、`docTabLabel` 去前缀、
+  `resetDocFrame` / `onDocFrameLoad` / 8.2s 兜底、`openDocInNewTab`、无文档时全空操作、
+  `beforeDestroy` 清定时器。
+- **C SCSS 产物**：`.esp-flow` 默认 `flex: 1 1 0`、`.esp-split.is-doc .esp-flow` 是 `6 1 0`、
+  `.esp-doc` 是 `4 1 0` / `min-width: 0` / 无 `width`；旧形态（`.esp-doc__empty*`、`.is-filled`）
+  **必须已删干净**；新结构 `__head` / `__order` / `__order-text` / `__tabs` / `__tab.is-active` /
+  `__frame` / `__frame-mask` / `__close` 齐全。
+- **D 源码防回归**：`docUrl` 只认 `docFiles`（不许再读 `$route.query`）、没二次 decode、
+  没碰返回里的 `url`；头部**不许再有** `@click="resetDocFrame"`（刷新按钮已删）、
+  必须有 `esp-doc__close` + `@click="resetDocArea"`；双击链路的每一环（模板接线 /
+  `queryAutoRate({orderId})` / `pickPayload` / `Array.isArray(data.files)` / `closeDetail()` /
+  没判 `code === 200`）；弹窗侧「按 `column.property` 判列、排除 `isDomainSwitch`、只 emit 不请求、
+  工单列用 `add-cell is-order` + tooltip、**不再挂** `show-overflow-tooltip`、
+  `.add-cell.is-order` 是蓝色 + hover 下划线」；接口层路径 / method / 入参名 / mock 分支；
+  mock 的 `buildDocFiles` 下限是 2。
+
+**浏览器侧**：`esp_doc_shot.mjs`（playwright + 本机 Chrome，见技能 §17 的配方）。
+node 断言只能证明「规则存在」，**证不了「流真的占满一屏」「左右真的是 6:4」** —— 这几条必须量像素。
+七段：A 默认态（`.esp-flow` 宽 == `.esp-split` 宽、DOM 里没有 `.esp-doc`、画布有节点）/
+B 调 `onDetailOrderDblclick` 后（流 915 / 文档 631 = 59.2%、gap 14px、iframe 铺满）/
+C **多文档 tab 切换**（mock 现在每个工单都给 2~3 个，直接断言「切到第 2 / 第 3 个 tab 后 iframe 地址都变」）/
+D **头部按钮与「收起」**（只有 2 个按钮、没有「刷新」、点 `×` 后 `.esp-doc` 从 DOM 消失且流恢复 1560px 满宽）/
+E **真实 UI 双击链路**（dblclick 节点 → 明细弹窗 → dblclick 表格里的工单单元格 → 文档区出现）/
+F **工单列样式**（`getComputedStyle` 量出 `rgb(43,108,255)` / `font-weight: 500` / td 是 pointer 而
+**th 是 auto**）/ G 控制台无 JS 报错（过滤 `[WDS]` / iframe 跨域噪音）。
+
+⚠️ **D 段踩的坑：`class-name` 会同时加到表头 `th` 上**，
+`.add-dialog .add-order-cell` 第一个命中的是表头那个「工单」格子（`cellTag: "TH"`），
+双击它当然什么都不发生 —— 看着像功能没做，其实是**校验脚本的选择器写宽了**。
+必须写成 `.el-table__body td.add-order-cell`。
+
+⚠️ 这个脚本踩过两个**脚本自己**的坑（不是页面 bug），已在技能里补文档：
+① 页面里 `window.open` → node 必须桩 `globalThis.window`；
+② 全局 `Vue.mixin` 会作用到每一个实例，**不能靠「第二个实例再传 beforeCreate」覆盖**
+（无效），要让 mixin 读一个外层可切换变量。

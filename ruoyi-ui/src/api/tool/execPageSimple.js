@@ -697,6 +697,50 @@ export function funcSkip(data) {
   });
 }
 
+/* ------------------------- 工单关联文档（自动发布渲染出的 HTML） ------------------------- */
+
+/**
+ * 查询工单关联的自动发布文档
+ *
+ * POST /python/api/cicd/query_auto_rate
+ * 入参：{ order_id } —— **下划线命名**（python 那批接口的约定），值取原子的 `aaiOrderId`
+ *       （也就是「查看明细」表格里「工单」列的那个工单号）。
+ *
+ * 返回（真实示例）：
+ * {
+ *   code: 0,
+ *   msg: '成功',
+ *   data: {
+ *     order_id: 'DASP-CHG-20260916-0003',
+ *     total_files: 1,
+ *     files: [
+ *       {
+ *         created_time: 1709534510,          // 秒级时间戳
+ *         file_name:    'DASP-CHG-20260916-0003_1486122233.html',
+ *         file_path:    '/app/data/aspect/release/auto_env/.../rendered/docs/<file_name>',
+ *         file_size:    99506,
+ *         url:          '/api/v1/doc/view/<file_name>',
+ *       },
+ *     ],
+ *   },
+ * }
+ *
+ * ⚠️ **`files` 是数组** —— 一个工单可能关联多个文档，页面上用 tab 切换（别只取第 0 个）。
+ * ⚠️ 成功码是 **0**（python `func/*`、`cicd/*` 那批的约定），**别判 `code === 200`**。
+ * ⚠️ 页面上真正拿去嵌 iframe 的地址**不是**返回里的 `url`（那是另一条路由 /api/v1/...），
+ *    而是 `DOC_VIEW_BASE + file_name`（见 index.vue 顶部的 `DOC_VIEW_BASE`）。
+ */
+export function queryAutoRate({ orderId }) {
+  if (USE_MOCK) {
+    return mockApi("queryAutoRate", { orderId });
+  }
+  return request({
+    url: "/python/api/cicd/query_auto_rate",
+    method: "post",
+    data: { order_id: orderId },
+  });
+}
+
 export default {
   getPlanList,
   pickExecPlanIds,
@@ -718,6 +762,7 @@ export default {
   updateWorkflowStatus,
   multiAtomFuncSkip,
   funcSkip,
+  queryAutoRate,
   EXEC_PLAN_SYSTEMS,
   SMS_SEND_ON,
   SMS_SEND_OFF,

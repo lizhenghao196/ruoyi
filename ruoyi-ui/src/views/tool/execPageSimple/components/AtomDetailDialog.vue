@@ -115,6 +115,7 @@
         size="mini"
         border
         @expand-change="onExpandChange"
+        @row-dblclick="onRowDblclick"
       >
         <!-- 空表：三种情况文案不同，避免「一片空白不知道在等还是在错」 -->
         <template slot="empty">
@@ -270,7 +271,16 @@
           </template>
         </el-table-column>
 
-        <!-- 第四列：域名切换类节点显示「指令描述」，其余节点显示「工单」 -->
+        <!--
+          第四列：域名切换类节点显示「指令描述」，其余节点显示「工单」。
+
+          ⚠️「工单」列可以**双击**查该工单关联的自动发布文档（见 onRowDblclick）。
+             「双击表格单元格」不是个能被猜到的交互，所以这里做两件事：
+               ① 蓝色 + hover 下划线 —— 让它看起来就是「能点的」；
+               ② 悬停 tooltip 直接写出「双击查看…」。
+             ⚠️ 因为要用自定义 tooltip，这一列**不能**再挂 `show-overflow-tooltip`
+                （两者会打架：一个是 el-table 自己包的 tooltip，一个是 el-tooltip）。
+        -->
         <el-table-column
           v-if="isDomainSwitch"
           label="指令描述"
@@ -295,8 +305,19 @@
           prop="aaiOrderId"
           align="center"
           width="160"
-          show-overflow-tooltip
-        />
+          class-name="add-order-cell"
+        >
+          <template slot-scope="scope">
+            <el-tooltip
+              v-if="scope.row.aaiOrderId"
+              placement="top"
+              content="双击查看该工单关联的文档"
+            >
+              <p class="add-cell is-order">{{ scope.row.aaiOrderId }}</p>
+            </el-tooltip>
+            <p v-else class="add-cell">—</p>
+          </template>
+        </el-table-column>
 
         <!-- 第五列：状态 -->
         <el-table-column
@@ -1240,6 +1261,34 @@ export default {
     },
 
     /**
+     * 表格行双击 —— 目前**只有「工单」列**的双击有意义。
+     *
+     * 双击工单 = 「查这个工单关联的自动发布文档」：这里只把工单号抛给父组件
+     * （弹窗是哑组件，**不自己调接口**，接口与文档区都归父组件管），
+     * 父组件拿到后去请求、再决定要不要关掉本弹窗、要不要展出右栏文档区。
+     *
+     * ⚠️ 判列用 `column.property`，**不要**写 `column.label === '工单'` —— 文案一改就静默失效。
+     * ⚠️ `aaiOrderId` 这一个 prop 被**两列**共用：
+     *      域名切换类节点 -> 该列 label 是「指令描述」
+     *      其余节点       -> 该列 label 是「工单」
+     *    只有后者才该触发，所以先排除 isDomainSwitch。
+     * ⚠️ 展开列（type="expand"）的 column.property 是 undefined，天然被下面挡掉。
+     */
+    onRowDblclick(row, column) {
+      if (this.isDomainSwitch) {
+        return;
+      }
+      if (!column || column.property !== "aaiOrderId") {
+        return;
+      }
+      const orderId = row && row.aaiOrderId;
+      if (!orderId) {
+        return;
+      }
+      this.$emit("order-dblclick", { orderId, row });
+    },
+
+    /**
      * 明细重拉之后，让表格**保持刷新前的展开状态**（用户要求：展开的 expend 刷新后仍然展开）。
      *
      * 为什么要显式做一遍：`expand-row-keys` 在 Element 里是**非 deep 的 prop watcher**，
@@ -2140,6 +2189,26 @@ export default {
       word-break: normal;
       cursor: default;
     }
+
+    /*
+      工单：**双击**可以查该工单关联的自动发布文档（见 onRowDblclick）。
+      做成「链接」的样子 —— 蓝色 + 悬停变深并加下划线 —— 让「这里能点」一眼可见；
+      「双击」这个动作本身由单元格上的 el-tooltip 说明。
+      ⚠️ 只在**有工单号**时才加这个 class（空值渲染的是普通 `add-cell` 的「—」），
+         否则一个灰色的「—」看着也能点，是误导。
+    */
+    &.is-order {
+      color: #2b6cff;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s ease;
+
+      &:hover {
+        color: #1a56db;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+    }
   }
 
   &-expand {
@@ -2253,6 +2322,14 @@ export default {
 
   .el-button--text {
     padding: 0 4px;
+  }
+
+  /* 「工单」列可双击（查该工单关联的自动发布文档，见 onRowDblclick）——
+     只给一个鼠标提示，不改任何视觉。域名切换节点的「指令描述」列没有这个 class。
+     ⚠️ 必须限定 td：el-table-column 的 class-name 会**同时加到表头的 th 上**，
+        不限定的话表头也会显示手型光标（表头并不能双击）。 */
+  td.add-order-cell {
+    cursor: pointer;
   }
 }
 

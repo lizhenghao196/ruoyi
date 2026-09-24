@@ -226,7 +226,9 @@
     <!--
       主体：左右两栏。
         左 = 当前选中那一条流的**纵向**流程图（从上到下 = 执行方向）
-        右 = 文档区占位（后续接入，本期只留空壳）
+        右 = 文档信息（工单关联的自动发布文档）
+      ⚠️ **默认只有左栏**：页面一进来没有文档，流独占整宽；
+         用户在「查看明细」里双击工单、接口返回了文档之后，右栏才出现（is-doc）。
       ⚠️ 这里刻意不用 <aside>：assets/styles/index.scss 里有一条全局 `aside { ... }`
          会漏进 scoped 组件（组件没声明的属性照样吃全局值），用 section 省掉这层心智负担。
     -->
@@ -251,7 +253,7 @@
         <p class="esp-empty__desc">已并发请求 {{ rawIds.length }} 个执行计划</p>
       </div>
 
-      <div v-else class="esp-split">
+      <div v-else class="esp-split" :class="{ 'is-doc': docVisible }">
         <!-- 左：选中流的纵向流程图 -->
         <section class="esp-flow">
           <header v-if="currentFlow" class="esp-flow__head">
@@ -366,14 +368,82 @@
           </div>
         </section>
 
-        <!-- 右：文档区占位（本期不接数据，只占位） -->
-        <section class="esp-doc">
-          <div class="esp-doc__empty">
-            <span class="esp-doc__empty-icon">
+        <!--
+          右：文档信息（工单关联的自动发布文档）。
+
+          ⚠️ **默认不渲染**（docVisible = docFiles 非空）：页面一进来只有流，流独占整宽。
+             只有用户在「查看明细」表格里**双击工单**、接口真的返回了文档，这一栏才出现。
+          ⚠️ 一个工单可能关联多个文档（接口的 files 是**数组**）→ 用 tab 切换，
+             iframe 始终只嵌当前那一个。
+          ⚠️ 文档地址 = DOC_VIEW_BASE + file_name（**不是**返回里的 url 字段，那是另一条路由）。
+        -->
+        <section v-if="docVisible" class="esp-doc">
+          <div class="esp-doc__head">
+            <!-- 工单号：一眼看出这块文档属于哪个工单 -->
+            <span class="esp-doc__order" :title="docOrderId">
               <svg-icon icon-class="documentation" />
+              <span class="esp-doc__order-text">{{ docOrderId }}</span>
             </span>
-            <p class="esp-doc__empty-title">文档信息</p>
-            <p class="esp-doc__empty-desc">该区域预留给后续的文档展示</p>
+            <span class="esp-doc__ops">
+              <button
+                type="button"
+                class="esp-doc__btn"
+                @click="openDocInNewTab"
+              >
+                新窗口打开
+              </button>
+              <!--
+                收起文档区：清空 docFiles -> docVisible 变假 -> 整栏消失、左栏恢复独占整宽。
+                （2026-09-24 用户要求把原来的「刷新」换成它 —— 刷新靠切 tab / 重新双击工单即可，
+                  收起才是这一栏真正缺的出口。）
+              -->
+              <button
+                type="button"
+                class="esp-doc__btn esp-doc__close"
+                title="收起文档区"
+                @click="resetDocArea"
+              >
+                <svg viewBox="0 0 12 12" aria-hidden="true">
+                  <path
+                    d="M3.2 3.2 L8.8 8.8 M8.8 3.2 L3.2 8.8"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+            </span>
+          </div>
+
+          <!-- 多文档 tab：只有一个文档时也保留 tab 条（用户要求「显示出工单号和 tab」） -->
+          <div class="esp-doc__tabs">
+            <button
+              v-for="(file, index) in docFiles"
+              :key="file.file_name || index"
+              type="button"
+              class="esp-doc__tab"
+              :class="{ 'is-active': index === docActiveIndex }"
+              :title="file.file_name"
+              @click="selectDoc(index)"
+            >
+              {{ docTabLabel(file) }}
+            </button>
+          </div>
+
+          <div class="esp-doc__frame">
+            <!-- key 一换就重建 iframe：src 没变时浏览器不会重新请求，刷新会变成空操作 -->
+            <iframe
+              :key="docFrameKey"
+              :src="docUrl"
+              title="文档信息"
+              frameborder="0"
+              @load="onDocFrameLoad"
+            ></iframe>
+            <div v-if="!docFrameLoaded" class="esp-doc__frame-mask">
+              <svg-icon icon-class="time" />
+              <span>文档加载中…</span>
+            </div>
           </div>
         </section>
       </div>
@@ -415,6 +485,7 @@
       @refresh="reloadDetailAtoms"
       @refresh-with-loading="reloadDetailAtoms({ withLoading: true })"
       @toggle-auto-refresh="toggleDetailAutoRefresh"
+      @order-dblclick="onDetailOrderDblclick"
     />
 
     <!-- 原子确认：**双击人工确认节点**弹出的小弹窗 -->
@@ -458,7 +529,9 @@
  *   功能集合**完全一致**（修改实施人 / 设置消息推送 / 流操作 / 节点操作 / 查看明细 /
  *   静默 / 双击分流 / 轮询 / 总体进度），差别只在信息架构与布局：
  *     · 顶部左侧多了一组**两级选择器**：第一行选环境，第二行选流（先环境后流）
- *     · 主体改成左右两栏：左 = 选中那**一条**流的纵向流程图，右 = 文档区占位
+ *     · 主体默认只有左栏：选中那**一条**流的纵向流程图（从上到下 = 执行方向），独占整宽
+ *     · 用户在「查看明细」表格里**双击工单**后，右栏才展出该工单关联的文档
+ *       （工单号 + 多文档 tab + iframe），左右变成 6 : 4 —— 见 onDetailOrderDblclick
  *     · 流图方向由「从左到右」改成「从上到下」（见 flowLayout.js）
  *
  * ⚠️ 用户明确要求：除了 mockData 里的内容，**其他组件 / 方法 / 接口一律不许共享**。
@@ -482,6 +555,8 @@ import {
   updateAtomStatus,
   updateNodeStatus,
   updateWorkflowStatus,
+  // 双击明细表「工单」列 -> 查该工单关联的自动发布文档（右栏文档区用它）
+  queryAutoRate,
   // 接口返回的载荷有可能在 data、也有可能在 rows —— 取值一律走它（见函数说明）
   pickPayload,
 } from "@/api/tool/execPageSimple";
@@ -599,6 +674,25 @@ const EXEC_USER_CLOSED = {
 };
 
 /**
+ * 右栏文档 iframe 的「加载中」兜底时长（毫秒）。
+ *
+ * ⚠️ 这里只是**防止遮罩永远不消失**，不是「超时 = 被 X-Frame-Options 拦了」的判据 ——
+ * 被拦时浏览器照样会触发 iframe 的 load 事件（它加载的是一张空白错误页），
+ * 所以前端**无法**区分「加载成功」和「被拦掉」，别拿这个时长做断言。
+ * 真正能确认被拦的只有浏览器控制台的 `Refused to display ... in a frame`。
+ */
+const DOC_FRAME_TIMEOUT_MS = 8000;
+
+/**
+ * 文档的实际访问地址前缀 —— `query_auto_rate` 返回的 `files[].file_name` 拼在它后面即可。
+ *
+ * ⚠️ **不要**改用返回里的 `files[].url`（那是 `/api/v1/doc/view/...`，是另一条路由，
+ *    与本页面要嵌的地址不是一回事）；用户明确给的就是「这条前缀 + file_name」。
+ * ⚠️ 内网地址：网外访问不到，只在内网环境有效。
+ */
+const DOC_VIEW_BASE = "http://10.2.64.36:8121/api/cicd/doc/view/";
+
+/**
  * 明细弹窗里的两个原子操作。它们只有「调哪个接口、叫什么名字」不同，
  * 其余流程（二次确认 -> 调接口 -> 重新拉明细 -> 按钮 loading）**完全一样**。
  */
@@ -678,6 +772,27 @@ export default {
       lastUserScrollAt: 0,
       // 平滑滚动的「落点核对」定时器（见 autoScrollToFocusNode 尾部）
       autoScrollSettleTimer: null,
+
+      /* --------------------------- 右栏文档信息 --------------------------- */
+      /**
+       * 文档区当前展示的工单号 + 该工单关联的文档列表（= `query_auto_rate` 返回的 data）。
+       *
+       * ⚠️ **初始为空**：页面一进来不展示文档模块，流独占整宽。
+       *    只有「查看明细」里双击工单、接口真的返回了文档，这一栏才展出来（见 docVisible）。
+       */
+      docOrderId: "",
+      // files[] —— 一个工单可能关联**多个**文档，tab 切换
+      docFiles: [],
+      // 当前激活的 tab（docFiles 的下标）
+      docActiveIndex: 0,
+      // 文档接口是否在飞（挡住重复双击）
+      docLoading: false,
+      // iframe 的 key：刷新 / 切文档时自增，强制浏览器重新请求（src 不变不会重发）
+      docFrameKey: 0,
+      // 首帧是否已加载（只用来收「加载中」遮罩）
+      docFrameLoaded: false,
+      // 兜底定时器：到点无条件收遮罩，避免加载失败时永远转圈
+      docFrameTimer: null,
     };
   },
   computed: {
@@ -693,6 +808,31 @@ export default {
     },
     sysName() {
       return this.incomingSys || "";
+    },
+
+    /* --------------------------- 右栏文档信息 --------------------------- */
+
+    /**
+     * 文档区是否展示 —— 也就是「页面一进来流独占整宽」的那个开关。
+     *
+     * ⚠️ 没有文档时**整栏都不渲染**（模板 v-if），`.esp-split` 也就不会带 is-doc，
+     *    左栏自然占满整屏（见样式里的 .esp-split.is-doc 覆盖）。
+     *    接口返回空数组（工单没关联文档）时保持不展示，并提示一句（见 onDetailOrderDblclick）。
+     */
+    docVisible() {
+      return this.docFiles.length > 0;
+    },
+    /**
+     * 右栏要嵌的文档地址 = `DOC_VIEW_BASE` + 当前 tab 的 `file_name`。
+     *
+     * ⚠️ **不要**改用接口返回里的 `files[].url`（`/api/v1/doc/view/...` 是另一条路由）。
+     * ⚠️ **不要**在这里 decodeURIComponent：file_name 是后端直接给的原文，
+     *    再解一次会把文件名里合法的 `%xx` 吃坏。
+     */
+    docUrl() {
+      const file = this.docFiles[this.docActiveIndex];
+      const name = file && file.file_name;
+      return name ? DOC_VIEW_BASE + name : "";
     },
     // 页头标题下的小字：加载中 / 汇总信息
     captionText() {
@@ -946,6 +1086,9 @@ export default {
     this.fetchUsers();
     this.startPolling();
     document.addEventListener("visibilitychange", this.onVisibilityChange);
+    // 右栏文档：初始为空（页面一进来不展示文档模块），
+    // 等用户在「查看明细」里双击工单、接口回了文档才会出现 ——
+    // iframe 的遮罩定时器由 watch.docUrl 统一负责（首次赋值 / 刷新 / 切 tab 都走它）。
   },
   beforeDestroy() {
     this.stopPolling();
@@ -955,9 +1098,21 @@ export default {
       clearTimeout(this.autoScrollSettleTimer);
       this.autoScrollSettleTimer = null;
     }
+    if (this.docFrameTimer) {
+      clearTimeout(this.docFrameTimer);
+      this.docFrameTimer = null;
+    }
     document.removeEventListener("visibilitychange", this.onVisibilityChange);
   },
   watch: {
+    /*
+      文档地址变了（首次拿到文档 / 刷新 / 切 tab）-> 重建 iframe + 重新盖「加载中」遮罩。
+      放这里统一处理，是因为这三条路径最终都只改 docUrl 这一个值；
+      iframe 的 src 没变时浏览器不会重新发请求，所以要换 key 把它整个重建一次。
+    */
+    docUrl() {
+      this.resetDocFrame();
+    },
     // 同一标签页内被再次传入新的 ids 时，重置轮询并重新拉取
     rawIds() {
       this.pollCount = 0;
@@ -970,6 +1125,8 @@ export default {
       this.closeMenu();
       this.closeSilence();
       this.closeDetail();
+      // 换了另一批执行计划 -> 右栏那块文档属于**上一个**工单，一并收起来
+      this.resetDocArea();
       this.fetchAll({ silent: false });
       this.startPolling();
     },
@@ -1062,6 +1219,135 @@ export default {
           this.scheduleAutoScroll();
         }
       }
+    },
+
+    /* --------------------------- 右栏文档信息 --------------------------- */
+
+    /**
+     * 文档 iframe 加载完成 -> 收掉「加载中」遮罩。
+     *
+     * ⚠️ 被 X-Frame-Options 拦掉时这个事件**照样会触发**（浏览器加载的是一张空白错误页），
+     *    所以这里只负责收遮罩，不能当作「加载成功」的判据。
+     */
+    onDocFrameLoad() {
+      this.docFrameLoaded = true;
+      if (this.docFrameTimer) {
+        clearTimeout(this.docFrameTimer);
+        this.docFrameTimer = null;
+      }
+    },
+    // 兜底：到点无条件收遮罩，避免加载失败时永远转圈（见 DOC_FRAME_TIMEOUT_MS 注释）
+    startDocFrameTimer() {
+      if (this.docFrameTimer) {
+        clearTimeout(this.docFrameTimer);
+      }
+      this.docFrameTimer = setTimeout(() => {
+        this.docFrameTimer = null;
+        this.docFrameLoaded = true;
+      }, DOC_FRAME_TIMEOUT_MS);
+    },
+    /**
+     * 「查看明细」表格里**双击工单** -> 查该工单关联的自动发布文档。
+     *
+     * 顺序（用户要求）：双击工单 → 请求接口 → 拿到文档 → 关掉查看明细弹窗 → 右栏展出文档区。
+     *
+     * ⚠️ 接口没返回文档时**不关弹窗、也不展文档区**，只提示一句 ——
+     *    否则用户会看到「弹窗关了、右边还是老样子」，不知道刚才那下双击到底发生了什么。
+     * ⚠️ 文档区一旦展出就**留着**：再双击别的工单是整块替换（工单号 + files + 回到第 0 个 tab）。
+     * @param {Object} payload { orderId, row } —— 由 AtomDetailDialog 抛上来
+     */
+    async onDetailOrderDblclick({ orderId }) {
+      if (!orderId || this.docLoading) {
+        return;
+      }
+      this.docLoading = true;
+      try {
+        const res = await queryAutoRate({ orderId });
+        const data = pickPayload(res) || {};
+        const files = Array.isArray(data.files) ? data.files : [];
+        if (!files.length) {
+          this.$modal.msgWarning(`工单 ${orderId} 没有关联的文档`);
+          return;
+        }
+        this.docOrderId = data.order_id || orderId;
+        this.docFiles = files;
+        this.docActiveIndex = 0;
+        // 关掉「查看明细」—— 右栏文档区随之展出（docVisible 看的就是 docFiles）
+        this.closeDetail();
+      } catch (e) {
+        console.error("[工单文档] query_auto_rate 请求失败", e);
+        this.$modal.msgError((e && e.message) || "查询工单文档失败");
+      } finally {
+        this.docLoading = false;
+      }
+    },
+
+    /**
+     * 清空右栏文档区，回到「流独占整宽」。
+     *
+     * 目前只有一个调用点：同一标签页里被再次传入新的 ids（换了另一批执行计划）——
+     * 那块文档属于上一个工单，留着就是错的。
+     * ⚠️ 顺手把兜底定时器也清掉：文档区都没了，遮罩定时器再跑就是野定时器。
+     */
+    resetDocArea() {
+      if (this.docFrameTimer) {
+        clearTimeout(this.docFrameTimer);
+        this.docFrameTimer = null;
+      }
+      this.docOrderId = "";
+      this.docFiles = [];
+      this.docActiveIndex = 0;
+    },
+
+    /**
+     * 切换文档 tab。
+     * 只改下标：docUrl 一变，watch.docUrl 会重建 iframe 并重新盖遮罩。
+     */
+    selectDoc(index) {
+      if (index === this.docActiveIndex || !this.docFiles[index]) {
+        return;
+      }
+      this.docActiveIndex = index;
+    },
+
+    /**
+     * tab 上的文案。
+     *
+     * 文件名是 `<工单号>_<时间戳>.html`，很长 —— tab 位置窄，把「工单号_」前缀去掉
+     * （工单号在上方已经单独显示过一遍），只留时间戳 + 扩展名，多个文档才分得清。
+     * 前缀对不上（后端换了命名规则）就原样显示全名，别硬切。
+     */
+    docTabLabel(file) {
+      const name = (file && file.file_name) || "";
+      if (!name) {
+        return "文档";
+      }
+      const prefix = this.docOrderId ? this.docOrderId + "_" : "";
+      return prefix && name.indexOf(prefix) === 0
+        ? name.slice(prefix.length)
+        : name;
+    },
+
+    /**
+     * 重建 iframe + 重新盖「加载中」遮罩。
+     *
+     * 这是「刷新」和「切 tab」的唯一落点（watch.docUrl 也走它）：
+     * src 没变时浏览器不会重新发请求，所以必须换 key 把 iframe 整个重建一次。
+     */
+    resetDocFrame() {
+      if (!this.docUrl) {
+        return;
+      }
+      this.docFrameLoaded = false;
+      this.docFrameKey += 1;
+      this.startDocFrameTimer();
+    },
+    // 兜底出口：iframe 嵌不出来（多半是被 X-Frame-Options 拦了）时，让用户能直接看原文
+    openDocInNewTab() {
+      if (!this.docUrl) {
+        return;
+      }
+      window.open(this.docUrl, "_blank");
     },
 
     /* --------------------------- 两级选择器 --------------------------- */
@@ -2662,17 +2948,21 @@ $tone-colors: (
 }
 
 /*
-  左栏：选中那一条流的纵向流程图。与右栏按 **6 : 4** 分宽。
-  ⚠️ 用 `flex: 6 1 0`（basis = 0）而不是 `width: 60%`：
-     容器里有 14px 的 gap，写成百分比会变成 60% + 40% + 14px > 100%，把容器撑破。
-     basis 归零后，剩余空间按 grow 6:4 分，比例才是精确的（gap 已被扣掉）。
+  左栏：选中那一条流的纵向流程图。
+
+  ⚠️ **默认独占整宽**（flex: 1 1 0）—— 页面一进来没有文档区，流就该占满一屏。
+     只有 `.esp-split` 带上 is-doc（= 用户双击工单、文档真的回来了）时才变成 6 : 4，
+     那条覆盖写在下面 `.esp-split.is-doc .esp-flow`。
+  ⚠️ 用 flex 而不是 `width: 60%`：容器里有 14px 的 gap，
+     写成百分比会变成 60% + 40% + 14px > 100%，把容器撑破；
+     basis 归零后剩余空间按 grow 分，比例才是精确的（gap 已被扣掉）。
   ⚠️ min-width:0 是关键 —— 没有它，FlowGraph 的 px 宽度会把这一栏顶开、
      右栏被挤没（flex 子项的默认 min-width 是 auto，按内容撑）。
 */
 .esp-flow {
   display: flex;
   flex-direction: column;
-  flex: 6 1 0;
+  flex: 1 1 0;
   min-width: 0;
   background: var(--ex-panel);
   border: 1px solid var(--ex-border);
@@ -2802,54 +3092,207 @@ $tone-colors: (
   }
 }
 
-/* 右栏：文档区占位。与左栏按 **6 : 4** 分宽（流 6 / 文档 4），随窗口伸缩 */
+/* 有文档时：流 6 成 / 文档 4 成（精确 6:4，14px 的 gap 由 basis:0 自动扣掉） */
+.esp-split.is-doc .esp-flow {
+  flex: 6 1 0;
+}
+
+/*
+  右栏：文档信息（工单关联的自动发布文档）。
+
+  ⚠️ 只在 docVisible 时渲染（页面一进来不展示文档模块，流独占整宽），
+     所以这里直接就是「有内容」的卡片样式 —— 原来的虚线占位空壳
+     （.esp-doc__empty / __empty-icon / __empty-title / __empty-desc）已随之删掉。
+  ⚠️ 与左栏按 **6 : 4** 分宽（流 6 / 文档 4），随窗口伸缩。
+*/
 .esp-doc {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
   flex: 4 1 0;
   min-width: 0;
-  border: 1px dashed #dde4ee;
+  padding: 10px 10px 12px;
+  border: 1px solid #e6eaf2;
   border-radius: 12px;
-  /* 占位区刻意弱化：虚线框 + 淡底，一眼能看出「这里还没接内容」 */
-  background: linear-gradient(180deg, #fdfefe, #fafbfd);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  /* 只淡入、不动尺寸 —— 左栏从「独占整宽」切到 6 成是瞬时的，
+     给宽度加过渡会让两栏在动画期间加起来超过 100%，反而抖一下 */
+  animation: esp-doc-in 0.2s ease;
 
-  &__empty {
+  /* 头部：左 = 工单号，右 = 刷新 / 新窗口打开 */
+  &__head {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
+    justify-content: space-between;
+    flex: none;
+    gap: 8px;
+    margin-bottom: 8px;
   }
 
-  &__empty-icon {
+  /* 工单号：一眼看出这块文档属于哪个工单 */
+  &__order {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ex-text);
+
+    .svg-icon {
+      flex: none;
+      font-size: 14px;
+      color: var(--ex-text-3);
+    }
+  }
+
+  &__order-text {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__ops {
+    display: flex;
+    align-items: center;
+    flex: none;
+    gap: 6px;
+  }
+
+  &__btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    height: 46px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    background: #eef1f7;
-    color: #a6b1c0;
-    font-size: 22px;
-  }
-
-  &__empty-title {
-    margin: 0;
-    font-size: 13px;
-    font-weight: 600;
+    height: 24px;
+    padding: 0 9px;
+    border: 1px solid #e2e8f2;
+    border-radius: 6px;
+    background: #fff;
     color: var(--ex-text-2);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+    &:hover {
+      border-color: #bcd2ff;
+      background: #f5f9ff;
+      color: #2b6cff;
+    }
   }
 
-  &__empty-desc {
-    margin: 6px 0 0;
+  /* 收起按钮：只有一个图标，宽度收成正方形，与左边的文字按钮同高 */
+  &__close {
+    width: 24px;
+    padding: 0;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* 收起是「关闭」语义，hover 用暖色，和「新窗口打开」的蓝色区分开 */
+    &:hover {
+      border-color: #f3c6c6;
+      background: #fef3f3;
+      color: #e35d5d;
+    }
+  }
+
+  /*
+    tab 条：一个工单可能关联**多个**文档，横向排开，再多就横向滚。
+    只有一个文档时也保留 —— 用户要求「显示出工单号和 tab」。
+  */
+  &__tabs {
+    display: flex;
+    align-items: center;
+    flex: none;
+    gap: 4px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eef1f7;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  &__tab {
+    flex: none;
+    max-width: 220px;
+    height: 24px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: #f4f6fb;
+    color: var(--ex-text-2);
     font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+
+    &:hover {
+      color: #2b6cff;
+    }
+
+    &.is-active {
+      border-color: #bcd2ff;
+      background: #eaf1ff;
+      color: #2b6cff;
+      font-weight: 600;
+    }
+  }
+
+  /* 文档视口：占满头部与 tab 以下的全部高度，随右栏伸缩 */
+  &__frame {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: 8px;
+    overflow: hidden;
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }
+  }
+
+  /* 加载遮罩。⚠️ 只按「load 有没有来」收，不能当「加载成功」的判据（见 DOC_FRAME_TIMEOUT_MS） */
+  &__frame-mask {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #fff;
     color: var(--ex-text-3);
+    font-size: 12px;
+  }
+}
+
+/* 文档区出现的淡入（只动透明度，不参与左右分栏的宽度计算） */
+@keyframes esp-doc-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
 /* 窄屏（<1280px）：收窄页头进度条，给两行选择器与操作按钮让位。
-   ⚠️ 这里**不再**单独收窄 .esp-doc —— 左右栏已按 6:4 定比，
+   ⚠️ 这里**不再**单独收窄 .esp-doc —— 左右两栏（有文档时）已按 6:4 定比，
       给右栏再塞一个 width 也不会生效（flex-basis:0 优先于 width），
       留着只会让读代码的人以为还有一层宽度控制。 */
 @media screen and (max-width: 1280px) {
