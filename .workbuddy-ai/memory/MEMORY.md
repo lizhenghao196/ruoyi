@@ -22,6 +22,7 @@
 
 ## 执行页面 / 明细弹窗 / 执行界面简版
 - **动手前必读**（三个 REF）：轮询必须静默 / 横滚在每条流内部 / 页头进度算法 / 哑组件契约 / `type="expand"` 不能加 `fixed`；execPlanList / execPageSimple 与 execPage **代码零共享**，别互相 import。
+- 简版画布自动滚动：**只认输入事件（wheel/touchmove/滚动键/mousedown 判滚动条），画布刻意不监听 `scroll`** —— 按 scroll 记会被轮询刷新的程序化滚动误判成「用户刚滚过」，自动滚动永远冻着且不报错。目标节点 `bad > run`；用户滚动后 20s 让位；`anyDialogOpen` 里新增弹窗要记得加。
 
 ## 工单甘特图（orderGantt）
 - ⚠️ **矩形宽度只认 `total_cost`**：结束时间 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求），判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`。**改这个页面前读 `REF-order-gantt.md`**（硬规则 7 条、气泡可达性、分组标签条 chip、柱体文字「完整或没有」、11 个校验脚本）。

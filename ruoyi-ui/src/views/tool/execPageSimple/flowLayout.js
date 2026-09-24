@@ -199,6 +199,59 @@ export function statusTone(status) {
   return STATUS_TONE[status] || 'init'
 }
 
+/**
+ * 汇总 tone 的判定优先级 —— 越靠前越「需要人看」。
+ * bad 必须最先被看到；confirm / stop 都是「等人处理」，排在「正在跑」的 run 之后。
+ */
+const AGG_TONE_PRIORITY = ['bad', 'run', 'confirm', 'stop']
+
+/**
+ * 把一批节点的状态汇总成**一个** tone（用于「环境小方块」的圆点配色）。
+ *
+ * 背景：环境 = 一条执行计划（aripExecPlanId），底下挂着若干条流，每条流又有一堆节点。
+ * 环境 chip 的圆点原来取的是**计划状态**（aripExecStatus）—— 那是另一个层级的东西，
+ * 看不出底下流的节点跑到哪了。这里改成直接看**节点状态**：
+ * 该环境下所有流的全部节点一起汇总，得出一个 tone 给圆点用。
+ *
+ * 规则（自上而下，先命中先返回）：
+ *   bad     有节点失败           —— 红
+ *   run     有节点在执行中        —— 蓝
+ *   confirm 有节点待人工确认      —— 琥珀
+ *   stop    有节点被挂起         —— 紫
+ *   ok      全部节点都成功        —— 绿
+ *   cancel  全部节点都已作废      —— 冷灰
+ *   run     ok 与 init 混合（跑了一半、后面的节点还没开始）—— 蓝，
+ *           读作「整体还在推进」比读作「还没开始」更接近事实
+ *   init    其余（还没开始 / 没有节点）—— 中性灰
+ *
+ * ⚠️ 只做「状态值 -> tone」的换算，不产出任何中文 —— 中文只从字典来（见 statusTone 的说明）。
+ *
+ * @param {Array} nodes 节点数组（可以是多个流的节点拼在一起）
+ * @returns {'bad'|'run'|'confirm'|'stop'|'ok'|'cancel'|'init'}
+ */
+export function aggregateTone(nodes) {
+  const list = Array.isArray(nodes) ? nodes : []
+  if (!list.length) {
+    return 'init'
+  }
+  const tones = list.map(n => statusTone(n && n.aniStatus))
+  for (let i = 0; i < AGG_TONE_PRIORITY.length; i++) {
+    if (tones.indexOf(AGG_TONE_PRIORITY[i]) !== -1) {
+      return AGG_TONE_PRIORITY[i]
+    }
+  }
+  if (tones.every(t => t === 'ok')) {
+    return 'ok'
+  }
+  if (tones.every(t => t === 'cancel')) {
+    return 'cancel'
+  }
+  if (tones.indexOf('ok') !== -1) {
+    return 'run'
+  }
+  return 'init'
+}
+
 /* ------------------------------- 布局计算 ------------------------------- */
 
 /**

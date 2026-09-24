@@ -97,6 +97,44 @@ mysql 客户端 `/c/Program Files/MySQL/MySQL Server 8.0/bin/mysql`。
 轮询（3s，静默）、明细自动刷新（5s）、修改实施人、设置消息推送、暂停/取消/恢复、
 节点右键菜单、节点双击看明细、流操作、`PROJECT_ROLE_KEYS` 权限判断、字典驱动状态配色。
 
+### 3.5 环境 chip 的圆点 = 节点状态汇总（2026-09-23 改）
+
+- **环境 chip 的圆点不再看计划状态**（`aripExecStatus`），改成看**节点**：
+  该环境下所有流的全部节点一起汇总，配色由 `flowLayout.aggregateTone(nodes)` 决定。
+  动机：计划状态是另一个层级，`aripExecStatus=SUCCESS` 时底下节点可能还有一半是 `INIT`
+  （真实 mock 数据里 11 个环境有 2 个就是这种），圆点会骗人。
+- ⚠️ **流 chip 的圆点不动**，仍取 `flow.status`（= `awiWorkflowStatus`）。用户明确只要环境改。
+- 汇总优先级（`AGG_TONE_PRIORITY` + 收尾分支，唯一判定处 `aggregateTone`）：
+  `bad > run > confirm > stop` → 全 `ok` → 全 `cancel` → 含 `ok` 的混合（读作 run）→ `init`。
+- 悬停提示（`envTitle` + `envNodeDistText`）里带一行「节点状态：执行中 2 · 成功 12」，
+  让圆点颜色有据可查。⚠️ **中文一律走字典 `statusText`**，页面不许新增状态中文表。
+
+### 3.6 画布自动滚动（2026-09-23 新增）
+
+把「执行中 / 报错」的节点带到 `.esp-flow__canvas` 视野中间。三条约束：
+
+1. **用户自己滚过之后 20 秒内不动视野**（`AUTO_SCROLL_HOLD_MS = 20000`）。
+2. **目标节点优先级 `bad > run > confirm > stop`**（`autoScrollNode`）：
+   ⚠️ 这四档和 `flowLayout.js` 的 `AGG_TONE_PRIORITY` **刻意保持同一顺序**，
+   所以「环境 chip 圆点是什么颜色」和「画布会居中哪个节点」永远指向同一件事 ——
+   **改一处必须改另一处**（`esp_verify.mjs` [I] 段有交叉断言钉住）。
+   报错 / 待确认 / 挂起三档都会一直命中（状态不会自己消失），
+   所以页面自然「停在那儿」不再往下走。四档都没有（没开始 / 已跑完）→ 不滚动。
+3. **弹窗 / 右键菜单开着时不动**（`anyDialogOpen`）。⚠️ **新增弹窗要记得加进 `anyDialogOpen`**。
+
+⚠️⚠️ **最容易被改坏的一条：区分「用户滚的」和「程序滚的」只看输入事件，不看 `scroll` 事件。**
+`@wheel` / `@touchmove` / `@keydown`（只认滚动键）/ `@mousedown`（判滚动条）→ 记 `lastUserScrollAt`；
+画布**刻意不监听 `scroll`**。原因：轮询每 3s 刷一次内容，按 `scroll` 记的话，
+程序化滚动和「内容变短导致浏览器夹 scrollTop」都会被误判成「用户刚滚过」，
+自动滚动就永远冻着不动 —— 这个 bug 不会报错，只会「功能像没做」。
+- `autoScrollBusy` 这类标志位是**多余的**，已删；别再为了「识别程序滚动」把它加回来。
+- 平滑滚动落点核对：`AUTO_SCROLL_SETTLE_MS = 700` 后比对 `scrollTop`，不一致说明用户中途插了一手。
+- `AUTO_SCROLL_MIN_DELTA = 6`：目标没动就不发起滚动，否则每轮轮询都蠕一下。
+- 触发点：`fetchAll` 的 `finally`（首屏 + 每轮轮询）、`watch.selectedPlanId`、`watch.selectedFlowKey`。
+  后两个**先把 `lastUserScrollAt` 清零**再滚 —— 换环境/换流是用户主动换视野，不该被上一条滚动记录压住。
+- 坐标换算：`.flow-graph` 顶边要用 `getBoundingClientRect` 差值换算到画布滚动坐标系，
+  **不能拿 `offsetTop`**（画布有 `padding: 10px 4px 16px`，且 offsetParent 不确定）。
+
 ## 4. 两个踩过的坑
 
 ### 4.1 动态 import 漏改（真 bug，2026-09-22 已修）
@@ -133,7 +171,10 @@ cd "C:/Users/lenovo/AppData/Local/Temp" && \
 
 六段：A SFC 编译（10 个）/ B JS 语法（14 个）/ C 零共享扫描 / D 纵向几何（真实数据 21 条流、210 节点、53 并行组）/
 E 与横向版对照（纵向 `H>W` vs 横向 `W>H`）/ F mock 链路 + 路由菜单 + expand 无 fixed /
-**H 左右分栏 6:4（编译 SCSS 产物后抠 `.esp-flow` / `.esp-doc` 规则体断言 flex）**。
+**H 左右分栏 6:4（编译 SCSS 产物后抠 `.esp-flow` / `.esp-doc` 规则体断言 flex）** /
+**I 环境圆点汇总 + 画布自动滚动（2026-09-23 新增，51 条断言：`aggregateTone` 行为、真实数据汇总、
+圆点取 `env.tone`、20s 让位、只认输入事件不认 scroll、弹窗抑制、四档优先级且与 `AGG_TONE_PRIORITY` 交叉一致、
+`anyDialogOpen` 覆盖 6 个弹窗）**。
 **动简版两页任一文件必跑**，期望 `FAILURES: 0`。
 
 ⚠️ 真实数据里有 1 条**空流**（节点尚未生成）：`layoutFlow([], [])` 返回全 0 空布局，

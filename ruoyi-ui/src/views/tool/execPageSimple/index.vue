@@ -32,7 +32,12 @@
                 :title="envTitle(env)"
                 @click="selectEnv(env)"
               >
-                <i class="esp-chip__dot" :class="'is-' + toneOf(env.status)" />
+                <!--
+                  圆点配色 = 该环境下**所有流的全部节点**汇总出来的 tone（见 flowLayout.aggregateTone），
+                  不再用计划状态（aripExecStatus）—— 那样看不出底下节点跑到哪了。
+                  悬停提示里有逐状态的数量，圆点颜色有据可查。
+                -->
+                <i class="esp-chip__dot" :class="'is-' + env.tone" />
                 <span class="esp-chip__text">{{ env.env || "—" }}</span>
                 <span class="esp-chip__sub">{{ env.flowCount }} 流</span>
               </button>
@@ -324,7 +329,21 @@
             </div>
           </header>
 
-          <div class="esp-flow__canvas">
+          <!--
+            画布滚动容器。除了滚动，还负责「认出用户是不是自己在滚」——
+            见 markUserScroll / onCanvasMousedown 的说明：
+            只有**输入类事件**（滚轮 / 触摸 / 键盘 / 拖滚动条）才算用户操作，
+            程序化滚动和内容变化引起的 scroll 事件一律不算，
+            否则轮询刷新一次就会误判成「用户刚滚过」、自动滚动被冻 20 秒。
+          -->
+          <div
+            class="esp-flow__canvas"
+            ref="flowCanvas"
+            @wheel.passive="markUserScroll"
+            @touchmove.passive="markUserScroll"
+            @keydown="onCanvasKeydown"
+            @mousedown="onCanvasMousedown"
+          >
             <flow-graph
               v-if="currentFlow && currentFlow.graph.nodes.length"
               :graph="currentFlow.graph"
@@ -471,6 +490,8 @@ import {
   layoutFlow,
   toClock,
   statusTone,
+  aggregateTone,
+  TONE_ORDER,
   EXEC_STATUS_DICT_TYPE,
 } from "./flowLayout";
 import FlowGraph from "./components/FlowGraph";
@@ -490,6 +511,29 @@ const POLL_INTERVAL = 3000;
 
 // 「查看明细」弹窗里那个「刷新 / 停止刷新」的定时间隔（毫秒），比页面轮询慢一档
 const DETAIL_POLL_INTERVAL = 5000;
+
+/* --------------------------- 画布自动滚动 --------------------------- */
+
+/**
+ * 用户自己滚动之后，自动滚动让位多久（毫秒）。
+ * 用户明确要求 20 秒：这段时间内轮询再怎么刷新都不动视野，免得和用户抢滚动条。
+ */
+const AUTO_SCROLL_HOLD_MS = 20000;
+
+/**
+ * 平滑滚动「落点核对」的等待时长（毫秒）。
+ * 平滑滚动没有「结束」事件，用这个窗口等它滚完；
+ * 窗口结束后如果落点和我们要求的不一致，说明用户中途插了一手
+ * （滚轮会打断平滑滚动），照样按「用户滚动」处理。
+ */
+const AUTO_SCROLL_SETTLE_MS = 700;
+
+/**
+ * 目标位置和当前位置差值小于它就不滚（像素）。
+ * 轮询每 3 秒来一次，目标节点没动的时候不要每次都发起一次平滑滚动 ——
+ * 那会让画面一直有轻微的蠕动感。
+ */
+const AUTO_SCROLL_MIN_DELTA = 6;
 
 // 关闭菜单时的初始值：与「打开菜单」保持同一结构，避免出现半残状态
 const MENU_CLOSED = {
@@ -624,6 +668,16 @@ export default {
       execUser: { ...EXEC_USER_CLOSED },
       users: [],
       usersLoading: false,
+
+      /* ------------------------- 画布自动滚动 ------------------------- */
+      /**
+       * 最后一次「用户自己滚动」的时间戳（毫秒）。0 = 从来没滚过。
+       * 自动滚动前会看它：距今不到 AUTO_SCROLL_HOLD_MS 就让位给用户。
+       * 切换环境 / 流时会清零 —— 那是用户主动换视野，不该被上一次的滚动记录压住。
+       */
+      lastUserScrollAt: 0,
+      // 平滑滚动的「落点核对」定时器（见 autoScrollToFocusNode 尾部）
+      autoScrollSettleTimer: null,
     };
   },
   computed: {
@@ -676,6 +730,20 @@ export default {
           this.incomingEnvs.find((m) => String(m.planId) === String(id)) || {};
         const workflows =
           data && Array.isArray(data.workflows) ? data.workflows : [];
+        // 该环境下**所有流的全部节点**（环境 chip 的圆点配色就看它们）
+        const nodes = workflows.reduce(
+          (acc, wf) =>
+            acc.concat(wf && Array.isArray(wf.nodes) ? wf.nodes : []),
+          []
+        );
+        // 逐状态计数：只给悬停提示用，让圆点颜色「有据可查」
+        const nodeStatusCount = {};
+        nodes.forEach((n) => {
+          const s = n && n.aniStatus;
+          if (s) {
+            nodeStatusCount[s] = (nodeStatusCount[s] || 0) + 1;
+          }
+        });
         return {
           planId: id,
           env: (data && data.aripExecEnv) || meta.env || "",
@@ -685,6 +753,10 @@ export default {
           planStart: data && data.aripExecPlanStart,
           planEnd: data && data.aripExecPlanEnd,
           flowCount: workflows.length,
+          // 圆点配色：该环境下所有节点的状态汇总（见 flowLayout.aggregateTone）
+          tone: aggregateTone(nodes),
+          nodeCount: nodes.length,
+          nodeStatusCount,
           loaded: !!data,
           stale: !!(item && item.stale),
         };
@@ -823,6 +895,48 @@ export default {
         projectRoleDisabled: this.isProjectRoleDisable,
       });
     },
+
+    /* ------------------------- 画布自动滚动 ------------------------- */
+
+    /**
+     * 是否有「操作弹窗 / 右键菜单」开着。
+     * 开着的时候一律不自动滚动 —— 用户正在对着某个节点做操作，
+     * 这时候把视野挪走，等于把人正在看的东西搬走了。
+     * 新增弹窗时**记得加进来**（判漏了不会报错，只会偶尔抢视野）。
+     */
+    anyDialogOpen() {
+      return (
+        this.menu.visible ||
+        this.silence.visible ||
+        this.detail.visible ||
+        this.atomConfirm.visible ||
+        this.sms.visible ||
+        this.execUser.visible
+      );
+    },
+    /**
+     * 自动滚动要盯住的那个节点：**报错 > 执行中 > 待确认 > 挂起**。
+     *
+     * 这四档正好是「需要人看」的四种形态，顺序与 flowLayout.aggregateTone 的
+     * AGG_TONE_PRIORITY **刻意保持一致** —— 这样环境 chip 圆点的颜色和画布会居中的那个节点
+     * 指向同一件事，圆点变色时画布也一定跟着过去了，两边不会互相打脸。
+     *
+     * 报错 / 待确认 / 挂起这三档都会一直命中（状态不会自己消失），
+     * 所以页面自然就「停在那儿」不再往下走，正好是用户要的效果。
+     * 四档都没有（流还没开始 / 已经跑完）-> 返回 null，**不滚动**，保持用户当前视野。
+     */
+    autoScrollNode() {
+      const flow = this.currentFlow;
+      if (!flow || !flow.graph.nodes.length) {
+        return null;
+      }
+      const pick = (tone) =>
+        flow.graph.nodes.find((n) => statusTone(n.node.aniStatus) === tone) ||
+        null;
+      return (
+        pick("bad") || pick("run") || pick("confirm") || pick("stop") || null
+      );
+    },
   },
   created() {
     this.incomingSys = String(this.$route.query.sys || "");
@@ -837,6 +951,10 @@ export default {
     this.stopPolling();
     // 页面被销毁时明细弹窗的自动刷新也必须停 —— 否则定时器会跟着组件一起被丢掉引用
     this.stopDetailAutoRefresh();
+    if (this.autoScrollSettleTimer) {
+      clearTimeout(this.autoScrollSettleTimer);
+      this.autoScrollSettleTimer = null;
+    }
     document.removeEventListener("visibilitychange", this.onVisibilityChange);
   },
   watch: {
@@ -848,6 +966,7 @@ export default {
       this.results = [];
       this.selectedPlanId = null;
       this.selectedFlowKey = null;
+      this.lastUserScrollAt = 0;
       this.closeMenu();
       this.closeSilence();
       this.closeDetail();
@@ -858,6 +977,18 @@ export default {
     selectedPlanId() {
       this.ensureFlowSelection();
       this.closeMenu();
+      // 换环境是用户主动换视野：上一次的滚动记录不该继续压着自动滚动
+      this.lastUserScrollAt = 0;
+      this.scheduleAutoScroll();
+    },
+    /*
+      切换流 = 换了一张图，必须重新定位。
+      换图之后画布内容整体换掉，浏览器可能把 scrollTop 夹回范围内 ——
+      所以这里不能只看「用户滚没滚过」，直接清零滚动记录，强制重新居中一次。
+    */
+    selectedFlowKey() {
+      this.lastUserScrollAt = 0;
+      this.scheduleAutoScroll();
     },
     // 菜单打开期间节点被刷没了（流被替换 / 计划失败被清空），收起菜单
     menuNode(node) {
@@ -927,6 +1058,8 @@ export default {
           this.refreshing = false;
           // 数据换了一批 -> 选中的环境 / 流可能已经不存在了，兜一次
           this.ensureSelection();
+          // 首屏 / 轮询都可能让「执行中」的节点换位置，渲染完再决定要不要跟过去
+          this.scheduleAutoScroll();
         }
       }
     },
@@ -980,6 +1113,8 @@ export default {
         `执行计划 ID：${env.planId}`,
         env.status ? `计划状态：${this.statusText(env.status)}` : "",
         env.loaded ? `${env.flowCount} 条流` : "详情加载中…",
+        // 圆点配色的依据：该环境下所有流的节点状态分布
+        this.envNodeDistText(env),
       ];
       if (env.planStart || env.planEnd) {
         lines.push(`计划时间：${env.planStart || "—"} → ${env.planEnd || "—"}`);
@@ -996,6 +1131,151 @@ export default {
     selectFlow(flow) {
       this.selectedFlowKey = flow.key;
       this.closeMenu();
+    },
+    /**
+     * 环境 chip 悬停里的「节点状态：执行中 2 · 成功 12 · 失败 1」一行。
+     * 中文一律走字典（this.statusText），本文件不维护状态中文表 ——
+     * 否则字典一改，这里就成了第二份会漂移的真值。
+     * 排序按 TONE_ORDER（越需要人看的越靠前），同 tone 内按状态值字典序，保证顺序稳定。
+     */
+    envNodeDistText(env) {
+      const counts = env.nodeStatusCount || {};
+      const values = Object.keys(counts);
+      if (!values.length) {
+        return "";
+      }
+      values.sort((a, b) => {
+        const ta = TONE_ORDER.indexOf(statusTone(a));
+        const tb = TONE_ORDER.indexOf(statusTone(b));
+        return ta === tb ? String(a).localeCompare(String(b)) : ta - tb;
+      });
+      return (
+        `节点状态：` +
+        values.map((v) => `${this.statusText(v)} ${counts[v]}`).join(" · ")
+      );
+    },
+
+    /* --------------------------- 画布自动滚动 --------------------------- */
+    /*
+      目标：把「需要人看」的节点带到画布视野中间，用户不用自己追着滚。
+      三条约束（用户明确要求）：
+        ① 用户自己滚过之后 20 秒内不动视野（AUTO_SCROLL_HOLD_MS）—— 别和用户抢滚动条
+        ② 目标节点按 报错 > 执行中 > 待确认 > 挂起 挑（见 autoScrollNode）
+        ③ 操作弹窗 / 右键菜单开着时不动（见 anyDialogOpen）
+
+      怎么区分「用户滚的」和「程序滚的」——**只看输入事件，不看 scroll 事件**：
+        滚轮 / 触摸 / 键盘 / 拖滚动条 都是人的动作，直接记时间戳；
+        程序化平滑滚动和「内容变化导致浏览器夹 scrollTop」产生的 scroll 事件不记。
+        这条很关键：轮询每 3 秒刷新一次内容，如果按 scroll 事件记，
+        每次刷新都可能被误判成「用户刚滚过」，自动滚动就永远冻着不动了。
+    */
+
+    /** 用户主动滚动：滚轮 / 触摸 / 键盘（画布拿到焦点时） */
+    markUserScroll() {
+      this.lastUserScrollAt = Date.now();
+    },
+    /**
+     * 键盘滚动也算用户主动滚动 —— 但只认**真的会滚动**的那几个键。
+     * 画布拿到焦点时按 Tab / 字母键也会冒 keydown，那不该把自动滚动冻 20 秒。
+     */
+    onCanvasKeydown(e) {
+      const keys = [
+        "ArrowUp",
+        "ArrowDown",
+        "PageUp",
+        "PageDown",
+        "Home",
+        "End",
+        " ",
+        "Spacebar",
+      ];
+      if (keys.indexOf(e.key) !== -1) {
+        this.markUserScroll();
+      }
+    },
+    /**
+     * 拖滚动条也算用户主动滚动。
+     * mousedown 落在「元素 padding box 之外、offset 之内」的那条就是滚动条：
+     * offsetWidth - clientWidth = 纵向滚动条宽，offsetHeight - clientHeight = 横向滚动条高。
+     * 用 clientX/clientY 相对 rect 算，不依赖 e.target —— 点在滚动条上时 target 才是容器本身。
+     */
+    onCanvasMousedown(e) {
+      const el = e.currentTarget;
+      if (!el) {
+        return;
+      }
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const barW = el.offsetWidth - el.clientWidth;
+      const barH = el.offsetHeight - el.clientHeight;
+      const onVBar = barW > 0 && x >= el.clientWidth;
+      const onHBar = barH > 0 && y >= el.clientHeight;
+      if (onVBar || onHBar) {
+        this.markUserScroll();
+      }
+    },
+    /**
+     * 数据变了之后排一次自动滚动。
+     * 必须等 $nextTick：图是 computed 算出来的，DOM 要等这一轮渲染完才更新，
+     * 提前量的话读到的是旧的 scrollHeight / 旧的节点坐标。
+     */
+    scheduleAutoScroll() {
+      this.$nextTick(() => this.autoScrollToFocusNode());
+    },
+    /**
+     * 把 autoScrollNode 那个节点滚到视野中间。
+     * 纵向为主（简版的流程图是**从上到下**的，纵向才是主轴）。
+     * 任何一条约束不满足就直接返回，什么都不做 —— 静默让位，不提示、不闪烁。
+     */
+    autoScrollToFocusNode() {
+      const canvas = this.$refs.flowCanvas;
+      if (!canvas) {
+        return;
+      }
+      // ② 弹窗 / 菜单开着：不抢视野
+      if (this.anyDialogOpen) {
+        return;
+      }
+      // ③ 用户 20 秒内自己滚过：让位
+      if (Date.now() - this.lastUserScrollAt < AUTO_SCROLL_HOLD_MS) {
+        return;
+      }
+      const target = this.autoScrollNode;
+      if (!target) {
+        return;
+      }
+      const graphEl = canvas.querySelector(".flow-graph");
+      if (!graphEl) {
+        return;
+      }
+      // 把 .flow-graph 顶边换算到画布的滚动坐标系里（画布有 padding，不能直接拿 offsetTop）
+      const canvasRect = canvas.getBoundingClientRect();
+      const graphRect = graphEl.getBoundingClientRect();
+      const graphTop = graphRect.top - canvasRect.top + canvas.scrollTop;
+      // 节点是绝对定位在 .flow-graph 里的，y/h 就是它相对图顶边的坐标
+      const nodeCenter = graphTop + target.y + target.h / 2;
+      const max = Math.max(0, canvas.scrollHeight - canvas.clientHeight);
+      const top = Math.max(
+        0,
+        Math.min(max, Math.round(nodeCenter - canvas.clientHeight / 2))
+      );
+      // 已经在差不多的位置（目标没动）-> 不动，免得每轮轮询都蠕一下
+      if (Math.abs(top - canvas.scrollTop) < AUTO_SCROLL_MIN_DELTA) {
+        return;
+      }
+
+      canvas.scrollTo({ top, behavior: "smooth" });
+      if (this.autoScrollSettleTimer) {
+        clearTimeout(this.autoScrollSettleTimer);
+      }
+      this.autoScrollSettleTimer = setTimeout(() => {
+        this.autoScrollSettleTimer = null;
+        const el = this.$refs.flowCanvas;
+        if (el && Math.abs(el.scrollTop - top) > 2) {
+          this.lastUserScrollAt = Date.now();
+        }
+      }, AUTO_SCROLL_SETTLE_MS);
     },
 
     /* --------------------------- 轮询控制 --------------------------- */
