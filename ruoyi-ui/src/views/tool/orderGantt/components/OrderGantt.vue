@@ -99,16 +99,17 @@
             :style="{ top: g.separatorTop + 'px' }"
           />
 
-          <!-- 分组标签：每个分组**上方**一条「MANUAL 手动 · N 条」/「AUTO 自动 · N 条」。
+          <!-- 分组标签：每个分组**上方**一条「MANUAL 手动 · N 单」/「AUTO 自动 · N 单」。
                y 由 ganttLayout 算好（chipTop）—— 组件不自己算，否则和行高反推对不上。
-               z-index 比矩形高，保证标签永远压得住底下的柱体。 -->
+               z-index 比矩形高，保证标签永远压得住底下的柱体。
+               ⚠️ 量词是「单」不是「条」（2026-09-24 用户要求）：这里数的是**工单**。 -->
           <span
             v-for="g in chips"
             :key="'chip-' + g.key"
             class="og__sep-chip"
             :style="{ top: g.chipTop + 'px' }"
           >
-            {{ g.label }} · {{ g.count }} 条
+            {{ g.label }} · {{ g.count }} 单
           </span>
 
           <!-- 「现在」竖线 -->
@@ -192,7 +193,11 @@
 
       <!-- detail 是**对象数组**（字段固定 type / count / type_cost），用表格展示。
            表头直接取 key 名，不翻译 —— 用户明确要求「表头就用 key 值就可以了」。
-           列不写死：从数据里取 key 的并集，以后后端加字段不用改这里。 -->
+           列不写死：从数据里取 key 的并集，以后后端加字段不用改这里。
+
+           2026-09-24：type 单元格里铺一条**占比进度条**（type_cost / 工单 total_cost），
+           条长按比例、每行一种颜色，文字压在条上 —— 用户要求照参考图来。
+           条是绝对定位的，**不参与布局**，所以气泡高度和加之前一模一样。 -->
       <div class="og-tip__detail">
         <table v-if="detailColumns.length" class="og-tip__table">
           <thead>
@@ -213,7 +218,14 @@
                 :key="c.key"
                 :class="{ 'is-num': c.num }"
               >
-                {{ formatCell(row[c.key]) }}
+                <div class="og-tip__cell">
+                  <span
+                    v-if="c.key === barColumnKey && rowRatio(row) > 0"
+                    class="og-tip__bar"
+                    :style="rowBarStyle(row, ri)"
+                  />
+                  <span class="og-tip__celltext">{{ formatCell(row[c.key]) }}</span>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -328,6 +340,30 @@ const TIP_CLOSE_DELAY = 220
  */
 const TIP_KEEP_PAD = 10
 const EDGE = 8
+
+/* ------------------------------------------------- 气泡表格的占比进度条
+ * 2026-09-24 用户要求：悬浮气泡的明细表里，给 `type` 单元格铺一条占比进度条，
+ * 条长表示 `type_cost` 占该工单 `total_cost` 的比例，**每行一种颜色**（照参考图）。
+ * ------------------------------------------------------------------ */
+/** 分子字段：该项耗时 */
+const BAR_COST_KEY = 'type_cost'
+/** 进度条铺在哪一列上（用户要求「type 单元格背景条」） */
+const BAR_BASE_KEY = 'type'
+/**
+ * 进度条配色，**按行号循环取**（用户要求每行不同颜色）。
+ *
+ * 都是「高明度填充 + 同色系描边」：type 的文字（--og-text #1f2937）是压在条上的，
+ * 填充一深文字就糊了，所以轮廓靠描边给、不靠加深填充。
+ * 深字 on 这几个填充的对比度都在 12:1 以上，怎么换行都读得清。
+ */
+const BAR_PALETTE = [
+  { fill: '#c8f0d9', line: '#6ecd96' }, // 绿
+  { fill: '#fbd8e3', line: '#f090b1' }, // 粉
+  { fill: '#fdeec2', line: '#e7c356' }, // 黄
+  { fill: '#fddfc3', line: '#eea568' }, // 橙
+  { fill: '#c9ebec', line: '#63c5c8' }, // 青
+  { fill: '#dcd8f8', line: '#a396ea' } // 紫
+]
 
 /* ------------------------------------------------------- 柱体文字量宽
  * 柱体上的工单号「要么完整、要么不显示」（用户明确要求），所以必须知道文字的
@@ -491,7 +527,7 @@ export default {
       return this.groups.filter((g) => g.separatorTop !== null)
     },
     /**
-     * 分组标签条：每个分组上方一条「MANUAL 手动 · N 条」/「AUTO 自动 · N 条」。
+     * 分组标签条：每个分组上方一条「MANUAL 手动 · N 单」/「AUTO 自动 · N 单」。
      * 位置由 ganttLayout 算（chipTop），这里只过滤 —— 组件不自己算几何。
      */
     chips() {
@@ -546,6 +582,33 @@ export default {
           (r) => r[k] === null || r[k] === undefined || typeof r[k] === 'number'
         )
       }))
+    },
+    /**
+     * 占比进度条铺在**哪一列**上。
+     *
+     * 用户要求「铺在 type 单元格里当背景」。列本身是动态的（detailColumns 取 key 并集），
+     * 所以这里也按 key 找而不是按列序号：有 `type` 就用 `type`，
+     * 万一后端换了字段名就退到第一列（进度条总得有个落脚处），一列都没有（空表）就不画。
+     */
+    barColumnKey() {
+      const cols = this.detailColumns
+      if (!cols.length) {
+        return ''
+      }
+      const hit = cols.filter((c) => c.key === BAR_BASE_KEY)[0]
+      return hit ? hit.key : cols[0].key
+    },
+    /**
+     * 占比的**分母** = 该工单的 `total_cost`（用户明确指定「占总cost比例」）。
+     *
+     * 取 bar 的 `durationMinutes` 而不是 `raw.total_cost`：`resolveSpan()` 里
+     * 「total_cost > 0 就按它算」，所以正常情况两者就是同一个数；
+     * 而 total_cost 缺失时 durationMinutes 会回退成起止时间差 ——
+     * 总比拿 0 当分母（整个表一条进度条都没有）强。
+     */
+    hoverBaseCost() {
+      const d = this.hover && this.hover.durationMinutes
+      return typeof d === 'number' && d > 0 ? d : 0
     },
     hoverBeginText() {
       return this.hover ? formatDateTimeShort(this.hover.start) : ''
@@ -800,6 +863,38 @@ export default {
       }
       return String(v)
     },
+    /**
+     * 一行明细的占比 = `type_cost` / 工单 `total_cost`，**封顶 1**。
+     *
+     * ⚠️ 封顶不能省：真实数据里 CHGU-20260909-0086 的 `total_cost` 是 30，
+     *    而它 detail 的 type_cost 合计有 50（单行暂时没超 30，但后端再给大一点就会超），
+     *    不封顶进度条会画到单元格外面去。
+     * 拿不到分子 / 分母（字段缺失、类型不对）时返回 0 —— 调用方据此不画条，
+     * 而不是画一条 0 宽的线。
+     */
+    rowRatio(row) {
+      const base = this.hoverBaseCost
+      const cost = row ? row[BAR_COST_KEY] : null
+      if (!(base > 0) || typeof cost !== 'number' || !(cost > 0)) {
+        return 0
+      }
+      return Math.min(1, cost / base)
+    },
+    /**
+     * 进度条的宽度 + 配色（宽度必须是百分比，交给 CSS 定位）。
+     *
+     * 百分比宽度的包含块是 `.og-tip__cell`（宽度 = 单元格内容宽），所以
+     * 「100%」正好铺满 `type` 那一列 —— 和参考图的观感一致。
+     * 颜色按**行号**循环取（`ri` 是 detailRows 的下标），同一行始终同一个颜色。
+     */
+    rowBarStyle(row, index) {
+      const tone = BAR_PALETTE[index % BAR_PALETTE.length]
+      return {
+        width: (this.rowRatio(row) * 100).toFixed(2) + '%',
+        background: tone.fill,
+        borderColor: tone.line
+      }
+    },
     tickStyle(tick) {
       const half = 26
       let transform = 'translateX(-50%)'
@@ -969,22 +1064,24 @@ export default {
   --og-text-2: #5b6b82;
   --og-text-3: #97a3b6;
 
-  /* ---- 分组配色：**AUTO = 蓝，MANUAL 手动 = 绿** ----
+  /* ---- 分组配色：**AUTO 自动 = 绿，MANUAL 手动 = 蓝**（2026-09-24 用户要求对调） ----
+     ⚠️ 只对调「颜色值」，**变量名不改** —— --og-auto-* 永远代表自动组，
+        图例 / 分组底色 / 柱体 / 气泡圆点全都引变量，对调后四处自动跟着变。
      两组都是「浅 → 中」的渐变，深端只到 400 档（原来用了 600 档，观感偏浓）。
      ⚠️ 底色浅到这个程度，**柱体上的白字是读不出来的**：
         白 on #a7f3d0 只有 1.44:1、白 on #34d399 只有 1.92:1（连 3:1 都不到）。
      所以文字改用同色系的深色 --og-*-ink，沿渐变从浅端走到深端：
-        手动 5.99 → 4.00，自动 7.29 → 3.73，全程 >= 3.7，是原来白字的三倍左右。
+        自动（绿）5.99 → 4.00，手动（蓝）7.29 → 3.73，全程 >= 3.7，是原来白字的三倍左右。
      两个 ink 的感知亮度刻意贴近（WCAG 相对亮度 0.087 / 0.051，差 0.035），两组并排时不会一边重一边轻。 */
-  --og-manual-a: #a7f3d0; /* 薄荷浅 */
-  --og-manual-b: #34d399; /* 绿 · 主色 */
-  --og-manual-ink: #065f46; /* 柱体文字 · 深祖母绿 */
-  --og-manual-soft: rgba(52, 211, 153, 0.055); /* 分组底色 */
+  --og-auto-a: #a7f3d0; /* 薄荷浅 */
+  --og-auto-b: #34d399; /* 绿 · 主色 */
+  --og-auto-ink: #065f46; /* 柱体文字 · 深祖母绿 */
+  --og-auto-soft: rgba(52, 211, 153, 0.055); /* 分组底色 */
 
-  --og-auto-a: #bfdbfe; /* 天蓝浅 */
-  --og-auto-b: #5b9cf8; /* 蓝 · 主色 */
-  --og-auto-ink: #1e3a8a; /* 柱体文字 · 深靛蓝 */
-  --og-auto-soft: rgba(91, 156, 248, 0.05);
+  --og-manual-a: #bfdbfe; /* 天蓝浅 */
+  --og-manual-b: #5b9cf8; /* 蓝 · 主色 */
+  --og-manual-ink: #1e3a8a; /* 柱体文字 · 深靛蓝 */
+  --og-manual-soft: rgba(91, 156, 248, 0.05);
 
   /* 时间轴 / 日期带的强调色（跟分组色无关，是「今天 / 整点」这类结构线） */
   --og-accent: #2563eb;
@@ -1453,13 +1550,16 @@ export default {
   font-weight: 500;
   letter-spacing: 0.3px;
 
-  /* 底色比柱体浅得多，方便当「标签」读；文字用同色系的深色 */
-  &.is-manual {
+  /* 底色比柱体浅得多，方便当「标签」读；文字用同色系的深色。
+     ⚠️ 这两组是**硬编码**的（不是变量），所以 2026-09-24 对调分组配色时
+        必须手动跟着换 —— 忘了就会出现「绿柱子配蓝 AUTO 徽标」。
+        og_scss.mjs 现在按色相钉住了它们，下次改配色会直接报错。 */
+  &.is-auto {
     background: #e9f9f1;
     color: #1f9d6b;
   }
 
-  &.is-auto {
+  &.is-manual {
     background: #eaf2ff;
     color: #2f7ff0;
   }
@@ -1575,6 +1675,38 @@ export default {
   th.is-num {
     padding-right: 8px;
   }
+}
+
+/* ---- 占比进度条（2026-09-24）：铺在 type 单元格里当背景，文字压在条上 ----
+   条长 = type_cost / 工单 total_cost，宽度由行内 style 给（百分比）。
+
+   ⚠️ `.og-tip__cell` 必须是 position: relative：条是绝对定位的，百分比宽度要参照
+      **单元格**；不写的话最近的定位祖先会落到气泡本身（position: fixed），
+      条会长得比单元格还宽、跑到隔壁列去。
+   ⚠️ 条用绝对定位是刻意的：这样它**完全不参与布局**，
+      加进度条前后气泡高度一模一样（气泡高度直接决定悬浮位置，不能变）。 */
+.og-tip__cell {
+  position: relative;
+}
+
+.og-tip__bar {
+  position: absolute;
+  /* 上下各探出 3px 盖住整行（td 内边距是 5px，留 2px 余量免得贴到行分隔线），
+     左边和文字对齐，不往左探 —— 探出去会盖住相邻单元格的留白。 */
+  left: 0;
+  top: -3px;
+  bottom: -3px;
+  z-index: 0;
+  box-sizing: border-box;
+  min-width: 2px;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+/* 文字必须在条之上（条是 z-index: 0 的背景） */
+.og-tip__celltext {
+  position: relative;
+  z-index: 1;
 }
 
 .og-tip__nodetail {

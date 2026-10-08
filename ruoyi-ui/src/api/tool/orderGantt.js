@@ -36,7 +36,13 @@ function mockApi(name, ...args) {
  *
  * ⚠️ 路径待确认（占位）
  * POST /python/api/cicd/orderList
- * 入参：{ systemId?, beginTime?, endTime? } —— 具体字段以联调为准
+ * 入参：{ date } —— 'YYYY-MM-DD'，页面弹窗里的日期选择器直接传过来
+ *       （默认**当天**，见 views/tool/orderGantt/index.vue 的 defaultDate）
+ *
+ * ⚠️ **下面的 mock 分支刻意不按 `date` 过滤**：
+ *    那 3 条样例工单的时间是 09-17 / 09-18，而默认日期是「今天」，
+ *    一旦真过滤，页面上永远是「未取到任何工单数据」、弹窗都打不开。
+ *    所以别顺手给它加过滤 —— 要看过滤效果请接真实接口（USE_MOCK = false）。
  *
  * 返回：{ code, msg, data: [ ... ] }
  *   data 里每条：
@@ -62,7 +68,7 @@ function mockApi(name, ...args) {
  *    **以 total_cost 为准（beginTime + total_cost 分钟），endTime 仅作兜底**。
  *    `endTime` 不代表工单实际占用的时间，只按它画会把矩形拉长一倍多。要改规则只改那一处。
  *
- * @param {Object} [params] 查询参数
+ * @param {Object} [params] 查询参数，`{ date: 'YYYY-MM-DD' }`
  * @returns {Promise<{code, msg, data}>}
  */
 export function getOrderList(params) {

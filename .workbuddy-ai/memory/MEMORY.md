@@ -8,6 +8,10 @@
 - **`code: 0` 能过拦截器是巧合**（`utils/request.js` 是 `res.data.code || 200`）；python `func/*` 成功码就是 0，**别判 `code === 200`**。
 - **取载荷一律走 `pickPayload(res)`**：载荷可能在 `data` 也可能在 `rows`，`data` 非 undefined/null 就用它（**`[]`/`''`/`0`/`false` 都算有值，别用 `||` 判**）；页面里**不许出现裸 `res.data`/`res.rows`**。
 
+## Element 弹窗两个通用坑（跨页面复用）
+- ⚠️ **`append-to-body` 的弹窗里，写在页面根节点的 CSS 变量继承不到**：弹窗 DOM 被挪到 `body` 下，不再是页面组件的后代。要用 `--xxx` 就在弹窗内容自己的包裹层上**再声明一份**，否则 `var(--xxx)` 静默失效（边框消失、颜色退回默认）。
+- ⚠️ **`el-dialog` 里放 `el-date-picker`（或任何带下拉面板的组件），Esc 会把整个弹窗关掉**：面板的 Esc 由组件自己的 `handleKeydown` 处理并 `stopPropagation`，**但前提是焦点在那个 input 上**；焦点不在时 Esc 直接冒到 `document`，被弹窗接走。⇒ 弹窗加 `:close-on-press-escape="false"`（和 `:close-on-click-modal="false"` 一个意思：别让误触把整页状态关掉）。
+
 ## CSS 两个通用坑
 - ⚠️ **全局元素选择器会漏进 scoped 组件**：`assets/styles/index.scss:99` 的 `aside { padding:8px 24px; margin-bottom:20px; line-height:32px; font-size:16px }` 会命中组件里的 `<aside>`。**特异性只对「双方都声明过的属性」生效**，没声明的照样吃全局值（`margin-bottom:20px` 会让 `stretch` 高度被扣 20px）。**scoped 里把这四个属性一起显式重置**。
 - ⚠️ **表格底线靠 `.el-table::before`**（`--border` 变体自身 `border-bottom:none`）。**绝不能给它 `display:none`**，否则底部敞口。
@@ -27,7 +31,8 @@
 - ⚠️ **文档 iframe 是跨源的**（`10.2.64.36:8121`），父页面**碰不到里面**（`contentWindow`/`contentDocument` 被同源策略挡）⇒ 横向滚动只能靠「把 iframe 撑得比容器宽、让父容器出横条」：`.esp-doc__frame { overflow: auto }`（**绝不能**改回 `hidden`）+ `iframe { min-width: 1440px }`。**纵向滚动仍在 iframe 内部**，别想着挪出来。
 
 ## 工单甘特图（orderGantt）
-- ⚠️ **矩形宽度只认 `total_cost`**：结束时间 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求），判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`。**改这个页面前读 `REF-order-gantt.md`**（硬规则 7 条、气泡可达性、分组标签条 chip、柱体文字「完整或没有」、11 个校验脚本）。
+- ⚠️ **矩形宽度只认 `total_cost`**：结束时间 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求），判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`。**改这个页面前读 `REF-order-gantt.md`**（硬规则 9 条、气泡可达性、分组标签条 chip、柱体文字「完整或没有」、气泡占比进度条、弹窗**日期**过滤条 `date`、16 个校验脚本）。
+- 配色（2026-09-24 用户要求对调）：**AUTO 自动 = 绿，MANUAL 手动 = 蓝**；变量名不变、只换值，但气泡 `.og-tip__mode` 徽标是**硬编码**的要手动跟。分组标签条量词是「**单**」不是「条」。
 
 ## 校验 / 协作
 - node 校验：`cd C:/Users/lenovo/AppData/Local/Temp && node --experimental-loader ./resolve_ext_loader.mjs ./test_xxx.mjs`；浏览器像素校验见技能 `ruoyi-ui-node-verify`。**dev server 日志认人**：根目录 `frontend.log` 是旧的，真正在写的是 `ruoyi-ui/npm-dev.log`。

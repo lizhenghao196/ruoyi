@@ -39,10 +39,16 @@
    - ⚠️ **可用高度里必须扣掉标签条**（见 §1.6）：`fitRowPlan` 与 `buildLayout` 共用 `groupStripHeights()`，
      两边各算一套的话行高会偏大，整图正好多出一条标签条的高度、底部工单被 `overflow-y: hidden` 裁掉。
    - ⚠️ 弹窗选择器写 `.el-dialog.ogp-dialog`（0,2,0），单独 `.ogp-dialog` 压不过 element-ui 的 `margin`（同特异性只看打包顺序）。
-3. **配色：AUTO = 蓝，手动 / 其他 = 绿**（`--og-auto-*` / `--og-manual-*`，图例/气泡/柱体全走变量）。
-   `og_scss.mjs` 按**色相 + 明度**钉住了，别把两组调换回去。
-   - ⚠️ **柱体上不能放白字**（2026-09-22）：底色是浅→中的渐变，白字对比度只有 1.4~1.9，用户反馈过两次。
-     文字色走 `--og-manual-ink: #065f46` / `--og-auto-ink: #1e3a8a`（`.og-bar.is-manual/.is-auto` 映射到 `--og-bar-text`），
+3. **配色：AUTO 自动 = 绿，MANUAL 手动 = 蓝**（2026-09-24 用户要求**对调**，此前是反的）。
+   变量名**不改**、只换颜色值（`--og-auto-*` 永远代表自动组），
+   图例圆点 / 分组底色 / 柱体 / 气泡圆点全走变量，对调后自动跟着变。
+   ⚠️ 但气泡里 `.og-tip__mode` 的 `is-auto` / `is-manual` 徽标底色是**硬编码**的（`#e9f9f1` / `#eaf2ff`），
+   对调时必须手动跟着换 —— 09-24 就漏过一次（绿柱子配蓝 AUTO 徽标）。
+   `og_scss.mjs` 按**色相 + 明度**钉住了两组配色（AUTO 徽标必须绿系、MANUAL 徽标必须蓝系），
+   别把两组调换回去。
+     - ⚠️ **柱体上不能放白字**（2026-09-22）：底色是浅→中的渐变，白字对比度只有 1.4~1.9，用户反馈过两次。
+     文字色走 `--og-auto-ink: #065f46`（深祖母绿）/ `--og-manual-ink: #1e3a8a`（深靛蓝）
+     （`.og-bar.is-auto/.is-manual` 映射到 `--og-bar-text`），
      沿渐变最差 4.00 / 3.73，是白字的 3 倍。深色字**不要再挂 text-shadow**（白字时代才需要，会把边缘糊脏）。
 4. **悬浮气泡必须紧贴矩形、鼠标能走到气泡上**（气泡里有明细表，走不过去等于白做）：
    - 定位读**渲染后量到的真实高度** `tipSize.h`（估算常量只当兜底）—— 用估算值算 `top`，矮气泡会离矩形 150px。
@@ -88,6 +94,27 @@
      这是用户明确要的（完整信息在悬浮气泡里），但每次改完要报一下实际条数。
    - ⚠️ 别退回 `slice(-4)` 或 `text-overflow: ellipsis` —— 半截工单号（`CHGU-20260909-0…` / `0086`）比不写更容易误读。
 
+8. **气泡明细表里 `type` 单元格有「占比进度条」**（2026-09-24 用户要求，照参考图）：
+   - 条长 = `type_cost` / 工单 **`total_cost`**（用户点名的分母，**不是** `sum(type_cost)`），**封顶 1**。
+     真实样例 `CHGU-20260909-0086` 的 `total_cost` 是 30、detail 合计 50（30/15/5）→ 第一行正好 100%（封顶在起作用）。
+   - 分母取 `bar.durationMinutes` 而**不是** `raw.total_cost`：`resolveSpan()` 里「total_cost > 0 就按它算」，
+     正常情况两者是同一个数；`total_cost` 缺失时它还能回退成起止时间差，不会整张表一条条都不画。
+   - 铺在 **`type` 列**（`barColumnKey`：有 `type` 用 `type`，没有就退到第一列），
+     **每行一种颜色**（`BAR_PALETTE` 6 色循环）。调色板都是「高明度填充 + 同色系描边」——
+     `type` 文字（`--og-text` #1f2937）是**压在条上**的，填充一深就糊；实测最差对比度 10.6。
+   - ⚠️ 条必须 `position: absolute`，且 `.og-tip__cell` 必须 `position: relative`：
+     前者保证**加进度条前后气泡高度一模一样**（气泡高度直接决定悬浮位置，一变鼠标就走不过去）；
+     后者是百分比宽度的包含块 —— 少了它最近的定位祖先是 `.og-tip`（`position: fixed`），
+     条会按 420px 解析、比单元格宽 4 倍（实测 26% 的条看着像铺满）。
+   - ⚠️ 静态预览（`og_preview*.mjs`）的 `renderDetailTable` 必须同步同一套规则，
+     调色板**从组件源码正则抠**（不自己抄一份），否则预览会骗人。
+
+9. **分组标签条的量词是「单」不是「条」**（2026-09-24 用户要求）：
+   `{{ g.label }} · {{ g.count }} 单` → 「MANUAL 手动 · 2 单」。
+   ⚠️ 只改**标签条**这一处。页面上另外两处带「条」的文案（弹窗标题 `N 条工单`、
+   卡片提示 `已获取 N 条工单`）用户没让改，别顺手动 —— 「3 条工单」本来就是通顺的。
+   `og_check_labels.mjs` / `og_preview*.mjs` 里的同款文案已同步。
+
 ## 2. 边缘与几何
 
 - **任何「有宽度的东西」都不能画在 `x === plotWidth` 上**：`alignDomain` 保证最后一个刻度恰好落在 plotWidth，
@@ -111,6 +138,18 @@
 | `og_verify_browser.mjs` | 真实浏览器：`scrollWidth === clientWidth` 才算「不滚动」 |
 | `og_verify_tip.mjs` | 气泡可达性（真实浏览器，含「分步移动鼠标走过去」「停在缝里 700ms」） |
 | `og_shot_ink.mjs` | 开预览 HTML 截柱体文字，`deviceScaleFactor:2` |
+| `og_syntax_check.mjs` | **进程内**跑 SFC 模板 + 脚本语法（不 spawn 子进程）+ 进度条四件套 / 调色板对比度 |
+| `og_shot_tipbar.mjs` | 两个静态预览：配色对调（AUTO 绿 / MANUAL 蓝）+ 进度条宽度比例 + 截 `.og-tip` |
+| `og_probe_tipbar_live.mjs` | **真实浏览器 + 真实页面**：登录 → `/tool/orderGantt` → 查看 → 悬浮 AUTO 矩形，核对配色与进度条（100/50/16.67%）+ 截图 |
+| `og_filter_check.mjs` | 弹窗日期过滤条（`index.vue`）：模板/接线源码断言（`type="date"` / `value-format` / 传参 `{ date }` / 不再出现 `beginTime`）+ **真实执行 `defaultDate()`**（注入假 Date 跑当天首末秒、月初、年末、年初 6 个边界） |
+| `og_probe_filter_live.mjs` | **真实浏览器 + 真实页面**：默认**当天**、是单日期不是 range、选择器可点开、Esc 只关面板不关弹窗、量词是「单」、**加了过滤条后甘特图仍不滚动**、换日期点搜索后弹窗仍在 |
+
+⚠️ **受限环境里 `og_verify.mjs` 会有 6 条假红**：它的语法检查走
+`execFileSync(process.execPath, ['--check', tmp])`，子进程被沙箱拒绝时报
+`spawnSync <node.exe> EBUSY`，于是 6 个文件一起报「语法错误」。
+判据：报错文本里是 `spawnSync` / `EBUSY` 而不是 `SyntaxError` + 行号。
+用 `og_syntax_check.mjs`（`vue-template-compiler` + `@babel/parser`，进程内）代替即可。
+除这 6 条外，`og_verify.mjs` 的其余断言必须全绿。
 
 ⚠️ 预览页（`og_preview*.mjs`）09-23 修掉三个**渲染器自身的坑**，之前一直让它「看起来有问题」：
 1. `.og` 的 `<div>` **没闭合**，后面的 `.stage`（气泡示例）被当成 `.og` 的 flex 子项，
@@ -128,3 +167,34 @@
 （不是文档注释里的 115）—— 它画出来只有 79px 宽，**放不下工单号，按新规则不显示文字**，不是 bug。
 
 ⚠️ `og_shot_ink.mjs` 截图前先把预览页 `.og__plotwrap` 撑开 —— 它只有 ~192px 高，蓝条会被裁在视口外。
+
+## 4. 弹窗里的日期过滤条（index.vue，2026-09-24 新增，同日改为单日期）
+
+**需求（最终形态）**：弹窗里加**日期**选择器，默认**当天**，传参字段名 **`date`**（`'YYYY-MM-DD'`），
+加搜索按钮，用户可自行改日期后就地重查。
+> 中途变过一次：最初要的是 `datetimerange`（默认「昨天 18:00 → 今天 08:00」，传 `beginTime` / `endTime`），
+> 随后用户改成「传日期了」→ 单日期 + `date`。**现在只有 `date`，`beginTime` / `endTime` 已全部移除。**
+
+- 默认值在 `index.vue` 的 `defaultDate()` 里算：`formatDate(new Date())`，取**本地**年月日，
+  不做时区换算 —— 页面显示的、传给后端的都是同一个本地日期。
+- 格式 `'YYYY-MM-DD'`：`el-date-picker` 的 `value-format="yyyy-MM-dd"`，
+  且与项目里其它 `date` 字段一致（`execPlan.js` / `execPlanSimple.js` 的样例就是 `'2026-08-07'`）。
+- ⚠️ **只在 `data()` 里算一次**（页面加载时刻）—— 刻意**不**在每次打开弹窗时重置，
+  否则用户选完日期、关掉再点「查看」就被悄悄改回去了。跨过 0 点不会自动变「新当天」，同理。
+- `:clearable="false"`：日期始终有值，不会发出空参数（真为空则只提示、不发请求）。
+- 「查看」和「搜索」共用 `fetchOrders()`，区别只是「搜索」时弹窗本来就开着。
+  查不到数据分两种：弹窗没开（首次查看）→ 只提示不开空弹窗；弹窗已开（搜索）→
+  **把 `orders` 清空**让图切空态（不能留着上一次的数据，那样图和上面选的日期对不上）。
+- ⚠️ **`.ogp-dialog__body` 这层包裹不能省**：弹窗 body 是 flex 容器，甘特图要「吃剩余高度」，
+  中间必须有个 `column flex + min-height: 0` 的父级把高度传下去，否则组件量到 0、行高反推失效。
+  实测加了过滤条后 `.og` 707 → 662px，`scrollWidth === clientWidth` 仍成立（不滚动）。
+- ⚠️ **`.ogp-dialog__body` 里要自己再声明一份 `--ogp-*` 变量**：弹窗是 `append-to-body` 的，
+  这层 DOM 挂在 `body` 下、**不在 `.ogp-page` 里面**，页面根节点上的变量继承不到（边框会直接消失）。
+- ⚠️ **弹窗必须加 `:close-on-press-escape="false"`**（实测踩过）：
+  日期面板的 Esc 由 `el-date-picker` 的 `handleKeydown` 处理（并 `stopPropagation`），
+  **但前提是焦点在那个 input 上**。焦点不在时 Esc 直接冒到 `document`，被弹窗接走 → 整个弹窗被关掉。
+  加了之后：面板开着按 Esc 只关面板、弹窗留着。
+- ⚠️ **mock 分支刻意不按 `date` 过滤**（见 `api/tool/orderGantt.js` 的注释）：
+  3 条样例工单是 09-17 / 09-18，默认日期是「今天」，一过滤就永远「未取到任何工单数据」、弹窗都打不开。
+  **别顺手给它加过滤。** 同理：因为走 mock，网络上观察不到请求体 ——
+  参数名的接线靠 `og_filter_check.mjs` 做源码级断言。

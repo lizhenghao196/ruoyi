@@ -699,7 +699,7 @@ export function buildLayout(items, options) {
   const autoPack = packRows(auto, { fromBottom })
 
   // AUTO 组永远在下面（y 更大）→ 贴近 x 轴。
-  // 每个分组前面先让出一段「标签条」（画「MANUAL 手动 · N 条」那个胶囊用），
+  // 每个分组前面先让出一段「标签条」（画「MANUAL 手动 · N 单」那个胶囊用），
   // 高度与 fitRowPlan 反推行高时用的是同一套（groupStripHeights）。
   const strips = groupStripHeights(manualPack.rowCount, autoPack.rowCount, groupGap)
   const manualStripTop = 0
