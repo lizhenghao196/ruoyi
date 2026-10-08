@@ -102,6 +102,11 @@
    - 铺在 **`type` 列**（`barColumnKey`：有 `type` 用 `type`，没有就退到第一列），
      **每行一种颜色**（`BAR_PALETTE` 6 色循环）。调色板都是「高明度填充 + 同色系描边」——
      `type` 文字（`--og-text` #1f2937）是**压在条上**的，填充一深就糊；实测最差对比度 10.6。
+   - ⚠️ **调色板里不许有红 / 玫红 / 粉**（2026-10-08 用户要求）：原来的第 2 色是粉
+     `#fbd8e3` / `#f090b1`，观感撞上本系统的「红色告警」语义 → 换成蓝 `#d6e6ff` / `#7ba7f5`。
+     现在 6 色 = **绿 蓝 黄 橙 青 紫**（色相 146/218/45/28/182/248°）。换色时避开暖红；
+     橙（28°）已偏暖，别再往上加红。`og_syntax_check.mjs` 新增**按色相**的防回归断言
+     （`<=20°` 或 `>=320°` 即判失败），换色会被它挡住。
    - ⚠️ 条必须 `position: absolute`，且 `.og-tip__cell` 必须 `position: relative`：
      前者保证**加进度条前后气泡高度一模一样**（气泡高度直接决定悬浮位置，一变鼠标就走不过去）；
      后者是百分比宽度的包含块 —— 少了它最近的定位祖先是 `.og-tip`（`position: fixed`），
@@ -138,7 +143,7 @@
 | `og_verify_browser.mjs` | 真实浏览器：`scrollWidth === clientWidth` 才算「不滚动」 |
 | `og_verify_tip.mjs` | 气泡可达性（真实浏览器，含「分步移动鼠标走过去」「停在缝里 700ms」） |
 | `og_shot_ink.mjs` | 开预览 HTML 截柱体文字，`deviceScaleFactor:2` |
-| `og_syntax_check.mjs` | **进程内**跑 SFC 模板 + 脚本语法（不 spawn 子进程）+ 进度条四件套 / 调色板对比度 |
+| `og_syntax_check.mjs` | **进程内**跑 SFC 模板 + 脚本语法（不 spawn 子进程）+ 进度条四件套 / 调色板对比度 + **调色板不含红粉（按色相）** |
 | `og_shot_tipbar.mjs` | 两个静态预览：配色对调（AUTO 绿 / MANUAL 蓝）+ 进度条宽度比例 + 截 `.og-tip` |
 | `og_probe_tipbar_live.mjs` | **真实浏览器 + 真实页面**：登录 → `/tool/orderGantt` → 查看 → 悬浮 AUTO 矩形，核对配色与进度条（100/50/16.67%）+ 截图 |
 | `og_filter_check.mjs` | 弹窗日期过滤条（`index.vue`）：模板/接线源码断言（`type="date"` / `value-format` / 传参 `{ date }` / 不再出现 `beginTime`）+ **真实执行 `defaultDate()`**（注入假 Date 跑当天首末秒、月初、年末、年初 6 个边界） |

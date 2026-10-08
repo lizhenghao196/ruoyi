@@ -33,6 +33,7 @@
 ## 工单甘特图（orderGantt）
 - ⚠️ **矩形宽度只认 `total_cost`**：结束时间 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求），判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`。**改这个页面前读 `REF-order-gantt.md`**（硬规则 9 条、气泡可达性、分组标签条 chip、柱体文字「完整或没有」、气泡占比进度条、弹窗**日期**过滤条 `date`、16 个校验脚本）。
 - 配色（2026-09-24 用户要求对调）：**AUTO 自动 = 绿，MANUAL 手动 = 蓝**；变量名不变、只换值，但气泡 `.og-tip__mode` 徽标是**硬编码**的要手动跟。分组标签条量词是「**单**」不是「条」。
+- 气泡明细表占比进度条调色板（`BAR_PALETTE`）：**不许有红 / 玫红 / 粉**（2026-10-08 用户要求，原第 2 色粉 `#fbd8e3`/`#f090b1` 撞告警红 → 换蓝 `#d6e6ff`/`#7ba7f5`）。现 6 色 = 绿蓝黄橙青紫；`og_syntax_check.mjs` 有按色相的防回归断言。
 
 ## 校验 / 协作
 - node 校验：`cd C:/Users/lenovo/AppData/Local/Temp && node --experimental-loader ./resolve_ext_loader.mjs ./test_xxx.mjs`；浏览器像素校验见技能 `ruoyi-ui-node-verify`。**dev server 日志认人**：根目录 `frontend.log` 是旧的，真正在写的是 `ruoyi-ui/npm-dev.log`。
