@@ -176,7 +176,16 @@
     >
       <div class="og-tip__head">
         <i class="og-tip__dot" :class="hover.auto ? 'is-auto' : 'is-manual'" />
-        <span class="og-tip__id">{{ hover.orderId }}</span>
+        <!-- 工单号：有 url 时渲染成蓝色超链接，点击新开浏览器 tab 访问（2026-10-12 用户要求）；
+             url 缺失（老数据 / 接口没给）时退化成纯文本，不摆一个点不动的假链接。 -->
+        <a
+          v-if="hoverUrl"
+          class="og-tip__id is-link"
+          :href="hoverUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >{{ hover.orderId }}</a>
+        <span v-else class="og-tip__id">{{ hover.orderId }}</span>
         <span class="og-tip__mode" :class="hover.auto ? 'is-auto' : 'is-manual'">
           {{ hover.mode }}
         </span>
@@ -622,6 +631,27 @@ export default {
     },
     hoverDurationText() {
       return this.hover ? formatDuration(this.hover.durationMinutes) : ''
+    },
+    /**
+     * 气泡里工单号的跳转地址（2026-10-12 用户要求：工单号变蓝色超链接，
+     * 点击**新开浏览器 tab** 访问）。
+     *
+     * url 取原始数据的 `url` 字段：`buildLayout()` 给每条 bar 挂了 `raw`（见
+     * ganttLayout.js），所以 mock / 真实接口给的 `url` 都能原样拿到，
+     * 不用往纯函数里加字段（那边只该管几何）。
+     *
+     * 返回空串 = 「不是链接」：模板据此渲染成纯文本 <span>。没有 url 的老数据、
+     * 或者后端给了非 http(s) 的怪值（`javascript:` 之类）都不该变成能点的链接 ——
+     * 前者点了没反应，后者是安全隐患。
+     */
+    hoverUrl() {
+      const raw = this.hover && this.hover.raw
+      const url = raw ? raw.url : null
+      if (typeof url !== 'string' || !url.trim()) {
+        return ''
+      }
+      const clean = url.trim()
+      return /^https?:\/\//i.test(clean) ? clean : ''
     },
     /**
      * 气泡位置。
@@ -1544,6 +1574,18 @@ export default {
   font-weight: 600;
   letter-spacing: 0.2px;
   color: var(--og-text);
+
+  /* 2026-10-12 用户要求：有 url 的工单号渲染成蓝色超链接（target="_blank" 新开 tab）。
+     颜色用 --og-accent（页面结构强调色 #2563eb），默认不带下划线、
+     悬停才加 —— 气泡里横线会跟明细表的分隔线抢视觉。 */
+  &.is-link {
+    color: var(--og-accent);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 .og-tip__mode {

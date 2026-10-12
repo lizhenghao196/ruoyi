@@ -146,6 +146,7 @@
 | `og_syntax_check.mjs` | **进程内**跑 SFC 模板 + 脚本语法（不 spawn 子进程）+ 进度条四件套 / 调色板对比度 + **调色板不含红粉（按色相）** |
 | `og_shot_tipbar.mjs` | 两个静态预览：配色对调（AUTO 绿 / MANUAL 蓝）+ 进度条宽度比例 + 截 `.og-tip` |
 | `og_probe_tipbar_live.mjs` | **真实浏览器 + 真实页面**：登录 → `/tool/orderGantt` → 查看 → 悬浮 AUTO 矩形，核对配色与进度条（100/50/16.67%）+ 截图 |
+| `og_probe_link_live.mjs` | **真实浏览器 + 真实页面**：悬浮两条样例矩形，核对气泡工单号是 `<a>`（href = `raw.url`、`target="_blank"`、rel 含 noopener、颜色 #2563eb）+ **真实点击后新开 tab 的地址**（见 §5） |
 | `og_filter_check.mjs` | 弹窗日期过滤条（`index.vue`）：模板/接线源码断言（`type="date"` / `value-format` / 传参 `{ date }` / 不再出现 `beginTime`）+ **真实执行 `defaultDate()`**（注入假 Date 跑当天首末秒、月初、年末、年初 6 个边界） |
 | `og_probe_filter_live.mjs` | **真实浏览器 + 真实页面**：默认**当天**、是单日期不是 range、选择器可点开、Esc 只关面板不关弹窗、量词是「单」、**加了过滤条后甘特图仍不滚动**、换日期点搜索后弹窗仍在 |
 
@@ -203,3 +204,18 @@
   3 条样例工单是 09-17 / 09-18，默认日期是「今天」，一过滤就永远「未取到任何工单数据」、弹窗都打不开。
   **别顺手给它加过滤。** 同理：因为走 mock，网络上观察不到请求体 ——
   参数名的接线靠 `og_filter_check.mjs` 做源码级断言。
+
+## 5. 气泡工单号超链接（2026-10-12 新增）
+
+**需求**：悬浮气泡 head 里的工单号变成**蓝色超链接**，点击**新开浏览器 tab** 访问工单的 `url`。
+
+- 链接取 `hover.raw.url`：`buildLayout()` 给每条 bar 挂了 `raw`（原始数据），
+  mock / 真实接口给的 `url` 直接可用 —— **不要往 `ganttLayout.js` 加字段**（纯函数只管几何）。
+- 判空 + 协议过滤在 computed `hoverUrl()`：非字符串 / 空 → 空串；**只放行 `^https?://`**
+  （`javascript:` 之类一律不成链）。空串时模板渲染 `<span>` 纯文本，不摆点不动的假链接。
+- 模板形态和 AlarmTable.vue 的 alertKey 一致：`<a target="_blank" rel="noopener noreferrer">`，
+  颜色 `--og-accent`（#2563eb），默认无下划线、hover 才加。
+- **没碰** tipStyle / measureTip / pointer watch：链接在气泡内部，可达性逻辑原样有效。
+- 校验：`og_probe_link_live.mjs`（真实浏览器：两条样例的 href / target / rel / 颜色断言 +
+  真实点击后 popup 地址断言）。注意 `.og-bar.is-manual` 匹配到 **2 个元素**（0087 + 0047），
+  定位要 `nth=0`；popup.url() 会被目标站点规范化（百度补尾斜杠），比对时去掉 `/`$。
