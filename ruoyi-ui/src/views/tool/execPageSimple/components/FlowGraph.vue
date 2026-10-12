@@ -145,7 +145,7 @@
 
       <div class="flow-node__foot">
         <span class="flow-node__status">{{ statusText(item.node.aniStatus) }}</span>
-        <span class="flow-node__dur">{{ durationOf(item.node) || '—' }}</span>
+        <span class="flow-node__dur">{{ planStartClock(item.node) || '—' }}</span>
       </div>
     </div>
   </div>
@@ -153,8 +153,11 @@
 
 <script>
 // ⚠️ 本组件是 execPage/components/FlowGraph.vue 的**独立副本**，服务「执行界面简版」。
-//    与横向版的唯一差别：并行组内成员的先后连线是**横向**的（见 graph.links 的绘制），
-//    因为简版用的是纵向布局（主轴 = 从上到下的执行方向），组内先后跟着主轴转 90°。
+//    与横向版的差别：
+//    ① 并行组内成员的先后连线是**横向**的（见 graph.links 的绘制），
+//       因为简版用的是纵向布局（主轴 = 从上到下的执行方向），组内先后跟着主轴转 90°；
+//    ② 节点卡片右下角展示的是**计划开始时间**（`aniNodePlanStarttime` 的时分秒，
+//       见 planStartClock），横向版那里仍是节点耗时。
 //    其余（状态配色、节点内容分支、右键 / 双击事件、脉冲提示）完全一致。
 //    用户要求两套页面组件不共享，所以这里是复制而不是 import —— 别为了「去重」合并回去。
 import { toClock, formatDuration, statusTone } from '../flowLayout'
@@ -419,6 +422,14 @@ export default {
     durationOf(node) {
       return formatDuration(node.aniStartTime, node.aniEndTime)
     },
+    /**
+     * 右下角：**计划开始时间**的时分秒。
+     * 取 `aniNodePlanStarttime`（如 '2026-08-07 22:00:00'），只留 HH:MM:SS ——
+     * 年月日在节点卡片上没用（同一条流的节点都在同一天），宽度也省。
+     */
+    planStartClock(node) {
+      return toClock(node.aniNodePlanStarttime)
+    },
     // 静默文案：'已静默10分钟'；没配静默返回空串（空串 = 不显示静音图标）
     silenceText(node) {
       return noticeDelayText(node)
@@ -428,7 +439,10 @@ export default {
       const lines = [
         `${node.aniInstanceNodeName}（${node.aniInstanceNodeType}）`,
         `状态：${this.statusText(node.aniStatus)}`,
+        `计划开始：${node.aniNodePlanStarttime || '—'}`,
         `时间：${node.aniStartTime || '—'} → ${node.aniEndTime || '—'}`,
+        // 右下角已改成展示计划开始时间的时分秒，耗时挪到悬停里，信息不丢
+        `耗时：${this.durationOf(node) || '—'}`,
         node.aniNodeGroup ? `并行组：${node.aniNodeGroup}` : '非并行节点',
         // 正文按分支换了内容，原子名与任务数挪到悬停里，信息不丢
         `任务数：${this.atomCount(node)} · ${this.atomText(node)}`

@@ -24,7 +24,7 @@
             <span class="esp-picker__label">环境</span>
             <div class="esp-picker__chips">
               <button
-                v-for="env in envList"
+                v-for="env in visibleEnvList"
                 :key="env.planId"
                 type="button"
                 class="esp-chip"
@@ -41,8 +41,8 @@
                 <span class="esp-chip__text">{{ env.env || "—" }}</span>
                 <span class="esp-chip__sub">{{ env.flowCount }} 流</span>
               </button>
-              <span v-if="!envList.length" class="esp-picker__hint">
-                未接收到环境
+              <span v-if="!visibleEnvList.length" class="esp-picker__hint">
+                {{ envList.length ? "暂无有流的环境" : "未接收到环境" }}
               </span>
             </div>
           </div>
@@ -904,9 +904,31 @@ export default {
           nodeCount: nodes.length,
           nodeStatusCount,
           loaded: !!data,
+          // 请求**有没有回来**（成功或失败都算）—— 与 loaded 不同：失败时 loaded 为假，
+          // 但 responded 为真。环境 chip 的 0 流过滤用它当「可以下结论了吗」的判据。
+          responded: !!item,
           stale: !!(item && item.stale),
         };
       });
+    },
+    /**
+     * 第一行**真正展示**的环境：**一条流都没有的环境不展示**（用户要求）。
+     *
+     * ⚠️ 判据是 `responded`（请求有没有回来），**不是 `loaded`**（有没有拿到数据）：
+     *   - 首屏 `results` 还是空数组 ⇒ `responded` 为假 ⇒ 全部保留 ——
+     *     否则整行环境会在首屏集体消失，看着像页面坏了。
+     *   - 请求回来了（无论成功还是**失败**）⇒ `responded` 为真 ⇒ 只看 `flowCount`。
+     *     取不到详情的环境 `flowCount` 也是 0，同样要隐藏 ——
+     *     它跟「真的 0 流」在页面上长得一模一样（都显示「0 流」），
+     *     拿 loaded 当判据会把这些环境漏出来（2026-10-10 就是这么出的问题：
+     *     mockData 里只有 11 个环境有详情，页面一却有 31 个计划，缺的那 20 个点进来全是 0 流）。
+     *     失败的环境数在页头「N 个环境获取失败」里有交代，信息不丢。
+     *
+     * 只做展示层过滤：`envList` 仍是完整数据（选中兜底、悬停提示等都用它），
+     * 免得数据层少一块导致别处找不到环境。
+     */
+    visibleEnvList() {
+      return this.envList.filter((e) => !e.responded || e.flowCount > 0);
     },
     selectedPlan() {
       return (
@@ -1384,7 +1406,9 @@ export default {
      * 这时 currentFlow 会变成 null、左栏一片空白，看着像页面坏了。
      */
     ensureSelection() {
-      const envs = this.envList;
+      // ⚠️ 用 visibleEnvList 而不是 envList：选中态不能落在被隐藏（0 流）的环境上，
+      //    否则页面上没有任何 chip 高亮，用户会以为「选择丢了」。
+      const envs = this.visibleEnvList;
       if (!envs.length) {
         this.selectedPlanId = null;
         this.selectedFlowKey = null;

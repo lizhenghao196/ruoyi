@@ -218,6 +218,45 @@ iframe 被压到容器宽（实测 609px），里面的宽表格要么被挤成�
 用 `send_file(file_path, mimetype='text/html')` 发出来 —— 没传 `as_attachment` / `download_name`
 ⇒ 没有 `Content-Disposition: attachment` ⇒ 浏览器原地渲染，iframe 同样渲染。
 
+### 3.8 节点右下角 = 计划开始时间；0 流环境不展示（2026-10-10）
+
+**右下角时间**（`components/FlowGraph.vue`）：`.flow-node__foot` 右侧原来是 `durationOf`（耗时），
+现改成 `planStartClock(node)` = `toClock(node.aniNodePlanStarttime)` ⇒ 只留 `HH:MM:SS`，年月日不展示。
+- `toClock` 直接复用 `flowLayout.js` 的既有导出，别新写一份格式化。
+- **耗时没删**，挪进节点悬停 `nodeTitle`（新增「计划开始」「耗时」两行）—— 沿用本项目「换正文就把信息挪进悬停」的惯例。
+- ⚠️ 只改简版。横向版 `execPage/components/FlowGraph.vue` 右下角**仍是 `durationOf`**，别顺手同步。
+
+**0 流环境隐藏**（`index.vue`）：新增 computed
+
+```js
+visibleEnvList() {
+  return this.envList.filter((e) => !e.responded || e.flowCount > 0)
+}
+```
+
+- ⚠️⚠️ **判据是 `responded`，不是 `loaded`**。两者语义不同：
+  - `loaded = !!data`（有没有**拿到数据**）—— 请求**失败**时也是 false；
+  - `responded = !!item`（请求**有没有回来**，成功失败都算）。
+  用 `loaded` 当过滤判据，失败的环境会被「未加载时保留」的防御兜住、漏出来显示成「0 流」——
+  **2026-10-10 就是踩了这个**。取不到详情的环境跟「真的 0 流」在页面上长得一模一样，必须一起隐藏。
+- 首屏 `results` 还是空数组 ⇒ `responded` 为假 ⇒ 全部保留，避免整行环境在首屏集体消失。
+- 模板第一行 `v-for` 用 `visibleEnvList`；空状态 hint 是
+  `envList.length ? "暂无有流的环境" : "未接收到环境"`（区分「没收到环境」和「环境都没流」）。
+- **`ensureSelection()` 也必须用 `visibleEnvList`** —— 否则选中态可能落在被隐藏的环境上，
+  页面上没有任何 chip 高亮，用户会以为「选择丢了」。
+- **只做展示层过滤**：`envList` 仍是完整数据（`selectedPlan` / `envTitle` / 悬停提示都用它）。
+- 失败环境数在页头「N 个环境获取失败」里有交代，信息不丢。
+
+⚠️ **配套要知道的数据坑**：`mockData/res.js` 里 **`planRes` 有 31 个计划，`executeResMap` 只有 11 个 key，缺 20 个**。
+页面一（execPlanList）列的是 `planRes`，所以点进 **BPC / DPS / PAY / DSI / LMP / DNET / CIS** 这些系统时，
+3~4 个环境**全部取不到详情**（`getExecuteIndex` reject：`未找到执行详情：<id>`），
+页头会写「N 个环境获取失败」，环境行按上面规则**整体为空**。
+真 0 流的只有 2 个：`75668`（AUTH/sandbox）、`75884`（DASP/sandbox）。
+注意 `75905` 也叫 sandbox 但有 2 流，**照样展示** —— 隐藏的是「这条计划 0 流」，不是「sandbox 这个名字」。
+
+校验：`esp_verify.mjs` [G] 段的 `v-for="env in envList"` 断言已改成 `visibleEnvList`，
+并新增 **[J] 段 13 条**（含「横向版仍是 durationOf 且无 planStartClock」的零共享防回归）。
+
 ## 4. 两个踩过的坑
 
 ### 4.1 动态 import 漏改（真 bug，2026-09-22 已修）

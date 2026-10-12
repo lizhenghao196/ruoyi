@@ -8,6 +8,11 @@
 - **`code: 0` 能过拦截器是巧合**（`utils/request.js` 是 `res.data.code || 200`）；python `func/*` 成功码就是 0，**别判 `code === 200`**。
 - **取载荷一律走 `pickPayload(res)`**：载荷可能在 `data` 也可能在 `rows`，`data` 非 undefined/null 就用它（**`[]`/`''`/`0`/`false` 都算有值，别用 `||` 判**）；页面里**不许出现裸 `res.data`/`res.rows`**。
 
+## 启动 / 运行
+- 顺序：Redis（`C:/Users/lenovo/.codex/tools/ruoyi-vue/redis-5.0.14.1` 下跑 `redis-server.exe redis.windows.conf`）→ 后端 → 前端。MySQL 3306 常驻。
+- 后端：工具链 jdk17 `java -jar ruoyi-admin/target/ruoyi-admin.jar`，端口 8080。前端：`ruoyi-ui` 下 `npm run dev`，端口 80，proxy 到 8080。
+- ⚠️ **启动后端必须显式加 `--server.port=8080`**：WorkBuddy 的 shell 注入了 `SERVER__PORT=60044`（双下划线），被 Spring Boot 宽松绑定成 `server.port`，会抢 60044 导致 `Port 60044 was already in use` 启动失败。顺手 `unset SERVER__PORT` 更稳。
+
 ## Element 弹窗两个通用坑（跨页面复用）
 - ⚠️ **`append-to-body` 的弹窗里，写在页面根节点的 CSS 变量继承不到**：弹窗 DOM 被挪到 `body` 下，不再是页面组件的后代。要用 `--xxx` 就在弹窗内容自己的包裹层上**再声明一份**，否则 `var(--xxx)` 静默失效（边框消失、颜色退回默认）。
 - ⚠️ **`el-dialog` 里放 `el-date-picker`（或任何带下拉面板的组件），Esc 会把整个弹窗关掉**：面板的 Esc 由组件自己的 `handleKeydown` 处理并 `stopPropagation`，**但前提是焦点在那个 input 上**；焦点不在时 Esc 直接冒到 `document`，被弹窗接走。⇒ 弹窗加 `:close-on-press-escape="false"`（和 `:close-on-click-modal="false"` 一个意思：别让误触把整页状态关掉）。
@@ -25,6 +30,8 @@
 - **细节（`levelTone` 顺序、`flattenLevel` 兜底、窄屏降级、三个校验脚本、字典 SQL）→ `REF-alarm-analysis.md`。**
 
 ## 执行页面 / 明细弹窗 / 执行界面简版
+- 简版环境 chip **0 流不展示**：走 `visibleEnvList`（`!e.responded || e.flowCount > 0`）——⚠️ **判据是 `responded`（请求回没回来）而不是 `loaded`（拿没拿到数据）**：请求**失败**时 `loaded` 也是 false，用 loaded 会把「取不到详情」的环境漏出来显示成「0 流」（2026-10-10 的 bug）。首屏 `results` 为空时 `responded` 为假 ⇒ 全保留，不闪空。`ensureSelection` 也用它（选中态不能落在隐藏环境上）。只做展示层过滤，`envList` 数据保持完整。节点卡片右下角 = **计划开始时间的时分秒**（`planStartClock` ← `aniNodePlanStarttime`），耗时挪进悬停提示。
+- ⚠️ **mock 数据不全**：`mockData/res.js` 的 `planRes` 有 **31** 个计划，`executeResMap` 只有 **11** 个 key —— 页面一点进 BPC/DPS/PAY/DSI/LMP/DNET/CIS 这些系统时环境**全部取不到详情**（`未找到执行详情：<id>`），页面看着像「一堆 0 流环境」。
 - **动手前必读**（三个 REF）：轮询必须静默 / 横滚在每条流内部 / 页头进度算法 / 哑组件契约 / `type="expand"` 不能加 `fixed`；execPlanList / execPageSimple 与 execPage **代码零共享**，别互相 import。
 - 简版画布自动滚动：**只认输入事件（wheel/touchmove/滚动键/mousedown 判滚动条），画布刻意不监听 `scroll`** —— 按 scroll 记会被轮询刷新的程序化滚动误判成「用户刚滚过」，自动滚动永远冻着且不报错。目标节点 `bad > run`；用户滚动后 20s 让位；`anyDialogOpen` 里新增弹窗要记得加。
 - 简版右栏「文档信息」**默认不展示**（流独占整宽）；用户在查看明细表里**双击工单**才展出（工单号 + 多文档 tab + iframe），左右变 6:4。文档地址 = `DOC_VIEW_BASE + file_name`，**不是**接口返回里的 `url` 字段；⚠️ `el-table-column` 的 `class-name` 会同时落到表头 `th` 上。
