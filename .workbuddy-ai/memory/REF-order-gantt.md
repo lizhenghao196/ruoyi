@@ -8,26 +8,24 @@
 > 页头指标（2026-09-23）：只剩「工单总数」「时间跨度」，**「占用行数」已删**（用户要求，行数属内部实现）。
 > 分组叫法（2026-09-23）：绿色那组从「手动 / 其他」改成 **「MANUAL 手动」**（图例 + 甘特图标签条 + `groups[].label` 三处一起改）。
 
-## 0. 矩形宽度只认 `total_cost`（2026-09-22 用户明确要求）
+## 0. 矩形宽度：MANUAL 认 `total_cost`；AUTO 取 max(total_cost, 末位节点结束)
+（2026-09-22 用户明确要求；**2026-10-12 按 mode 拆分修订**）
 
-**结束时间 = `beginTime` + `total_cost` 分钟，`endTime` 不参与绘图。**
-
-用户原话：「开始时间没问题，取 beginTime，但是甘特图的结束时间不能取 endTime，
-要看 total_cost 是多少」。样例里两个字段本来就打架：
-
-| 工单 | beginTime | total_cost | 按 cost 的结束 | 接口 endTime |
-| --- | --- | --- | --- | --- |
-| CHGU-20260909-0086 | 09-17 18:00 | 115 | **09-17 19:55** | 09-17 23:00 |
-| CHGU-20260909-0087 | 09-17 18:00 | 135 | **09-17 20:15** | 09-17 22:00 |
-| CHGU-20260916-0047 | 09-18 00:00 | 135 | **09-18 02:15** | 09-18 06:00 |
-
-- 判定只此一处：`ganttLayout.js` 的 `resolveSpan()`。顺序是刻意的：
-  `beginTime` 解析不出来 → null（不画）；`total_cost > 0` → 用它；否则才回退 `endTime` 差；
-  都没有 → `DEFAULT_DURATION_MIN`（30）。
-- **回退分支留着是兜底**：`total_cost` 缺失时宁可退回起止时间差，也不要全画成固定 30 分钟。
-- `fromCost` = 「时长不是由起止时间差算出来的」（cost 分支与兜底分支都为 true）。
-- 改完必跑 `og_verify.mjs`（§3.2 已按新语义钉住三条断言），期望 `FAILURES: 0`。
-- ⚠️ 别把顺序改回去。`endTime` 不代表工单实际占用时间，按它画会把矩形拉长一倍多。
+- **MANUAL（原样不变）**：结束时间 = `beginTime` + `total_cost` 分钟，**`endTime` 不参与绘图**。
+  用户原话（2026-09-22）：「开始时间没问题，取 beginTime，但是甘特图的结束时间不能取 endTime，
+  要看 total_cost 是多少」。样例里两个字段本来就打架（0086 起止跨 5 小时但 total_cost 115 等）。
+- **AUTO（2026-10-12 需求变更，用户原话「综合 total_cost 和 node_detail 的 plan_start_time，
+  取最长」）**：结束时间 = `max(beginTime + total_cost 推出, node_detail 最后一个节点的真正结束)`。
+  末位节点 = 按 plan_start_time 排完序串行推进的最后一个。
+  例：CHGU-20260917-0206：total_cost 推出 22:50，但末位节点 plan 00:30 + cost 15 → 00:45，
+  **柱子画到 00:45**（休息区随之从「被裁掉」变成 22:35~00:30 显形的 115 分钟）。
+- 判定只此一处：`ganttLayout.js` 的 `resolveSpan()`。基础时长顺序仍是刻意的：
+  `beginTime` 解析不出来 → null（不画）；`total_cost > 0` → 用它；否则 `endTime` 差兜底；
+  都没有 → `DEFAULT_DURATION_MIN`（30）。⚠️ MANUAL 的兜底分支**别改回去**按 `endTime` 画。
+- ⚠️ AUTO 分支里 `resolveSpan()` 会调 `computeNodeTimeline()`，并把结果挂到 `span.timeline`
+  给 `buildLayout` 复用（避免每工单算两遍时间线）；顺序是：基础 span → 探时间线拿末位 end →
+  需要则扩展 span → 用最终 span 再算一次（rests 的裁剪边界才对）。
+- 改完必跑 `og_verify.mjs`（§3.2 时长规则 + §3.7 节点时间线/AUTO 延长），期望 `FAILURES: 0`。
 
 ## 1. 其余硬规则（改动时最容易破）
 
@@ -146,7 +144,8 @@
 | `og_syntax_check.mjs` | **进程内**跑 SFC 模板 + 脚本语法（不 spawn 子进程）+ 进度条四件套 / 调色板对比度 + **调色板不含红粉（按色相）** |
 | `og_shot_tipbar.mjs` | 两个静态预览：配色对调（AUTO 绿 / MANUAL 蓝）+ 进度条宽度比例 + 截 `.og-tip` |
 | `og_probe_tipbar_live.mjs` | **真实浏览器 + 真实页面**：登录 → `/tool/orderGantt` → 查看 → 悬浮 AUTO 矩形，核对配色与进度条（100/50/16.67%）+ 截图 |
-| `og_probe_link_live.mjs` | **真实浏览器 + 真实页面**：悬浮两条样例矩形，核对气泡工单号是 `<a>`（href = `raw.url`、`target="_blank"`、rel 含 noopener、颜色 #2563eb）+ **真实点击后新开 tab 的地址**（见 §5） |
+| `og_probe_link_live.mjs` | **真实浏览器 + 真实页面**：悬浮两条样例矩形，核对气泡工单号是 `<a>`（href = `raw.url`、`target="_blank"`、rel 含 noopener、颜色 #2563eb）+ **真实点击后新开 tab 的地址**（见 §5）。⚠️ hover 后要等气泡稳（visibility/位置）再 Promise.all(click) —— 2026-10-12 踩过「点太急 click 反复重试、popup 30s 假失败」 |
+| `og_probe_rest_live.mjs` | **真实浏览器 + 真实页面**：休息区域专项（见 §6）—— 图例 3 条、4 条 AUTO 各自的休息块数量 / 位置比例 / 宽度比例 / title / 斜纹、MANUAL 0 块、无横纵滚动、文字压层、悬浮仍正常 |
 | `og_filter_check.mjs` | 弹窗日期过滤条（`index.vue`）：模板/接线源码断言（`type="date"` / `value-format` / 传参 `{ date }` / 不再出现 `beginTime`）+ **真实执行 `defaultDate()`**（注入假 Date 跑当天首末秒、月初、年末、年初 6 个边界） |
 | `og_probe_filter_live.mjs` | **真实浏览器 + 真实页面**：默认**当天**、是单日期不是 range、选择器可点开、Esc 只关面板不关弹窗、量词是「单」、**加了过滤条后甘特图仍不滚动**、换日期点搜索后弹窗仍在 |
 
@@ -219,3 +218,46 @@
 - 校验：`og_probe_link_live.mjs`（真实浏览器：两条样例的 href / target / rel / 颜色断言 +
   真实点击后 popup 地址断言）。注意 `.og-bar.is-manual` 匹配到 **2 个元素**（0087 + 0047），
   定位要 `nth=0`；popup.url() 会被目标站点规范化（百度补尾斜杠），比对时去掉 `/`$。
+
+## 6. AUTO 工单柱子的休息区域（2026-10-12 新增）
+
+**需求**：AUTO 工单带 `node_detail`（只有 AUTO 有），在柱子上把「工单总时长里没被任何节点
+占用的片段」用灰白斜纹画成休息区域；图例加第三条「休息区域」。
+
+- **唯一计算处 = 纯函数 `computeNodeTimeline(item, span)`**（ganttLayout.js）。
+  `buildLayout` 把结果挂到 `bar.timeline`（没有 node_detail 的工单是 null，组件据此一块都不画）。
+  - `plan_start_time` 的语义（用户特别强调）：**「该时间之后节点才可以开始执行」**，
+    不是开始时间；**null 或解析失败 → 取外层 `beginTime`**（外层 beginTime 就是这一级的 plan）。
+  - **先按 `plan_start_time`（可开工时间）升序排，再串行执行**（2026-10-12 用户明确要求）：
+    ⚠️ 中间曾改成「按 node_detail 数组顺序执行」——用户加的工单 CHGU-20260917-0206
+    直接证伪：它第一个节点的 plan 是**次日 00:30**（在整个工单跨度外），按数组序排第一
+    执行，四个节点被全推到跨度外、**整根柱子都变成休息区**。排序后 22:00 可开工的三个
+    节点先做（35 分钟），00:30 的排最后（被 total_cost 裁掉），只剩尾部 15 分钟休息。
+    同值（含多个 null 都解析成外层 beginTime）时保持**数组原顺序**（显式 index tiebreak，
+    不依赖引擎 sort 稳定性）。
+  - 节点真正开始时间 = `max(前一节点真正结束时间, 本节点 plan_start_time)`；
+    plan 早于前一节点结束 → 排队等前一做完。游标从外层 beginTime 起。
+  - `cost` 无效（缺失 / <=0 / NaN）→ 该节点不产生执行段；整段 `node_detail` 空 / 全无效 /
+    非数组 → 返回 **null**（整根柱子一块休息区都不画，MANUAL 零影响）。
+  - rests = 工单**总跨度**（按 §0 的 AUTO 规则：`max(total_cost 推出, 末位节点结束)`）
+    减去所有执行段 ⇒「节点之间的计划等待」和「尾部余量」都算休息（用户样例 0086 是尾部 5 分钟）。
+    ⚠️ 跨度本身会被末位节点延长（0206：50 → 165 分钟），原「被裁掉」的等待随之显形
+    （0206 的休息 = 22:35~00:30 共 115 分钟，不是 15 分钟）。执行段超出旧 spanEnd 不再被剪。
+    执行段互相重叠（数据自相矛盾时）也不会出负区间。
+- **渲染**（OrderGantt.vue）：模板里 `.og-bar__rest`（绝对定位），几何走组件方法
+  `restBlocks` / `restBlockStyle`：**百分比宽**，分母 = bar 自己的真实跨度（end-start）。
+  **不参与布局** ⇒ 柱高、气泡高度、行高零变化。title = 「休息 N 分钟」。
+  文字 span 抬 `position: relative; z-index: 1` 压住斜纹。
+- **配色 = 中性灰白斜纹**（rgba(100,116,139,.32) + 白斜纹）：刻意避开绿/蓝两组分组色，
+  也不碰红色（告警语义）。图例点 `.og__legend-dot.is-rest` 同款斜纹。
+- ⚠️ **柱体文字条数会变少**：样例扩到 8 条后时间跨度 27 小时、矩形普遍变窄，
+  **只有 0111（155 分钟）和 0206（延长后 165 分钟）显示得出完整工单号**，其余按
+  「完整或没有」规则不显示文字 —— 不是 bug（og_check_labels 会打印实际条数）。
+- **两份 mock 别混**：页面实际数据是 `api/tool/orderGantt.js` 内联的 **8 条**
+  （3 条原始 + 0110/0111/0205 + 用户加的 0206、0210；0210 是「单节点恰好填满 → 0 休息」的
+  边界样例）。`mockData/res.js` 的 orderRes（造数器 seeds）**没动** —— og_verify §4 的
+  「样例条数 = 3」断言读的是它，别顺手同步。
+- **重叠分行**：柱子结束时间变长后（0206 与 0210 重叠），`packRows` 按新 span 自动分行
+  （AUTO 组实测 3 行）—— og_probe_rest_live 第 5 节断言「同组同行柱子两两不重叠」。
+- 校验：og_verify §3.7 纯函数断言（含用户样例 0086 的 5 分钟尾部休息、排队、乱序不重排、
+  null plan 边界、clamp、buildLayout 挂载）；og_probe_rest_live.mjs 真实浏览器全量几何断言。

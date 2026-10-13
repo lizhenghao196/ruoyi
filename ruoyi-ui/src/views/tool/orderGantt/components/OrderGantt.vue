@@ -23,6 +23,11 @@
           <i class="og__legend-dot is-auto" />
           AUTO 自动 · {{ stats.auto }}
         </span>
+        <!-- 休息区说明（和 .og-bar__rest 同一套斜纹，图例和柱子对得上） -->
+        <span class="og__legend-item">
+          <i class="og__legend-dot is-rest" />
+          休息区域
+        </span>
         <span v-if="invalidCount > 0" class="og__legend-warn">
           <i class="el-icon-warning-outline" />
           {{ invalidCount }} 条时间无效未展示
@@ -135,6 +140,17 @@
             @mouseenter="onBarEnter(bar, $event)"
             @mouseleave="onBarLeave"
           >
+            <!-- 休息区域块（2026-10-12 用户要求）：AUTO 工单的 node_detail 串行执行后，
+                 工单总时长里没被节点占用的片段。灰白斜纹、绝对定位百分比宽，
+                 **不参与布局** —— 柱高、气泡高度、行高全都不变。
+                 没有 node_detail 的工单 restBlocks 返回空数组，一根都不渲染。 -->
+            <i
+              v-for="(r, ri) in restBlocks(bar)"
+              :key="'rest-' + ri"
+              class="og-bar__rest"
+              :style="restBlockStyle(bar, r)"
+              :title="restBlockTitle(r)"
+            />
             <span v-if="barLabel(bar)" class="og-bar__text">{{ barLabel(bar) }}</span>
           </div>
         </div>
@@ -815,6 +831,45 @@ export default {
       return canFitLabel(this.textWidth(id), bar.width) ? id : ''
     },
     /**
+     * 柱子里要画的**休息区域块**（2026-10-12 用户要求）。
+     *
+     * 数据来自 ganttLayout 的 computeNodeTimeline（AUTO 工单的 node_detail
+     * 串行展开的结果，已经挂在 bar.timeline 上）。没有 node_detail 的工单
+     * （含全部 MANUAL）timeline 是 null → 返回空数组，一根休息块都不画，
+     * 老页面观感零变化。
+     */
+    restBlocks(bar) {
+      const tl = bar && bar.timeline
+      return tl && Array.isArray(tl.rests) ? tl.rests : []
+    },
+    /**
+     * 休息块的位置 / 宽度 —— **百分比**，不引入像素依赖：
+     * 分母用工单自己的真实跨度（bar.end - bar.start），所以缩放、横向滚动
+     * 都不影响比例。bar 被绘图区右缘截断时，超出 100% 的部分自然被柱子的
+     * overflow:hidden 裁掉（夹一下只是防浮点误差画出负宽）。
+     *
+     * display:none 表示「宽到 0、不用渲染」—— 和气泡进度条 rowRatio<=0 不画同理。
+     */
+    restBlockStyle(bar, r) {
+      const total = bar.end - bar.start
+      if (!(total > 0)) {
+        return { display: 'none' }
+      }
+      const left = Math.max(0, Math.min(100, ((r.start - bar.start) / total) * 100))
+      const width = Math.max(0, Math.min(100 - left, ((r.end - r.start) / total) * 100))
+      if (!(width > 0)) {
+        return { display: 'none' }
+      }
+      return {
+        left: left.toFixed(3) + '%',
+        width: width.toFixed(3) + '%'
+      }
+    },
+    /** 休息块的 title：鼠标放上去显示这段休息有多长 */
+    restBlockTitle(r) {
+      return '休息 ' + formatDuration(r.minutes)
+    },
+    /**
      * 量一段文字在**柱体字号**下的真实宽度（px）。
      *
      * 字体从根节点的 computed style 里取 —— `.og` 没写 font-family，取到的就是继承值，
@@ -1210,6 +1265,19 @@ export default {
   &.is-auto {
     background: linear-gradient(135deg, var(--og-auto-a), var(--og-auto-b));
   }
+
+  /* 休息区图例点：和柱子里 .og-bar__rest 同一套灰白斜纹（图例和柱子必须对得上） */
+  &.is-rest {
+    background-color: rgba(100, 116, 139, 0.32);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.55) 0,
+      rgba(255, 255, 255, 0.55) 3px,
+      rgba(255, 255, 255, 0) 3px,
+      rgba(255, 255, 255, 0) 7px
+    );
+    border: 1px solid rgba(100, 116, 139, 0.28);
+  }
 }
 
 .og__legend-warn {
@@ -1485,6 +1553,32 @@ export default {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* 压住休息区斜纹块（绝对定位）：文字是后写的 flex 子项，
+       但没有定位时也可能被绝对定位的兄弟盖住，显式抬一层最稳。 */
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 休息区域块（2026-10-12 用户要求：柱子上用其他颜色标出休息时间）：
+     AUTO 工单的 node_detail 串行执行后，工单总时长里没被节点占用的片段。
+     —— 中性灰白斜纹：刻意避开「绿=自动 / 蓝=手动」两组分组色，
+        也不碰红色（本系统里红色是告警语义），斜纹是「停工」的通用视觉语言。
+     —— 绝对定位 + 百分比宽：**不参与布局**，柱高和悬浮气泡高度零变化
+        （气泡高度直接决定悬浮位置，变了鼠标就走不过去）。
+     —— 左缘一道实边，和前面的执行段分界清楚；右缘交给 overflow:hidden + 圆角。 */
+  &__rest {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(100, 116, 139, 0.32);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.55) 0,
+      rgba(255, 255, 255, 0.55) 3px,
+      rgba(255, 255, 255, 0) 3px,
+      rgba(255, 255, 255, 0) 7px
+    );
+    border-left: 1px solid rgba(255, 255, 255, 0.55);
   }
 }
 

@@ -59,6 +59,15 @@ function mockApi(name, ...args) {
  *                 所以**不要**再往 detail 里塞嵌套对象 / 空值，表格渲染不了。
  *                 样例满足的两条自洽关系（已写成断言）：
  *                   sum(type_cost) <= total_cost；type_cost 是 5 的整数倍
+ *     node_detail **仅 AUTO 工单有**（2026-10-12 新增），对象数组，每项：
+ *                   plan_start_time  该时间**之后**节点才可以开始执行
+ *                                   （**不是**开始时间）；null = 取外层 beginTime
+ *                   cost             该节点耗时（分钟）
+ *                   node_name / node_type / node_id / plan_id / workflow_id 展示用
+ *                 节点之间**串行**：一个做完才能做下一个，真正开始时间 =
+ *                 max(前一个节点的真正结束时间, 本节点 plan_start_time)。
+ *                 串行结果由 ganttLayout.js 的 computeNodeTimeline 算（纯函数），
+ *                 柱子上「工单总时长里没被节点占用的片段」画成休息区域（灰白斜纹）。
  *
  * ⚠️ `total_cost` 与 `beginTime`/`endTime` 在样例里是**打架**的：
  *      样例 1  起止跨 5 小时（300 分钟）但 `total_cost: 115`
@@ -102,6 +111,28 @@ export function getOrderList(params) {
             },
           ],
           url: "https://www.baidu.com",
+          node_detail: [
+            {
+              cost: 15,
+              node_id: 524465,
+              node_name: "批处理-容器云发布",
+              node_type: "容器云工程发布/重启",
+              orderId: "CHGU-20260909-0086",
+              plan_id: 88435,
+              plan_start_time: "2026-09-17 18:00:00",
+              workflow_id: 60281,
+            },
+            {
+              cost: 10,
+              node_id: 524472,
+              node_name: "人工节点",
+              node_type: "人工确认",
+              orderId: "CHGU-20260909-0086",
+              plan_id: 88435,
+              plan_start_time: null,
+              workflow_id: 60281,
+            },
+          ],
         },
         {
           orderId: "CHGU-20260909-0087",
@@ -137,6 +168,230 @@ export function getOrderList(params) {
             },
           ],
           url: "https://www.github.com",
+        },
+        /* ---- 以下三条为 2026-10-12 新增的 AUTO 样例：演示 node_detail 串行执行 + 柱子上
+           休息区域的三种形态 ----
+              0110：中间有等待（后一节点 plan 晚于前一做完）+ 尾部余量
+              0111：等待特别长（50 分钟的中间休息）
+              0205：后一节点 plan 早于前一做完（排队，真正开始要等前一节点结束）
+           ⚠️ 只有 AUTO 工单才有 node_detail；plan_start_time 为 null 表示取外层
+           beginTime；plan_start_time 是「该时间后才能开始」，不是开始时间。 */
+        {
+          orderId: "CHGU-20260917-0110",
+          total_cost: 120,
+          beginTime: "2026-09-17 09:00:00",
+          endTime: "2026-09-17 11:00:00",
+          mode: "AUTO",
+          detail: [
+            { type: "容器云工程发布/重启", count: 2, type_cost: 50 },
+            { type: "数据库发布", count: 1, type_cost: 30 },
+            { type: "配置发布", count: 1, type_cost: 25 },
+          ],
+          url: "https://www.qq.com",
+          node_detail: [
+            {
+              cost: 20,
+              node_id: 600001,
+              node_name: "批处理-容器云发布",
+              node_type: "容器云工程发布/重启",
+              orderId: "CHGU-20260917-0110",
+              plan_id: 90001,
+              plan_start_time: "2026-09-17 09:00:00",
+              workflow_id: 60281,
+            },
+            {
+              cost: 30,
+              node_id: 600002,
+              node_name: "数据库变更",
+              node_type: "数据库发布",
+              orderId: "CHGU-20260917-0110",
+              plan_id: 90001,
+              // 09:50 才能开始，而上一节点 09:20 就做完了 → 中间休息 09:20~09:50
+              plan_start_time: "2026-09-17 09:50:00",
+              workflow_id: 60281,
+            },
+            {
+              cost: 25,
+              node_id: 600003,
+              node_name: "配置下发",
+              node_type: "配置发布",
+              orderId: "CHGU-20260917-0110",
+              plan_id: 90001,
+              // null → 取外层 beginTime（09:00 后即可），实际 10:20 上一节点做完才开始
+              plan_start_time: null,
+              workflow_id: 60281,
+            },
+          ],
+        },
+        {
+          orderId: "CHGU-20260917-0111",
+          total_cost: 155,
+          beginTime: "2026-09-17 13:00:00",
+          endTime: "2026-09-17 15:35:00",
+          mode: "AUTO",
+          detail: [
+            { type: "ITSM_原子变更_YUM包更新", count: 3, type_cost: 45 },
+            { type: "人工确认", count: 2, type_cost: 30 },
+            { type: "ITSM_屏蔽告警", count: 1, type_cost: 5 },
+          ],
+          url: "https://www.taobao.com",
+          node_detail: [
+            {
+              cost: 40,
+              node_id: 600010,
+              node_name: "YUM包更新",
+              node_type: "ITSM_原子变更_YUM包更新",
+              orderId: "CHGU-20260917-0111",
+              plan_id: 90002,
+              plan_start_time: "2026-09-17 13:00:00",
+              workflow_id: 60282,
+            },
+            {
+              cost: 20,
+              node_id: 600011,
+              node_name: "人工审批",
+              node_type: "人工确认",
+              orderId: "CHGU-20260917-0111",
+              plan_id: 90002,
+              // 14:30 才能开始，上一节点 13:40 做完 → 中间休息 50 分钟
+              plan_start_time: "2026-09-17 14:30:00",
+              workflow_id: 60282,
+            },
+            {
+              cost: 35,
+              node_id: 600012,
+              node_name: "屏蔽告警",
+              node_type: "ITSM_屏蔽告警",
+              orderId: "CHGU-20260917-0111",
+              plan_id: 90002,
+              plan_start_time: null,
+              workflow_id: 60282,
+            },
+          ],
+        },
+        {
+          orderId: "CHGU-20260918-0205",
+          total_cost: 100,
+          beginTime: "2026-09-18 10:00:00",
+          endTime: "2026-09-18 11:40:00",
+          mode: "AUTO",
+          detail: [
+            { type: "容器云工程发布/重启", count: 1, type_cost: 25 },
+            { type: "数据库发布", count: 2, type_cost: 30 },
+            { type: "配置发布", count: 1, type_cost: 20 },
+          ],
+          url: "https://www.jd.com",
+          node_detail: [
+            {
+              cost: 35,
+              node_id: 600020,
+              node_name: "容器云发布",
+              node_type: "容器云工程发布/重启",
+              orderId: "CHGU-20260918-0205",
+              plan_id: 90003,
+              plan_start_time: "2026-09-18 10:00:00",
+              workflow_id: 60283,
+            },
+            {
+              cost: 25,
+              node_id: 600021,
+              node_name: "数据库变更",
+              node_type: "数据库发布",
+              orderId: "CHGU-20260918-0205",
+              plan_id: 90003,
+              // plan（10:20）早于上一节点的真正结束（10:35）→ 排队等到 10:35 才开始
+              plan_start_time: "2026-09-18 10:20:00",
+              workflow_id: 60283,
+            },
+            {
+              cost: 20,
+              node_id: 600022,
+              node_name: "配置下发",
+              node_type: "配置发布",
+              orderId: "CHGU-20260918-0205",
+              plan_id: 90003,
+              plan_start_time: null,
+              workflow_id: 60283,
+            },
+          ],
+        },
+        {
+          orderId: "CHGU-20260917-0206",
+          total_cost: 50,
+          beginTime: "2026-09-17 22:00:00",
+          endTime: "2026-09-18 6:00:00",
+          mode: "AUTO",
+          detail: [
+            { type: "容器云工程发布/重启", count: 2, type_cost: 50 },
+            { type: "数据库发布", count: 1, type_cost: 30 },
+            { type: "配置发布", count: 1, type_cost: 25 },
+          ],
+          node_detail: [
+            {
+              cost: 15,
+              node_id: 600001,
+              node_name: "批处理-容器云发布",
+              node_type: "容器云工程发布/重启",
+              orderId: "CHGU-20260917-0110",
+              plan_id: 90001,
+              plan_start_time: "2026-09-18 00:30:00",
+              workflow_id: 60281,
+            },
+            {
+              cost: 10,
+              node_id: 600001,
+              node_name: "批处理-容器云发布",
+              node_type: "容器云工程发布/重启",
+              orderId: "CHGU-20260917-0110",
+              plan_id: 90001,
+              plan_start_time: null,
+              workflow_id: 60281,
+            },
+            {
+              cost: 15,
+              node_id: 600001,
+              node_name: "批处理-容器云发布",
+              node_type: "容器云工程发布/重启",
+              orderId: "CHGU-20260917-0110",
+              plan_id: 90001,
+              plan_start_time: "2026-09-17 22:00:00",
+              workflow_id: 60281,
+            },
+            {
+              cost: 10,
+              node_id: 600001,
+              node_name: "批处理-容器云发布",
+              node_type: "容器云工程发布/重启",
+              orderId: "CHGU-20260917-0110",
+              plan_id: 90001,
+              plan_start_time: null,
+              workflow_id: 60281,
+            },
+          ],
+        },
+        {
+          orderId: "CHGU-20260917-0210",
+          total_cost: 50,
+          beginTime: "2026-09-18 00:00:00",
+          endTime: "2026-09-18 6:00:00",
+          mode: "AUTO",
+          detail: [
+            { type: "容器云工程发布/重启", count: 2, type_cost: 50 },
+            { type: "数据库发布", count: 1, type_cost: 30 },
+            { type: "配置发布", count: 1, type_cost: 25 },
+          ],
+          node_detail: [
+            {
+              cost: 50,
+              node_id: 600001,
+              node_name: "批处理-容器云发布",
+              node_type: "容器云工程发布/重启",
+              orderId: "CHGU-20260917-0110",
+              plan_id: 90001,
+              plan_start_time: null,
+              workflow_id: 60281,
+            },
+          ],
         },
       ],
     };

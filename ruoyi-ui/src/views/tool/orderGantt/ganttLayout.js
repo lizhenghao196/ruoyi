@@ -138,20 +138,30 @@ export function normalizeMode(mode) {
  *
  * 规则（顺序是刻意的）：
  *   1. beginTime 解析不出来  → 返回 null，这条不画（调用方计入 invalidCount）
- *   2. total_cost > 0        → 时长 = total_cost 分钟  ← **主判据**
+ *   2. total_cost > 0        → 时长 = total_cost 分钟  ← **MANUAL 的主判据**
  *   3. 否则 endTime > beginTime → 时长 = 两者之差（兜底）
  *   4. 都没有                 → 时长 = DEFAULT_DURATION_MIN
  *
- * 第 2 步优先于第 3 步：`endTime` 在这份数据里**不代表工单实际占用的时间**，
- * 只按 total_cost 画。样例 3 起止跨 6 小时（360 分钟）但 total_cost 只有 135，
- * 按 endTime 画出来的矩形会凭空长出一倍多，用户看到的「结束时间」是错的。
+ * 第 2 步优先于第 3 步：`endTime` 在这份数据里**不代表工单实际占用的时间**。
  *
- * 第 3 步留着是纯兜底：total_cost 缺失时，宁可退回起止时间差，
- * 也不要给所有工单都画成固定 30 分钟 —— 那才是彻底看不出信息。
+ * ⚠️ AUTO 工单是例外（2026-10-12 需求变更）：**结束时间取更晚的那个** ——
+ *    `max(beginTime + total_cost, node_detail 最后一个节点的真正结束时间)`。
+ *    最后一个节点 = 按 plan_start_time 排完序后串行推进的末位节点
+ *    （例：CHGU-20260917-0206，total_cost 推出 22:50，但最后一个节点
+ *    plan 00:30 + cost 15 → 00:45，柱子画到 00:45）。
+ *    MANUAL 没有 node_detail，仍走上面的 2~4 步，一格不变。
+ *
+ * 实现：先用上面的规则算基础 span，再把基础 span 喂给 computeNodeTimeline 拿
+ * segments（segments 按串行次序生成，不受 span 长短影响），若末位节点的结束
+ * 时间更晚就扩展 span；**扩展后用最终 span 再算一次** computeNodeTimeline，
+ * 保证 rests 的裁剪边界是最终结束时间。结果挂在 `span.timeline` 上，
+ * buildLayout 直接取，不算第二遍。
  *
  * @param {Object} item
- * @returns {{start:number, end:number, durationMinutes:number, fromCost:boolean}|null}
- *          fromCost = 时长不是由起止时间差算出来的（total_cost 或兜底宽度）
+ * @returns {{start:number, end:number, durationMinutes:number, fromCost:boolean,
+ *            timeline:(Object|null)}|null}
+ *          fromCost = 时长不是由起止时间差算出来的（total_cost / 兜底 / 节点扩展）
+ *          timeline = computeNodeTimeline 的结果（仅 AUTO 有；无 node_detail 时为 null）
  */
 export function resolveSpan(item) {
   const start = parseTime(item && item.beginTime)
@@ -173,11 +183,168 @@ export function resolveSpan(item) {
     fromCost = true
   }
 
-  return {
+  const span = {
     start,
     end: start + durationMinutes * MINUTE_MS,
     durationMinutes,
-    fromCost
+    fromCost,
+    timeline: null
+  }
+
+  if (item && normalizeMode(item.mode) === 'AUTO') {
+    const probe = computeNodeTimeline(item, span)
+    if (probe && probe.segments.length) {
+      const nodeEnd = probe.segments[probe.segments.length - 1].end
+      if (nodeEnd > span.end) {
+        span.end = nodeEnd
+        span.durationMinutes = (nodeEnd - start) / MINUTE_MS
+      }
+    }
+    // 用最终 span 再算一次（rests 的裁剪边界才是对的），挂上去供 buildLayout 复用
+    span.timeline = computeNodeTimeline(item, span)
+  }
+
+  return span
+}
+
+/* ------------------------------------------------- AUTO 工单的节点时间线
+ * 2026-10-12 用户需求：AUTO 工单带 `node_detail`，要在柱子上把**休息区域**
+ * （工单总时长里没被任何节点占用的片段）用别的颜色画出来。
+ *
+ * `plan_start_time` 的语义（用户特别强调）：**不是节点的开始时间**，
+ * 而是「这个时间之后节点才可以开始执行」。节点之间**串行**——
+ * 一个做完才能做下一个，所以下一个节点的真正开始时间是
+ *     max(前一个节点的真正结束时间, 本节点的 plan_start_time)
+ * `plan_start_time` 为 null 时取外层 `beginTime`（外层 beginTime 就是这一级的
+ * plan_start_time）。
+ *
+ * 典型形态（用户给的样例，CHGU-20260909-0086，total_cost=30，beginTime 18:00）：
+ *   节点1  plan 18:00  cost 15  →  实际 18:00 ~ 18:15
+ *   节点2  plan null→18:00  cost 10  →  18:15 ~ 18:25（要等节点1做完）
+ *   休息   18:25 ~ 18:30（尾部余量：节点全做完，离 total_cost 还有 5 分钟）
+ * ------------------------------------------------------------------ */
+
+/**
+ * 算一条工单的节点执行时间线 + 休息区间。
+ *
+ * 纯函数：只吃 item（原始工单）和 span（resolveSpan 的结果），不碰 DOM。
+ *
+ * ⚠️ **先按 `plan_start_time`（可开工时间）升序排，再串行执行**（2026-10-12 用户明确要求）：
+ *    不排序而按数组顺序执行会出过事故 —— mock 工单 CHGU-20260917-0206 的第一个节点
+ *    plan 是次日 00:30（在整个工单跨度之外），按数组序排在第一个执行，四个节点全被推到
+ *    跨度外、整根柱子都变成休息区。排序后 22:00 可开工的三个节点先做，00:30 的排最后。
+ *    同值（含多个 null 都解析成外层 beginTime）时保持**数组原顺序**（stable）。
+ *    null / 解析失败的 plan_start_time 一律当作「外层 beginTime」参与排序。
+ *
+ * @param {Object} item 原始工单（读 node_detail / beginTime）
+ * @param {{start:number,end:number}|null} span resolveSpan(item) 的结果，
+ *        span.start = beginTime、span.end = beginTime + total_cost 分钟
+ * @returns {{segments:Array, rests:Array, nodeCount:number, validNodeCount:number}|null}
+ *          segments —— 各节点**真正**的执行区间（已按串行规则算好），
+ *                     {start, end, minutes, name, type}
+ *          rests    —— 休息区间（工单总跨度内、执行段没覆盖的部分），
+ *                     {start, end, minutes}。含两种：节点之间的计划等待、
+ *                     以及尾部余量（用户点名要画的是最后这种）。
+ *          没有 node_detail / 没有有效节点（都取不到 cost）时返回 **null**
+ *          —— 调用方据此完全不画休息区，MANUAL 工单（本来就没这个字段）不受影响。
+ */
+export function computeNodeTimeline(item, span) {
+  if (!item || !span) {
+    return null
+  }
+  const nodes = Array.isArray(item.node_detail) ? item.node_detail : null
+  if (!nodes || !nodes.length) {
+    return null
+  }
+
+  const spanStart = span.start
+  const spanEnd = span.end
+
+  // 1. 逐节点解析「可开工时间」与耗时。
+  //    plan_start_time 解析不出来（null / 脏值）→ 退回外层 beginTime；
+  //    cost 无效（缺失 / <=0 / NaN）→ 该节点不产生执行段（零工时节点画了也看不见）。
+  const parsed = []
+  nodes.forEach((n, index) => {
+    if (!n || typeof n !== 'object' || Array.isArray(n)) {
+      return
+    }
+    let plan = parseTime(n.plan_start_time)
+    if (plan === null) {
+      plan = spanStart
+    }
+    const cost = toPositiveNumber(n.cost)
+    if (cost === null) {
+      return
+    }
+    parsed.push({
+      earliest: plan,
+      minutes: cost,
+      name: typeof n.node_name === 'string' ? n.node_name : '',
+      type: typeof n.node_type === 'string' ? n.node_type : '',
+      index
+    })
+  })
+  if (!parsed.length) {
+    return null
+  }
+
+  // 2. 按「可开工时间」升序排，同值保持数组顺序 —— plan_start_time 早的先做。
+  //    （显式带 index 做 tiebreak，不依赖引擎的 sort 稳定性。）
+  parsed.sort((a, b) => (a.earliest !== b.earliest ? a.earliest - b.earliest : a.index - b.index))
+
+  // 3. 串行推进：每个节点的真正开始 = max(游标, 可开工时间)，结束 = 开始 + cost。
+  //    游标从外层 beginTime 起 —— 第一个节点也不能早于工单自己的开始时间。
+  const segments = []
+  let cursor = spanStart
+  parsed.forEach((n) => {
+    const actualStart = Math.max(cursor, n.earliest)
+    const actualEnd = actualStart + n.minutes * MINUTE_MS
+    segments.push({
+      start: actualStart,
+      end: actualEnd,
+      minutes: n.minutes,
+      name: n.name,
+      type: n.type
+    })
+    cursor = actualEnd
+  })
+
+  // 3. 休息区间 = 工单总跨度 [spanStart, spanEnd] 减去所有执行段。
+  //    segments 已按开始时间有序且互不重叠（游标单调），一遍扫描即可。
+  //    执行段超出 spanEnd 的部分（节点总工时 > total_cost，数据自相矛盾时）裁掉，
+  //    别让休息算出负区间。
+  const rests = []
+  let restCursor = spanStart
+  segments.forEach((s) => {
+    const segStart = Math.max(s.start, spanStart)
+    const segEnd = Math.min(s.end, spanEnd)
+    if (segEnd <= segStart) {
+      return
+    }
+    if (segStart > restCursor) {
+      rests.push({
+        start: restCursor,
+        end: segStart,
+        minutes: (segStart - restCursor) / MINUTE_MS
+      })
+    }
+    if (segEnd > restCursor) {
+      restCursor = segEnd
+    }
+  })
+  if (restCursor < spanEnd) {
+    rests.push({
+      start: restCursor,
+      end: spanEnd,
+      minutes: (spanEnd - restCursor) / MINUTE_MS
+    })
+  }
+
+  return {
+    segments,
+    rests,
+    nodeCount: nodes.length,
+    validNodeCount: parsed.length
   }
 }
 
@@ -672,6 +839,12 @@ export function buildLayout(items, options) {
       durationMinutes: span.durationMinutes,
       durationFromCost: span.fromCost,
       detail: item ? item.detail : null,
+      /**
+       * 节点时间线（AUTO 工单的 node_detail 串行展开）。resolveSpan 里已经算好
+       * （它还要拿末位节点定柱子结束时间），这里直接用，不算第二遍。
+       * 没有 node_detail 的工单是 null —— 组件据此不画休息区。
+       */
+      timeline: span.timeline,
       raw: item,
       row: 0
     })
