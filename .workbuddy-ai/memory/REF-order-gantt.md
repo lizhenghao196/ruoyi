@@ -18,7 +18,7 @@
   取最长」）**：结束时间 = `max(beginTime + total_cost 推出, node_detail 最后一个节点的真正结束)`。
   末位节点 = 按 plan_start_time 排完序串行推进的最后一个。
   例：CHGU-20260917-0206：total_cost 推出 22:50，但末位节点 plan 00:30 + cost 15 → 00:45，
-  **柱子画到 00:45**（休息区随之从「被裁掉」变成 22:35~00:30 显形的 115 分钟）。
+  **柱子画到 00:45**（暂停区随之从「被裁掉」变成 22:35~00:30 显形的 115 分钟）。
 - 判定只此一处：`ganttLayout.js` 的 `resolveSpan()`。基础时长顺序仍是刻意的：
   `beginTime` 解析不出来 → null（不画）；`total_cost > 0` → 用它；否则 `endTime` 差兜底；
   都没有 → `DEFAULT_DURATION_MIN`（30）。⚠️ MANUAL 的兜底分支**别改回去**按 `endTime` 画。
@@ -145,7 +145,7 @@
 | `og_shot_tipbar.mjs` | 两个静态预览：配色对调（AUTO 绿 / MANUAL 蓝）+ 进度条宽度比例 + 截 `.og-tip` |
 | `og_probe_tipbar_live.mjs` | **真实浏览器 + 真实页面**：登录 → `/tool/orderGantt` → 查看 → 悬浮 AUTO 矩形，核对配色与进度条（100/50/16.67%）+ 截图 |
 | `og_probe_link_live.mjs` | **真实浏览器 + 真实页面**：悬浮两条样例矩形，核对气泡工单号是 `<a>`（href = `raw.url`、`target="_blank"`、rel 含 noopener、颜色 #2563eb）+ **真实点击后新开 tab 的地址**（见 §5）。⚠️ hover 后要等气泡稳（visibility/位置）再 Promise.all(click) —— 2026-10-12 踩过「点太急 click 反复重试、popup 30s 假失败」 |
-| `og_probe_rest_live.mjs` | **真实浏览器 + 真实页面**：休息区域专项（见 §6）—— 图例 3 条、4 条 AUTO 各自的休息块数量 / 位置比例 / 宽度比例 / title / 斜纹、MANUAL 0 块、无横纵滚动、文字压层、悬浮仍正常 |
+| `og_probe_rest_live.mjs` | **真实浏览器 + 真实页面**：暂停区域专项（见 §6）—— 图例 3 条、4 条 AUTO 各自的暂停块数量 / 位置比例 / 宽度比例 / title / 斜纹、MANUAL 0 块、无横纵滚动、文字压层、悬浮仍正常 |
 | `og_filter_check.mjs` | 弹窗日期过滤条（`index.vue`）：模板/接线源码断言（`type="date"` / `value-format` / 传参 `{ date }` / 不再出现 `beginTime`）+ **真实执行 `defaultDate()`**（注入假 Date 跑当天首末秒、月初、年末、年初 6 个边界） |
 | `og_probe_filter_live.mjs` | **真实浏览器 + 真实页面**：默认**当天**、是单日期不是 range、选择器可点开、Esc 只关面板不关弹窗、量词是「单」、**加了过滤条后甘特图仍不滚动**、换日期点搜索后弹窗仍在 |
 
@@ -217,12 +217,29 @@
 - **没碰** tipStyle / measureTip / pointer watch：链接在气泡内部，可达性逻辑原样有效。
 - 校验：`og_probe_link_live.mjs`（真实浏览器：两条样例的 href / target / rel / 颜色断言 +
   真实点击后 popup 地址断言）。注意 `.og-bar.is-manual` 匹配到 **2 个元素**（0087 + 0047），
-  定位要 `nth=0`；popup.url() 会被目标站点规范化（百度补尾斜杠），比对时去掉 `/`$。
+  定位要 `nth=0`；popup.url() 会被目标站点规范化（百度补尾斜杠），比对时去掉 `/`$；
+  headless 下 popup 事件偶发竞态/外网 chrome-error，脚本已有重试与容错。
 
-## 6. AUTO 工单柱子的休息区域（2026-10-12 新增）
+## 5.5 气泡 meta 行：总耗时 / 节点耗时两枚胶囊（2026-10-13 用户要求）
+
+- 结构：meta 行右侧一层 `.og-tip__costs` 容器（`flex-direction:column; align-items:flex-end;
+  margin-left:auto`）里竖排两枚胶囊 —— **总耗时在上、节点耗时在下**（用户要求「放总耗时下面」）。
+  ⚠️ `margin-left:auto` 放在**容器**上，不能给两个 pill 各设一个：两个 auto margin 会平分
+  剩余空间、把两枚胶囊在同一行左右分开，竖不起来。
+- 拆分原因：AUTO 的总耗时 = `max(beginTime+total_cost, 末位节点结束)`（§0/§6 的新规则），
+  会把节点间等待吃进来；**节点耗时 = 原始 `total_cost`**，两者在 0206 上分别是 2h45m / 50 分钟。
+  MANUAL 两者相同（竖排显示反而能一眼看出「无等待」）。
+- `hoverNodeCostText` 判空：`== null` / `''` / NaN / 负数 → 空串，模板 `v-if` 整项不渲染；
+  **0 是合法值**（显示「0 分钟」），判空不许用 falsy。
+- ⚠️ meta 竖排后气泡会高一行（~28px）：tipStyle 用 measureTip 的实测高度定位，自动跟随，
+  og_verify_tip 的可达性断言已覆盖。
+- 校验：og_probe_rest_live 第 6 节（0206 = 165/50、0086 = 30/30、0087 MANUAL = 135/135，
+  外加「节点耗时 pill 在总耗时下方且右对齐」的几何断言）。
+
+## 6. AUTO 工单柱子的暂停区域（2026-10-12 新增）
 
 **需求**：AUTO 工单带 `node_detail`（只有 AUTO 有），在柱子上把「工单总时长里没被任何节点
-占用的片段」用灰白斜纹画成休息区域；图例加第三条「休息区域」。
+占用的片段」用灰白斜纹画成暂停区域；图例加第三条「暂停区域」。
 
 - **唯一计算处 = 纯函数 `computeNodeTimeline(item, span)`**（ganttLayout.js）。
   `buildLayout` 把结果挂到 `bar.timeline`（没有 node_detail 的工单是 null，组件据此一块都不画）。
@@ -231,22 +248,26 @@
   - **先按 `plan_start_time`（可开工时间）升序排，再串行执行**（2026-10-12 用户明确要求）：
     ⚠️ 中间曾改成「按 node_detail 数组顺序执行」——用户加的工单 CHGU-20260917-0206
     直接证伪：它第一个节点的 plan 是**次日 00:30**（在整个工单跨度外），按数组序排第一
-    执行，四个节点被全推到跨度外、**整根柱子都变成休息区**。排序后 22:00 可开工的三个
-    节点先做（35 分钟），00:30 的排最后（被 total_cost 裁掉），只剩尾部 15 分钟休息。
+    执行，四个节点被全推到跨度外、**整根柱子都变成暂停区**。排序后 22:00 可开工的三个
+    节点先做（35 分钟），00:30 的排最后（被 total_cost 裁掉），只剩尾部 15 分钟暂停。
     同值（含多个 null 都解析成外层 beginTime）时保持**数组原顺序**（显式 index tiebreak，
     不依赖引擎 sort 稳定性）。
   - 节点真正开始时间 = `max(前一节点真正结束时间, 本节点 plan_start_time)`；
     plan 早于前一节点结束 → 排队等前一做完。游标从外层 beginTime 起。
   - `cost` 无效（缺失 / <=0 / NaN）→ 该节点不产生执行段；整段 `node_detail` 空 / 全无效 /
-    非数组 → 返回 **null**（整根柱子一块休息区都不画，MANUAL 零影响）。
+    非数组 → 返回 **null**（整根柱子一块暂停区都不画，MANUAL 零影响）。
   - rests = 工单**总跨度**（按 §0 的 AUTO 规则：`max(total_cost 推出, 末位节点结束)`）
-    减去所有执行段 ⇒「节点之间的计划等待」和「尾部余量」都算休息（用户样例 0086 是尾部 5 分钟）。
+    减去所有执行段 ⇒「节点之间的计划等待」和「尾部余量」都算暂停（用户样例 0086 是尾部 5 分钟）。
     ⚠️ 跨度本身会被末位节点延长（0206：50 → 165 分钟），原「被裁掉」的等待随之显形
-    （0206 的休息 = 22:35~00:30 共 115 分钟，不是 15 分钟）。执行段超出旧 spanEnd 不再被剪。
+    （0206 的暂停 = 22:35~00:30 共 115 分钟，不是 15 分钟）。执行段超出旧 spanEnd 不再被剪。
     执行段互相重叠（数据自相矛盾时）也不会出负区间。
 - **渲染**（OrderGantt.vue）：模板里 `.og-bar__rest`（绝对定位），几何走组件方法
   `restBlocks` / `restBlockStyle`：**百分比宽**，分母 = bar 自己的真实跨度（end-start）。
-  **不参与布局** ⇒ 柱高、气泡高度、行高零变化。title = 「休息 N 分钟」。
+  **不参与布局** ⇒ 柱高、气泡高度、行高零变化。title = 「暂停时间 N 分钟」。
+  ⚠️ **术语（2026-10-13 用户要求）**：界面上「休息」一律改称**「暂停」**（图例「暂停区域」、
+  title「暂停时间 N 分钟」）；**代码标识符不动**（`rest` / `rests` / `restBlocks` /
+  `restBlockStyle` / `.og-bar__rest` / `computeNodeTimeline` 的 rests 字段、脚本
+  `og_probe_rest_live.mjs` 等）—— 换说法不换变量名，别为文案 rename 满仓库代码。
   文字 span 抬 `position: relative; z-index: 1` 压住斜纹。
 - **配色 = 中性灰白斜纹**（rgba(100,116,139,.32) + 白斜纹）：刻意避开绿/蓝两组分组色，
   也不碰红色（告警语义）。图例点 `.og__legend-dot.is-rest` 同款斜纹。
@@ -254,10 +275,10 @@
   **只有 0111（155 分钟）和 0206（延长后 165 分钟）显示得出完整工单号**，其余按
   「完整或没有」规则不显示文字 —— 不是 bug（og_check_labels 会打印实际条数）。
 - **两份 mock 别混**：页面实际数据是 `api/tool/orderGantt.js` 内联的 **8 条**
-  （3 条原始 + 0110/0111/0205 + 用户加的 0206、0210；0210 是「单节点恰好填满 → 0 休息」的
+  （3 条原始 + 0110/0111/0205 + 用户加的 0206、0210；0210 是「单节点恰好填满 → 0 暂停」的
   边界样例）。`mockData/res.js` 的 orderRes（造数器 seeds）**没动** —— og_verify §4 的
   「样例条数 = 3」断言读的是它，别顺手同步。
 - **重叠分行**：柱子结束时间变长后（0206 与 0210 重叠），`packRows` 按新 span 自动分行
   （AUTO 组实测 3 行）—— og_probe_rest_live 第 5 节断言「同组同行柱子两两不重叠」。
-- 校验：og_verify §3.7 纯函数断言（含用户样例 0086 的 5 分钟尾部休息、排队、乱序不重排、
+- 校验：og_verify §3.7 纯函数断言（含用户样例 0086 的 5 分钟尾部暂停、排队、乱序不重排、
   null plan 边界、clamp、buildLayout 挂载）；og_probe_rest_live.mjs 真实浏览器全量几何断言。

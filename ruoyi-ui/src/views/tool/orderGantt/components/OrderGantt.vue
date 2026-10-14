@@ -23,10 +23,10 @@
           <i class="og__legend-dot is-auto" />
           AUTO 自动 · {{ stats.auto }}
         </span>
-        <!-- 休息区说明（和 .og-bar__rest 同一套斜纹，图例和柱子对得上） -->
+        <!-- 暂停区说明（和 .og-bar__rest 同一套斜纹，图例和柱子对得上） -->
         <span class="og__legend-item">
           <i class="og__legend-dot is-rest" />
-          休息区域
+          暂停区域
         </span>
         <span v-if="invalidCount > 0" class="og__legend-warn">
           <i class="el-icon-warning-outline" />
@@ -140,7 +140,7 @@
             @mouseenter="onBarEnter(bar, $event)"
             @mouseleave="onBarLeave"
           >
-            <!-- 休息区域块（2026-10-12 用户要求）：AUTO 工单的 node_detail 串行执行后，
+            <!-- 暂停区域块（2026-10-12 用户要求）：AUTO 工单的 node_detail 串行执行后，
                  工单总时长里没被节点占用的片段。灰白斜纹、绝对定位百分比宽，
                  **不参与布局** —— 柱高、气泡高度、行高全都不变。
                  没有 node_detail 的工单 restBlocks 返回空数组，一根都不渲染。 -->
@@ -211,9 +211,21 @@
         <span><i class="el-icon-time" />{{ hoverBeginText }}</span>
         <i class="el-icon-right og-tip__arrow" />
         <span>{{ hoverEndText }}</span>
-        <span class="og-tip__cost">
-          <i class="el-icon-timer" />{{ hoverDurationText }}
-        </span>
+        <!-- 两枚时长胶囊：**总耗时在上、节点耗时在下**竖排，整体贴右
+             （2026-10-13 用户要求「节点耗时放到总耗时下面」）。
+             贴右靠这层容器的 margin-left:auto，pill 自己不再吃 ——
+             两个 pill 都设 auto 会被平分剩余空间、左右分开，竖不起来。 -->
+        <div class="og-tip__costs">
+          <span class="og-tip__cost">
+            <i class="el-icon-timer" />总耗时 {{ hoverDurationText }}
+          </span>
+          <!-- 节点耗时 = 原始数据 total_cost。AUTO 工单的总耗时会吃进节点间等待
+               （0206：总 2h45m / 节点 50 分钟），MANUAL 两者相同。
+               total_cost 缺失 / 非法时整项不渲染。 -->
+          <span v-if="hoverNodeCostText" class="og-tip__nodecost">
+            <i class="el-icon-set-up" />节点耗时 {{ hoverNodeCostText }}
+          </span>
+        </div>
       </div>
 
       <!-- detail 是**对象数组**（字段固定 type / count / type_cost），用表格展示。
@@ -649,6 +661,30 @@ export default {
       return this.hover ? formatDuration(this.hover.durationMinutes) : ''
     },
     /**
+     * 「节点耗时」= 原始数据的 `total_cost`（2026-10-13 用户要求：气泡里在
+     * 总耗时之外**再显示一个节点耗时**）。
+     *
+     * 为什么和 hoverDurationText 分开：AUTO 工单的总耗时 = max(beginTime+total_cost,
+     * 末位节点结束)（见 resolveSpan），会把节点之间的等待也吃进来；
+     * 而 total_cost 是工单自己的计划工时。0206 就是典型：总 2h45m / 节点 50 分钟。
+     * MANUAL 两者一般相同（此时两枚胶囊并排显示，一致性反而能一眼看出「无等待」）。
+     *
+     * total_cost 缺失 / NaN / 负数 → 返回空串，模板据此不渲染这一项
+     * （判空用 == null 和 Number 判定，不用 falsy —— 0 是合法值，显示「0 分钟」）。
+     */
+    hoverNodeCostText() {
+      const raw = this.hover && this.hover.raw
+      const cost = raw ? raw.total_cost : null
+      if (cost === null || cost === undefined || cost === '') {
+        return ''
+      }
+      const n = Number(cost)
+      if (!isFinite(n) || n < 0) {
+        return ''
+      }
+      return formatDuration(n)
+    },
+    /**
      * 气泡里工单号的跳转地址（2026-10-12 用户要求：工单号变蓝色超链接，
      * 点击**新开浏览器 tab** 访问）。
      *
@@ -831,11 +867,11 @@ export default {
       return canFitLabel(this.textWidth(id), bar.width) ? id : ''
     },
     /**
-     * 柱子里要画的**休息区域块**（2026-10-12 用户要求）。
+     * 柱子里要画的**暂停区域块**（2026-10-12 用户要求）。
      *
      * 数据来自 ganttLayout 的 computeNodeTimeline（AUTO 工单的 node_detail
      * 串行展开的结果，已经挂在 bar.timeline 上）。没有 node_detail 的工单
-     * （含全部 MANUAL）timeline 是 null → 返回空数组，一根休息块都不画，
+     * （含全部 MANUAL）timeline 是 null → 返回空数组，一根暂停块都不画，
      * 老页面观感零变化。
      */
     restBlocks(bar) {
@@ -843,7 +879,7 @@ export default {
       return tl && Array.isArray(tl.rests) ? tl.rests : []
     },
     /**
-     * 休息块的位置 / 宽度 —— **百分比**，不引入像素依赖：
+     * 暂停块的位置 / 宽度 —— **百分比**，不引入像素依赖：
      * 分母用工单自己的真实跨度（bar.end - bar.start），所以缩放、横向滚动
      * 都不影响比例。bar 被绘图区右缘截断时，超出 100% 的部分自然被柱子的
      * overflow:hidden 裁掉（夹一下只是防浮点误差画出负宽）。
@@ -865,9 +901,9 @@ export default {
         width: width.toFixed(3) + '%'
       }
     },
-    /** 休息块的 title：鼠标放上去显示这段休息有多长 */
+    /** 暂停块的 title：鼠标放上去显示这段暂停有多长 */
     restBlockTitle(r) {
-      return '休息 ' + formatDuration(r.minutes)
+      return '暂停时间 ' + formatDuration(r.minutes)
     },
     /**
      * 量一段文字在**柱体字号**下的真实宽度（px）。
@@ -1266,7 +1302,7 @@ export default {
     background: linear-gradient(135deg, var(--og-auto-a), var(--og-auto-b));
   }
 
-  /* 休息区图例点：和柱子里 .og-bar__rest 同一套灰白斜纹（图例和柱子必须对得上） */
+  /* 暂停区图例点：和柱子里 .og-bar__rest 同一套灰白斜纹（图例和柱子必须对得上） */
   &.is-rest {
     background-color: rgba(100, 116, 139, 0.32);
     background-image: repeating-linear-gradient(
@@ -1553,13 +1589,13 @@ export default {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* 压住休息区斜纹块（绝对定位）：文字是后写的 flex 子项，
+    /* 压住暂停区斜纹块（绝对定位）：文字是后写的 flex 子项，
        但没有定位时也可能被绝对定位的兄弟盖住，显式抬一层最稳。 */
     position: relative;
     z-index: 1;
   }
 
-  /* 休息区域块（2026-10-12 用户要求：柱子上用其他颜色标出休息时间）：
+  /* 暂停区域块（2026-10-12 用户要求：柱子上用其他颜色标出暂停时间）：
      AUTO 工单的 node_detail 串行执行后，工单总时长里没被节点占用的片段。
      —— 中性灰白斜纹：刻意避开「绿=自动 / 蓝=手动」两组分组色，
         也不碰红色（本系统里红色是告警语义），斜纹是「停工」的通用视觉语言。
@@ -1726,8 +1762,27 @@ export default {
   color: var(--og-text-3);
 }
 
-.og-tip__cost {
+/* 两枚时长胶囊的右侧容器：竖排、贴右（2026-10-13 用户要求「节点耗时放总耗时下面」）。
+   margin-left:auto 在这层而不是 pill 上 —— 两个 pill 各设 auto 会被平分剩余空间、
+   同一行左右分开，竖不起来。 */
+.og-tip__costs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
   margin-left: auto;
+}
+
+.og-tip__cost {
+  padding: 1px 7px;
+  border-radius: 9px;
+  background: #f2f5fa;
+  color: var(--og-text-2);
+}
+
+/* 节点耗时（2026-10-13 用户要求）：和 .og-tip__cost 同款胶囊，共用一套视觉，
+   让「总耗时 / 节点耗时」看起来是一对。 */
+.og-tip__nodecost {
   padding: 1px 7px;
   border-radius: 9px;
   background: #f2f5fa;

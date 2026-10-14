@@ -40,7 +40,7 @@
 ## 工单甘特图（orderGantt）
 - ⚠️ **矩形宽度按 mode 拆**：**MANUAL** 结束 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求）；**AUTO 例外**（2026-10-12 需求变更）= `max(beginTime+total_cost, node_detail 末位节点真正结束)`。判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`（AUTO 分支把 `computeNodeTimeline` 挂 `span.timeline` 供 buildLayout 复用）。**改这个页面前读 `REF-order-gantt.md`**（硬规则 9 条、气泡可达性、分组标签条 chip、柱体文字「完整或没有」、气泡占比进度条、弹窗**日期**过滤条 `date`、校验脚本）。
 - 配色（2026-09-24 用户要求对调）：**AUTO 自动 = 绿，MANUAL 手动 = 蓝**；变量名不变、只换值，但气泡 `.og-tip__mode` 徽标是**硬编码**的要手动跟。分组标签条量词是「**单**」不是「条」。
-- **AUTO 柱子休息区域**（2026-10-12）：`node_detail` **先按 plan_start_time 升序排、再串行执行**（⚠️ 曾试过「按数组序」，被 0206（首节点 plan 在跨度外 → 整柱全休息）证伪，别改回去）；`plan_start_time` = 「最早可开工」不是开始时间，null→外层 beginTime；纯函数 `computeNodeTimeline`（ganttLayout.js）挂 `bar.timeline`，休息块 % 宽不参与布局。详见 `REF-order-gantt.md` §6。
+- **AUTO 柱子暂停区域**（2026-10-12）：`node_detail` **先按 plan_start_time 升序排、再串行执行**（⚠️ 曾试过「按数组序」，被 0206（首节点 plan 在跨度外 → 整柱全暂停）证伪，别改回去）；`plan_start_time` = 「最早可开工」不是开始时间，null→外层 beginTime；纯函数 `computeNodeTimeline`（ganttLayout.js）挂 `bar.timeline`，暂停块 % 宽不参与布局。详见 `REF-order-gantt.md` §6。
 - 气泡明细表占比进度条调色板（`BAR_PALETTE`）：**不许有红 / 玫红 / 粉**（2026-10-08 用户要求，原第 2 色粉 `#fbd8e3`/`#f090b1` 撞告警红 → 换蓝 `#d6e6ff`/`#7ba7f5`）。现 6 色 = 绿蓝黄橙青紫；`og_syntax_check.mjs` 有按色相的防回归断言。
 
 ## 校验 / 协作
