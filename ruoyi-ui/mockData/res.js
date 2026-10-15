@@ -63,7 +63,8 @@ let systemProfileRes = {
     系统简介:
       "提供以查询处理和文件处理等为核心的交易驱动型业务系统，主要包括产品服务、营销支撑、运营支撑、发卡与用卡、消息服务、账单查询与计算服务、风险服务、数据采集等十几个子模块",
     系统重要性级别: "A+",
-    所属集群: "应用/dasp-app-mgr-d5c7",
+    // 所属集群：链路图不区分节点、不做特殊标记，这里只是基础信息的一部分
+    所属集群: "bpc@SZ-CS-SCYW-CSPROD@app-bpc",
   },
   组件拓扑: {
     CANAL: {
@@ -1525,104 +1526,82 @@ let systemProfileRes = {
       ],
     },
   },
-  // 链路: [
-  //   {
-  //     fnode: "NGINX/bjb-dasp-nginx-kzx",
-  //     snode: "HAPROXY/dasp_ht_haproxy_4",
-  //   },
-  //   {
-  //     fnode: "NGINX/bjc-dasp-nginx-kzx",
-  //     snode: "HAPROXY/dasp_cym_haproxy_4",
-  //   },
-  //   {
-  //     fnode: "NGINX/hfa-dasp-nginx-kzx",
-  //     snode: "HAPROXY/dasp_ht_haproxy_5",
-  //   },
-  //   {
-  //     fnode: "HAPROXY/dasp_ht_haproxy_4",
-  //     snode: "应用/dasp-azkaban-mgr-4d86",
-  //   },
-  //   {
-  //     fnode: "HAPROXY/dasp_ht_haproxy_5",
-  //     snode: "应用/dasp-app-mgr-d5c7",
-  //   },
-  //   {
-  //     fnode: "HAPROXY/dasp_cym_haproxy_4",
-  //     snode: "应用/bjc-dasp-mgr-7384",
-  //   },
-  //   {
-  //     fnode: "HAPROXY/dasp_cym_haproxy_8",
-  //     snode: "应用/bjc-dasp-mgr-3174",
-  //   },
-  //   {
-  //     fnode: "应用/dasp-app-mgr-d5c7",
-  //     snode: "容器云/bjb-dasp-k8s-kzx",
-  //   },
-  //   {
-  //     fnode: "应用/bjc-dasp-mgr-7384",
-  //     snode: "容器云/bjc-dasp-k8s-kzx",
-  //   },
-  //   {
-  //     fnode: "应用/dasp-app-mgr-d5c7",
-  //     snode: "MYSQL/bjb-dasp-mysql-kzx",
-  //   },
-  //   {
-  //     fnode: "应用/bjc-dasp-mgr-7384",
-  //     snode: "MYSQL/bjc-dasp-mysql-kzx",
-  //   },
-  //   {
-  //     fnode: "应用/dasp-azkaban-mgr-4d86",
-  //     snode: "MYSQL/bjb-dasp-mysql-kzx",
-  //   },
-  //   {
-  //     fnode: "MYSQL/bjb-dasp-mysql-kzx",
-  //     snode: "CANAL/bjb-dasp-canal-kzx",
-  //   },
-  //   {
-  //     fnode: "MYSQL/bjc-dasp-mysql-kzx",
-  //     snode: "CANAL/bjc-dasp-canal-kzx",
-  //   },
-  //   {
-  //     fnode: "MYSQL/hfa-dasp-mysql-kzx",
-  //     snode: "CANAL/hfa-dasp-canal-kzx",
-  //   },
-  //   {
-  //     fnode: "CANAL/bjb-dasp-canal-kzx",
-  //     snode: "KAFKA/bjb-dasp-kafka-kzx",
-  //   },
-  //   {
-  //     fnode: "CANAL/bjc-dasp-canal-kzx",
-  //     snode: "KAFKA/bjc-dasp-kafka-kzx",
-  //   },
-  //   {
-  //     fnode: "CANAL/hfa-dasp-canal-kzx",
-  //     snode: "KAFKA/hfa-dasp-kafka-kzx",
-  //   },
-  //   {
-  //     fnode: "KAFKA/bjb-dasp-kafka-kzx",
-  //     snode: "ZOOKEEPER/bjb-dasp-zk-kzx",
-  //   },
-  //   {
-  //     fnode: "KAFKA/bjb-dasp-kafka-kzx",
-  //     snode: "ES/bjb-dasp-es-kzx",
-  //   },
-  //   {
-  //     fnode: "KAFKA/bjb-dasp-kafka-kzx",
-  //     snode: "GREATDB/bjb-dasp-greatdb-kzx",
-  //   },
-  //   {
-  //     fnode: "KAFKA/bjb-dasp-kafka-kzx",
-  //     snode: "HADOOP/bjb-dasp-hadoop-kzx",
-  //   },
-  //   {
-  //     fnode: "ZOOKEEPER/bjb-dasp-zk-kzx",
-  //     snode: "KAFKA/bjb-dasp-kafka-kzx",
-  //   },
-  //   {
-  //     fnode: "ES/bjb-dasp-es-kzx",
-  //     snode: "GREATDB/bjb-dasp-greatdb-kzx",
-  //   },
-  // ],
+  链路: [
+    // 生产网真实链路：只有 fnode → snode 两个字段，没有描述信息。
+    // 节点名字带着集群前缀（bpc@SZ-XX-YY@角色），但这里一视同仁 ——
+    // 就是一张有向链接表，位置完全由链路关系决定，不做任何特殊标记。
+    // HAProxy 接入
+    { fnode: "bpc-nw-haproxy-1", snode: "zddy" },
+    { fnode: "bpc-kjy-haproxy01", snode: "zddy" },
+    // CS 机房应用 / 批处理
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "starcard-act.gw.khx.cc" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "armprod-ocp-gw.itcs.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "cp-mail.szprod.cb.cc" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "sth.eureka1.cb.cc" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "prod-ocp.sm.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "starcard-dasp.gw.khx.cc" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "prod-pccmt.bpc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-batch", snode: "starcard-dasp.gw.khx.cc" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-batch", snode: "cp-mail.szprod.cb.cc" },
+    // 科技园机房应用 / 批处理 / API 网关
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "armprod-ocp-gw.itcs.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "cp-mail.szprod.cb.cc" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "prod-ocp.sm.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "starcard-act.gw.khx.cc" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "starcard-dasp.gw.khx.cc" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-batch", snode: "cp-mail.szprod.cb.cc" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-batch", snode: "sth.eureka1.cb.cc" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-batch", snode: "starcard-dasp.gw.khx.cc" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-api-gateway", snode: "starcard-dasp.gw.khx.cc" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-api-gateway", snode: "lb.uc.citicbank.com" },
+    // CS 调度
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "starcard-act.gw.khx.cc" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "starcard-dasp.gw.khx.cc" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "dify-app-bpc.aiap.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "opt-bpc.testapps.oa.citicbank.com" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "prod-c86-pccmt.newmedia.eprod-kzx.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "prd-bjb.strosys.prod-kzx.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "stor-sza.strosys.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "alt.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "armprod-ocp-gw.itcs.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "sth.eureka1.cb.cc" },
+    // 科技园调度
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "opt-bpc.testapps.oa.citicbank.com" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "dify-app-bpc.aiap.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "prd-bjbstar.strosys.prod-kzx.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "prod-c86-pccmt.newmedia.eprod-kzx.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "stor-sza2.strosys.eprod-kzx1.cncb:8060" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "stor-sza.strosys.eprod-kzx1.cncb:8060" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "alt.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "armprod-ocp-gw.itcs.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "cp-mail.szprod.cb.cc" },
+    // 统一接入网关
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "agent.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "behavior.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "task.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "sso.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "gray.serverUrl" },
+    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "prod-pccmt.bpc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "agent.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "behavior.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "task.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "sso.ipcc.eprod-kzx1.cncb" },
+    // 统一接出网关
+    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "agent.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "behavior.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "task.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "sso.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "prod-pccmt.bpc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "agent.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "behavior.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "task.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "sso.ipcc.eprod-kzx1.cncb" },
+    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "prod-pccmt.bpc.eprod-kzx1.cncb" },
+  ],
   集群关系: {
     CANAL: [
       {
