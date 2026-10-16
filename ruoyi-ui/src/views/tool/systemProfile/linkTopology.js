@@ -1,5 +1,5 @@
 /**
- * 系统画像 - 链路关系图：数据规范化 + 瀑布分层布局（纯函数，无 echarts 依赖）
+ * 系统画像 - 链路关系图：数据规范化 + 按组件集群筛选 + 瀑布分层布局（纯函数，无 echarts 依赖）
  *
  * 数据契约（兼容后端两种格式）：
  *   1. 对象数组：[{ fnode: "A", snode: "B" }, ...]（生产网真实格式）
@@ -67,6 +67,41 @@ export function normalizeLinks(raw) {
     out.push(link);
   });
   return out;
+}
+
+/**
+ * 按「组件下的集群名」筛选链路（纯函数）。
+ *
+ * 命中规则：**只看链路的起点**（fnode / normalizeLinks 之后的 source），并且是**全等**判断 ——
+ * `fnode === 集群名` 才算命中（不是「包含」）。
+ * 节点名就是集群名本身（如 bjb-dasp-nginx-kzx），所以全等等价于
+ * 「这条链路的起点就是这个集群」，一个集群名对应链路里一个节点，不会出现
+ * `集群名@角色` 这种主机列表里查不到的名字。
+ *
+ * 为什么不看终点（snode）：终点是链路的下游，选上游组件时不该把下游组件的链路
+ * 一并带出来（选 NGINX 就该只看到 NGINX 发出的链路，而不是所有指向 NGINX 的链路）。
+ *
+ * 一个集群名都拿不到（没选组件 / 组件下没有集群）时返回空数组 —— 调用方按
+ * 「无链路」渲染占位，不要退回「显示全部」。
+ *
+ * @param {Array<{source:string,target:string}>} links normalizeLinks 的输出
+ * @param {Array<string>} clusterNames 选中组件下的集群名（= 组件拓扑第二层的 key）
+ * @returns {Array} 命中的链路（保持入参顺序）
+ */
+export function filterLinksByClusters(links, clusterNames) {
+  const list = Array.isArray(links) ? links : [];
+  // 集群名来自对象 key，两侧可能带空白，先 trim 再参与全等比较
+  const names = (Array.isArray(clusterNames) ? clusterNames : [])
+    .map((n) => (n == null ? "" : String(n)).trim())
+    .filter(Boolean);
+  if (!names.length) return [];
+  return list.filter((link) => {
+    if (!link) return false;
+    // fnode 侧不做 trim / 大小写折叠：要的就是「逐字相同」，宽松匹配会
+    // 把「长得像但其实是另一个集群」的链路放进来，那正是要避免的
+    const from = link.source == null ? "" : String(link.source);
+    return from !== "" && names.indexOf(from) >= 0;
+  });
 }
 
 /**

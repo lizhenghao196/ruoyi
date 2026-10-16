@@ -240,10 +240,16 @@
           </div>
         </section>
 
-        <!-- 链路关系图：瀑布拓扑（节点为原始节点名、链路为边，自上而下分层） -->
+        <!-- 链路关系图：瀑布拓扑（节点为原始节点名、链路为边，自上而下分层）。
+             图里只画「选中组件下集群发出的链路」—— 组件拓扑的集群名就是链路起点节点名的前缀，
+             切换组件时整张图重算；该组件一条链路都匹配不上时走下面的「无链路」占位 -->
         <section class="profile-link">
           <header class="profile-link__head">
             <span class="profile-link__title">链路关系图</span>
+            <!-- 当前链路图的归属组件：不写出来的话，用户不知道这张图为什么只有这么几条链路 -->
+            <span v-if="activeComponent" class="profile-link__scope">
+              {{ activeComponent }}
+            </span>
             <span class="profile-link__count"
               >{{ links.length }} 条链路 · {{ linkNodeCount }} 个节点</span
             >
@@ -305,11 +311,12 @@
               </p>
             </div>
           </div>
-          <!-- 链路字段缺失 / 空数组 / 数据全是脏数据（自环、空节点）时都走这里 -->
+          <!-- 没有可画的链路时走这里，两种原因文案分开：
+               整份画像就没返回链路 / 返回了链路但没有一条起点属于当前组件 -->
           <div v-else class="profile-link__empty">
             <i class="el-icon-share" />
-            <p>暂无链路数据</p>
-            <span>当前系统画像未返回链路关系</span>
+            <p>{{ linkEmptyTitle }}</p>
+            <span>{{ linkEmptyHint }}</span>
           </div>
         </section>
       </div>
@@ -392,7 +399,8 @@
       <div class="profile-topo-dialog__body">
         <div class="profile-topo-dialog__bar">
           <span class="profile-topo-dialog__meta"
-            >{{ links.length }} 条链路 · {{ linkNodeCount }} 个节点 · 自上而下分层展示</span
+            >{{ activeComponent ? activeComponent + " · " : ""
+            }}{{ links.length }} 条链路 · {{ linkNodeCount }} 个节点 · 自上而下分层展示</span
           >
           <div class="profile-topo-dialog__actions">
             <!-- 节点名按画布宽度截短（机房前缀 + 角色），悬浮才给全名，这里点一句 -->
@@ -428,7 +436,11 @@
 <script>
 import * as echarts from "echarts";
 import { getSystemProfile } from "@/api/tool/systemProfile";
-import { normalizeLinks, buildTopology } from "./linkTopology";
+import {
+  normalizeLinks,
+  buildTopology,
+  filterLinksByClusters,
+} from "./linkTopology";
 
 // 组件类型的展示顺序（与调用流向一致）
 const COMPONENT_ORDER = [
@@ -470,6 +482,11 @@ const TOPO_COLORS = {
   flow: "rgba(64, 158, 255, 0.5)",
   flowActive: "rgba(64, 158, 255, 0.85)",
   label: "#4d6785",
+  // 直接画在线段上的 desc 文字：淡蓝药丸底 + 深一点的蓝字，
+  // 压在半透明的虚线上也读得清，又不会比节点名更抢眼
+  edgeLabel: "#41678f",
+  edgeLabelBg: "rgba(251, 253, 255, 0.94)",
+  edgeLabelBorder: "#dbe8f8",
 };
 
 // 节点外形：六边形（尖顶），比圆角方块更像「节点」，小尺寸下轮廓也清晰
@@ -482,6 +499,10 @@ const TOPO_EDGE_SERIES = "topo-edges"; // 全部连线（静态虚线）
 const TOPO_FLOW_SERIES = "topo-flow"; // 沿连线流动的光点（线条本身不画）
 const TOPO_FOCUS_SERIES = "topo-focus"; // 悬浮时高亮的相邻连线 + 光点
 const TOPO_NODE_SERIES = "topo-nodes"; // 节点
+// 线段上的 desc 文字。echarts 4.9 的 lines 系列压根不渲染 label
+// （LinesView 走 LineDraw/EffectLine，整条链路里没有 label 分支），
+// 所以文字只能自己用 scatter 挂在线段中点上
+const TOPO_EDGE_LABEL_SERIES = "topo-edge-labels";
 
 // 分层画布（zlevel）：流动光点的拖尾是 zrender 的 motionBlur 实现的 ——
 // 它把整层画布按 lastFrameAlpha 叠加到下一帧，而且这层不再被自动清空。
@@ -500,15 +521,65 @@ const TOPO_LAYER_GAP = 120;
 const TOPO_COL_GAP_MIN = 96;
 const TOPO_COL_GAP_MAX = 340;
 
-// 节点文字：长名截断（真实节点名可达 30+ 字符），完整名看 tooltip。
-// 小图里文字只在悬浮时出现，一次只有一条，可以放宽；
+// 节点文字：长名截断，完整名看 tooltip。
+// 节点名现在是**集群名**（bjb-dasp-nginx-kzx 这种 19~27 字符），比原来的主机名短不到哪去，
+// 所以上限放到 24：绝大多数集群名能整串画出来，只有 BJ-DB@auth-service-switchadapt 这种
+// 超长的才截。小图里文字只在悬浮时出现，一次只有一条，放宽不会压字；
 // 弹窗里文字常显、一层又可能有 20 多个节点，能画几个字要按实际列距反算
-// （见 topoState 里的 labelMax），这里只兜住上下限
-const TOPO_LABEL_MAX = 18;
-const TOPO_LABEL_MAX_DIALOG = 22;
+// （见 topoState 里的 labelMax），这里的上限只负责兜住
+const TOPO_LABEL_MAX = 24;
+const TOPO_LABEL_MAX_DIALOG = 26;
 const TOPO_LABEL_MIN_DIALOG = 6;
 // 11px 字号下拉丁字符的近似宽度（含字距）
 const TOPO_LABEL_CHAR_W = 6.6;
+
+// ---- 线段上的 desc（「空间合适就直出，不合适退回悬浮卡片」的判定）----
+// 密度上限：节点 / 线段任一超了就不直出。十几个节点起步的图上到处挂文字等于糊成一片，
+// 那时候 desc 只在悬浮连线的卡片里给
+const TOPO_EDGE_LABEL_MAX_NODES = 14;
+const TOPO_EDGE_LABEL_MAX_EDGES = 12;
+// 文字宽度上下限（px）：超过上限就截断（全文在悬浮卡片里）；
+// 连下限都放不下说明线段太短，干脆不画 —— 画个「解…」还不如不画
+const TOPO_EDGE_LABEL_MAX_W = 200;
+const TOPO_EDGE_LABEL_MIN_W = 60;
+// 文字两端要留的空白（和两端节点的间隙）
+const TOPO_EDGE_LABEL_PAD = 26;
+
+// 单个字符的估算宽度：中日韩 / 全角按 11px，其余按 6.2px。
+// 比真实宽度略宽一点点 —— 宁可判「放不下」也别让文字压到节点上
+function charWidth(ch) {
+  return /[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6]/.test(
+    ch
+  )
+    ? 11
+    : 6.2;
+}
+
+// 整串文字的估算宽度（中英混排按字数估会忽长忽短，必须逐字累加）
+function estimateTextWidth(text) {
+  const s = String(text || "");
+  let w = 0;
+  for (let i = 0; i < s.length; i += 1) w += charWidth(s[i]);
+  return w;
+}
+
+// 按可用宽度截断（不是按字数）。截断时给末尾的省略号留出位置。
+// 返回 { text, truncated }
+function fitText(text, budget) {
+  const s = String(text || "");
+  if (estimateTextWidth(s) <= budget) return { text: s, truncated: false };
+  const ell = charWidth("…");
+  let w = 0;
+  let cut = 0;
+  for (let i = 0; i < s.length; i += 1) {
+    const cw = charWidth(s[i]);
+    if (w + cw + ell > budget) break;
+    w += cw;
+    cut = i + 1;
+  }
+  return { text: s.slice(0, cut) + "…", truncated: true };
+}
+
 // 截断只砍尾巴：这些名字「像不像」几乎都差在前半段
 // （bpc-unity-in-gateway / bpc-unity-out-gateway 到第 11 个字符才分开），
 // 留头去尾还认得出，掐头留尾或头尾各留一半就会撞成同一个名字
@@ -517,26 +588,31 @@ function shortNodeName(name, max = TOPO_LABEL_MAX) {
   return s.length <= max ? s : s.slice(0, max - 1) + "…";
 }
 
-// 画在节点下面的是名字里「有信息量」的那一段：
-//   集群路径 + 角色  bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler → CSPROD@bpc-scheduler
+// 画在节点下面的是名字里「有信息量」的那一段。
+// 节点名现在就是**集群名**（链路 fnode === 组件拓扑第二层 key），所以默认整串照画 ——
+// 用户在主机列表里看到的就是这个名字，两边必须对得上，不能再自己加工。
+// 只有两类名字要削：
+//   三段式主机名  bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler → CSPROD@bpc-scheduler
 //     集群路径只留最后一段，但一定要留 —— 同一套应用在 CS / 科技园两个机房各部署一份，
 //     只取角色的话两个节点会同时叫 bpc-scheduler，谁也认不出哪个是哪个
+//     （真后端返回这种主机名时用得上；集群名不会有三段）
 //   域名取第一个点之前  starcard-dasp.gw.khx.cc → starcard-dasp
-// 生产网的节点名动辄 30+ 字符，整串画出来只会互相压成一条黑线。全名在悬浮卡片里给
+// ⚠️ 两段式名字（`BJ-DB@auth-adapt-mcd` 这种集群名）**不削**：早期版本会只留 @ 后面那段，
+//    结果图上显示 auth-adapt-mcd、主机列表里叫 BJ-DB@auth-adapt-mcd，对不上。
 function topoLabelOf(name) {
   const raw = String(name || "");
   // 端口要留着：同一个域名带不带端口是两条链路，截掉就分不出来了
   const port = raw.lastIndexOf(":");
   const suffix = port > 0 ? raw.slice(port) : "";
-  const parts = raw.split("@");
-  const role = parts[parts.length - 1];
+  const body = suffix ? raw.slice(0, port) : raw;
+  const parts = body.split("@");
   if (parts.length > 2) {
     const cluster = parts[parts.length - 2].split("-").pop();
+    const role = parts[parts.length - 1];
     return (cluster ? cluster + "@" + role : role) + suffix;
   }
-  if (parts.length === 2 && parts[0] && role) return role + suffix;
-  const dot = raw.indexOf(".");
-  return (dot > 0 ? raw.slice(0, dot) : raw) + suffix;
+  const dot = body.indexOf(".");
+  return (dot > 0 ? body.slice(0, dot) : body) + suffix;
 }
 
 // 节点下面真正画出来的文字。
@@ -636,6 +712,10 @@ export default {
     return {
       loading: false,
       profileData: null,
+      // 全量链路（接口返回多少就是多少，只做规范化）。顶部概览的「链路」用它的条数，
+      // 右侧链路图不用它 —— 那边画的是「当前组件下集群发出的链路」子集
+      allLinks: [],
+      // 当前组件下集群发出的链路（selectComponent / 查询成功后重算，见 refreshTopo）
       links: [],
       // 主机列表表格可用宽度（实测），用于把动态列压缩到容器内，避免横向滚动条
       tableWidth: 0,
@@ -710,7 +790,10 @@ export default {
     basic() {
       return (this.profileData && this.profileData["基础信息"]) || {};
     },
-    // 统计卡片：组件类型 / 集群 / 主机 / 链路（链路预留，仅显示数字）
+    // 统计卡片：组件类型 / 集群 / 主机 / 链路。
+    // 前三个都是系统级全量，链路也保持系统级全量（= 接口返回的全部链路），
+    // 不跟着选中组件变 —— 跟着变的话这块概览就变成「当前组件的概览」了，
+    // 当前组件的链路条数在右侧链路图表头上单独给
     stats() {
       const topo = (this.profileData && this.profileData["组件拓扑"]) || {};
       const componentCount = Object.keys(topo).length;
@@ -746,7 +829,7 @@ export default {
         {
           key: "link",
           label: "链路",
-          value: this.links.length,
+          value: this.allLinks.length,
           icon: "el-icon-connection",
           reserved: true,
         },
@@ -831,9 +914,26 @@ export default {
     filteredTotal() {
       return this.filteredGroups.reduce((s, g) => s + g.hosts.length, 0);
     },
+    // 当前选中组件下的集群名（= 组件拓扑第二层的 key，也是主机列表里 profile-cluster__title
+    // 显示的那个名字）。它同时是「链路筛选的命中词」：链路起点节点名里带这些名字就算这个组件的链路
+    activeClusters() {
+      const comp = this.componentList.find(
+        (c) => c.name === this.activeComponent
+      );
+      return comp ? comp.clusters.map((c) => c.name) : [];
+    },
     // 链路关系图节点数量（瀑布拓扑的节点数，链路里出现过即计入）
     linkNodeCount() {
       return (this.topo && this.topo.nodes.length) || 0;
+    },
+    // 空态文案分两种：整份画像没给链路 / 给了链路但当前组件一条都没匹配上
+    linkEmptyTitle() {
+      return this.allLinks.length ? "无链路" : "暂无链路数据";
+    },
+    linkEmptyHint() {
+      return this.allLinks.length
+        ? "当前组件下的集群未匹配到链路，切换组件试试"
+        : "当前系统画像未返回链路关系";
     },
   },
 
@@ -876,16 +976,14 @@ export default {
       getSystemProfile({ systemId: name })
         .then((res) => {
           this.profileData = res.data || res;
-          this.prepareData();
           this.searched = true;
-          // 默认选中第一个组件（按数据顺序），并展开其第一个集群
+          // 先把默认选中的组件定下来，再建拓扑 —— 顺序反了会先按上一次查询的组件
+          // 筛一遍链路（拓扑白算一次），还得再补一次重算
           const first = this.componentList[0];
-          if (first) {
-            this.activeComponent = first.name;
-            this.openClusters = first.clusters.length
-              ? [first.clusters[0].name]
-              : [];
-          }
+          this.activeComponent = first ? first.name : "";
+          this.openClusters =
+            first && first.clusters.length ? [first.clusters[0].name] : [];
+          this.prepareData();
         })
         .catch(() => {
           this.$message.error("获取系统画像数据失败");
@@ -902,11 +1000,12 @@ export default {
         });
     },
 
-    // 链路数据规范化 + 瀑布拓扑构建（查询成功后调用一次）。
+    // 链路数据规范化（查询成功后调用一次）+ 按默认选中的组件建一次拓扑。
     // 兼容两种后端格式：
     //   1. 对象数组：[{ fnode, snode }, ...]
     //   2. 生产网真实格式（元组）：[["A", "snode", "B"], ...] / [["A", "", "B"], ...]
-    // 节点名是原始字符串（不带「组件类型/集群名」前缀），去重、去自环、去脏数据
+    // 节点名形如 <集群名>@<角色>（如 bjb-dasp-nginx-kzx@bjb-nginx-lb）：前半段是组件拓扑里
+    // 第二层的集群名，链路筛选就靠它把「当前组件的链路」挑出来，去重、去自环、去脏数据
     prepareData() {
       // 整体响应可能为空对象 / 不含链路字段：统一兜底，后面按「空数据」渲染占位
       const data = this.profileData || {};
@@ -916,7 +1015,16 @@ export default {
         : raw && Array.isArray(raw.arrow)
         ? raw.arrow
         : [];
-      this.links = normalizeLinks(rawLinks);
+      // 全量链路先留着：顶部概览的「链路」总数用它，右侧链路图只用筛出来的那部分
+      this.allLinks = normalizeLinks(rawLinks);
+      this.refreshTopo();
+    },
+
+    // 按当前选中组件筛链路 + 重建瀑布拓扑。
+    // 组件拓扑的集群名 → 链路起点（fnode）命中词，命中不到的组件就是「无链路」。
+    // 筛选/建图都只在展示层做，接口返回的链路数据一个字节没动
+    refreshTopo() {
+      this.links = filterLinksByClusters(this.allLinks, this.activeClusters);
       // 节点位置只由链路关系决定（分层 + 层内重心排序），没有任何需要特殊标记的节点
       this.topo = buildTopology(this.links, {
         colGap: TOPO_COL_GAP_MIN,
@@ -927,22 +1035,47 @@ export default {
       this._topoLayout = null;
     },
 
+    // 切换组件后的链路图刷新：重筛 → 重建 → 重画两个画布。
+    // 容器是 v-if="links.length"，从「无链路」切到「有链路」时容器下一帧才存在，
+    // 所以重画必须等 $nextTick
+    applyComponentLinks() {
+      this.refreshTopo();
+      this.topoHover = null;
+      this.topoDirty.inline = false;
+      this.topoDirty.dialog = false;
+      this.$nextTick(() => {
+        this.renderTopoChart("inline");
+        if (this.topoDialogVisible) this.renderTopoChart("dialog");
+      });
+    },
+
+    // 扔掉某个画布的 echarts 实例（重绘前 / 变成无链路时都要调）。
+    // 容器被 v-if 摘掉后实例还挂着旧 DOM，不 dispose 会漏
+    disposeTopoChart(mode) {
+      const chart = mode === "dialog" ? this.topoDialogChart : this.linkChart;
+      if (chart) {
+        chart.dispose();
+        if (mode === "dialog") this.topoDialogChart = null;
+        else this.linkChart = null;
+      }
+      this._topoStates[mode] = null;
+      this.clearTopoHover(mode);
+    },
+
     // ---------- 链路关系图（瀑布拓扑） ----------
     // mode: "inline" 页面内小图（默认不显示文字、悬浮才显示）/ "dialog" 放大弹窗（文字常显）
     // 两个画布的交互完全一致：拖拽节点、拖拽平移、滚轮缩放、悬浮高亮
     renderTopoChart(mode) {
       const el =
         mode === "dialog" ? this.$refs.topoDialogChart : this.$refs.linkChart;
-      if (!el || !this.topo || !this.topo.nodes.length) return;
-      if (mode === "dialog") {
-        if (this.topoDialogChart) {
-          this.topoDialogChart.dispose();
-          this.topoDialogChart = null;
-        }
-      } else if (this.linkChart) {
-        this.linkChart.dispose();
-        this.linkChart = null;
+      // 没链路可画（字段缺失 / 当前组件一条都没匹配上）时容器已经不在了，
+      // 这里只负责把旧实例收掉
+      if (!el || !this.topo || !this.topo.nodes.length) {
+        this.disposeTopoChart(mode);
+        return;
       }
+      // 重建前先扔旧实例：容器是复用的，不 dispose 会叠出两层画布
+      this.disposeTopoChart(mode);
       const chart = echarts.init(el);
       if (mode === "dialog") this.topoDialogChart = chart;
       else this.linkChart = chart;
@@ -1033,6 +1166,10 @@ export default {
           { id: TOPO_EDGE_SERIES, data: state.edgeItems },
           { id: TOPO_NODE_SERIES, data: state.nodeItems },
         ];
+        // 线段上的 desc 文字也要跟着拖拽走（位置锚在中点，节点一动中点就变）
+        if (state.edgeLabelItems.length) {
+          series.push({ id: TOPO_EDGE_LABEL_SERIES, data: state.edgeLabelItems });
+        }
         if (all) {
           series.push({ id: TOPO_FLOW_SERIES, data: state.edgeItems });
           series.push({
@@ -1238,6 +1375,20 @@ export default {
           if (focus.source === id) focus.coords[0] = xy;
           else focus.coords[1] = xy;
         }
+        // 挂在这条线段中点的 desc 文字跟着挪（没有就是空间不合适，跳过）。
+        // 整颗替换数据项：echarts 靠 setOption 重建数据列表来重读 item，原地改不一定被重读
+        const li = state.edgeLabelIndex.get(ei);
+        if (li != null) {
+          const prev = state.edgeLabelItems[li];
+          state.edgeLabelItems[li] = {
+            value: this.curveMidpoint(
+              item.coords[0],
+              item.coords[1],
+              item.lineStyle.curveness
+            ),
+            name: prev.name,
+          };
+        }
       });
     },
 
@@ -1304,18 +1455,80 @@ export default {
       zrSetCursor(chart, "pointer");
     },
 
-    // 连线中点（屏幕坐标）：二次贝塞尔 t=0.5
-    topoEdgeMidpoint(item) {
-      const a = item.coords[0];
-      const b = item.coords[1];
-      const c = (item.lineStyle && item.lineStyle.curveness) || 0;
+    // 二次贝塞尔 t=0.5 的中点（连线上的 desc 文字、悬浮卡片都锚在这里）。
+    // 曲率公式和 echarts lines 系列的 cp 算法一致，所以文字正好压在画出来的线上
+    curveMidpoint(a, b, c) {
       if (!c) return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
       const cx = (a[0] + b[0]) / 2 - (a[1] - b[1]) * c;
       const cy = (a[1] + b[1]) / 2 - (b[0] - a[0]) * c;
-      return [
-        (a[0] + 2 * cx + b[0]) / 4,
-        (a[1] + 2 * cy + b[1]) / 4,
-      ];
+      return [(a[0] + 2 * cx + b[0]) / 4, (a[1] + 2 * cy + b[1]) / 4];
+    },
+
+    // 连线中点（屏幕坐标）
+    topoEdgeMidpoint(item) {
+      return this.curveMidpoint(
+        item.coords[0],
+        item.coords[1],
+        (item.lineStyle && item.lineStyle.curveness) || 0
+      );
+    },
+
+    // 线段上直出 desc 的判定 + 排版计划。返回 null = 不直出（desc 退回悬浮卡片）。
+    // 两层判定，任何一层不过就**整体**不画 —— 半张图的线上有字、半张没有，
+    // 比统一不给更容易让人以为图坏了：
+    //   1. 密度：节点 ≤14 且线段 ≤12（十几个节点的图上到处挂文字等于糊成一片）
+    //   2. 每条带 desc 的线段都放得下至少 TOPO_EDGE_LABEL_MIN_W 宽的文字
+    // 通过后各画各的：**长线多画几个字、短线少画几个字**，上限 TOPO_EDGE_LABEL_MAX_W ——
+    // desc 很长时按线段实际宽度截断（末尾 …），全文始终能在悬浮卡片里看到。
+    // 文字就摆在线段中点、横着画（不转不偏移），这是这个页面一贯的形式
+    edgeLabelPlans(topo, posMap) {
+      const edges = (topo && topo.edges) || [];
+      const nodes = (topo && topo.nodes) || [];
+      const descEdges = edges
+        .map((e, i) => ({ e, i }))
+        .filter(({ e }) => e.desc);
+      if (!descEdges.length) return null;
+      if (nodes.length > TOPO_EDGE_LABEL_MAX_NODES) return null;
+      if (edges.length > TOPO_EDGE_LABEL_MAX_EDGES) return null;
+      const plans = [];
+      for (let k = 0; k < descEdges.length; k += 1) {
+        const e = descEdges[k].e;
+        const a = posMap.get(e.source);
+        const b = posMap.get(e.target);
+        if (!a || !b) return null;
+        // 线段实际能用来放文字的宽度（扣掉两端留给节点的空白）
+        const len = Math.sqrt(
+          (a[0] - b[0]) * (a[0] - b[0]) + (a[1] - b[1]) * (a[1] - b[1])
+        );
+        const budget = Math.min(len - TOPO_EDGE_LABEL_PAD, TOPO_EDGE_LABEL_MAX_W);
+        if (budget < TOPO_EDGE_LABEL_MIN_W) return null;
+        const fitted = fitText(e.desc, budget);
+        plans.push({
+          edge: descEdges[k].i,
+          text: fitted.text,
+          truncated: fitted.truncated,
+          center: this.curveMidpoint(a, b, e.curveness),
+        });
+      }
+      return plans;
+    },
+
+    // 线段上的 desc 标签数据项：位置就是线段中点（canvas 像素坐标），
+    // 拖拽节点时位置要跟着重算，所以和 edgeItems 一样存进 state
+    buildEdgeLabelItems(topo, posMap) {
+      const items = [];
+      const index = new Map(); // 连线下标 → 标签项下标（拖拽时按连线找标签）
+      const plans = this.edgeLabelPlans(topo, posMap);
+      if (!plans) return { items, index };
+      plans.forEach((p) => {
+        index.set(p.edge, items.length);
+        items.push({
+          value: p.center,
+          // 文字就是 desc（截断版），formatter 直接取 name
+          name: p.text,
+        });
+      });
+      return { items, index };
     },
 
     // 卡片定位：贴在被悬浮的元素上方，容器内放不下就翻到下方，最后整体夹在容器内。
@@ -1468,6 +1681,8 @@ export default {
       });
       const { baseSize } = this.topoNodeMetrics(mode);
       const isDialog = mode === "dialog";
+      // 线段上的 desc 文字（空间够才建，否则 desc 只走悬浮卡片）
+      const edgeLabels = this.buildEdgeLabelItems(topo, posMap);
       // 弹窗里文字常显，同一层节点挨得太近就会互相压成一条黑线
       // （生产网数据一层 20 多个节点，屏幕列距只有 40~70 像素，而名字有 90 像素宽）。
       // 两个办法一起用：文字上下交错（相邻节点错开一个字高），
@@ -1550,6 +1765,9 @@ export default {
         interacting: false,
         edgeItems: topo.edges.map((e) => this.buildEdgeItem(e, false, posMap)),
         focusItems: topo.edges.map((e) => this.buildEdgeItem(e, true, posMap)),
+        // 线段上的 desc 文字项 + 「连线下标 → 标签下标」的索引（拖拽时按连线找回标签）
+        edgeLabelItems: edgeLabels.items,
+        edgeLabelIndex: edgeLabels.index,
       };
     },
 
@@ -1676,6 +1894,39 @@ export default {
               color: c.flowActive,
             },
             data: [],
+          },
+          {
+            // 线段上的 desc 文字。echarts 4.9 的 lines 系列不渲染 label，
+            // 所以用 scatter 把文字挂在线段中点（没有图形，只剩 label），横着画。
+            // 数据为空 = 空间不合适，desc 退回悬浮卡片；zlevel 和节点同层、z 更低，
+            // 保证文字压在连线之上、节点之下
+            //
+            // ⚠️ symbolSize 必须是 2：Symbol 内部把图形建成 2×2 再按 symbolSize/2 缩放，
+            // 而 label 是挂在这个被缩放的图形元素上的 —— symbolSize=2 时缩放比正好是 1，
+            // 文字才是 fontSize 指定的真实大小（顺手用一个 2px 透明圆点当锚，看不见）
+            id: TOPO_EDGE_LABEL_SERIES,
+            type: "scatter",
+            clip: false,
+            silent: true,
+            zlevel: TOPO_ZLEVEL_NODE,
+            z: 3,
+            symbol: "circle",
+            symbolSize: 2,
+            itemStyle: { color: "transparent" },
+            label: {
+              show: true,
+              position: "inside",
+              color: c.edgeLabel,
+              fontSize: 10.5,
+              lineHeight: 13,
+              padding: [2, 5],
+              borderRadius: 4,
+              borderColor: c.edgeLabelBorder,
+              borderWidth: 1,
+              backgroundColor: c.edgeLabelBg,
+              formatter: (p) => p.name,
+            },
+            data: state.edgeLabelItems,
           },
           {
             // 节点（数据项在 topoState 里建好，拖拽时原地改坐标即可）
@@ -1807,12 +2058,15 @@ export default {
       this.panelObserver.observe(el);
     },
 
-    // 切换组件类型：左侧主机列表联动筛选，并默认展开其第一个集群
+    // 切换组件类型：左侧主机列表联动筛选（默认展开其第一个集群），
+    // 右侧链路图也换成「这个组件下集群发出的链路」；重复点同一个组件不用重算
     selectComponent(name) {
+      const changed = name !== this.activeComponent;
       this.activeComponent = name;
       const comp = this.componentList.find((c) => c.name === name);
       this.openClusters =
         comp && comp.clusters.length ? [comp.clusters[0].name] : [];
+      if (changed) this.applyComponentLinks();
     },
 
     // 展开/收起集群（非手风琴，value 为展开的集群名数组）
@@ -2711,6 +2965,23 @@ $stat-colors: (
       font-size: 11.5px;
       color: #a6b1bf;
     }
+  }
+
+  /* 当前链路图的归属组件：和计数徽标同排，视觉上比标题弱、比计数强 */
+  &__scope {
+    flex-shrink: 0;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: $profile-accent;
+    background: #ecf5ff;
+    border: 1px solid #d4e8ff;
+    padding: 1px 8px;
+    border-radius: 8px;
+    line-height: 18px;
   }
 
   /* 链路/集群计数徽标 */

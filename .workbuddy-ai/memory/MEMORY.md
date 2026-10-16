@@ -1,6 +1,6 @@
 # MEMORY.md — RuoYi-Vue 工作台长期备忘
 
-> 只留「不知道就会做错」的。**动手前读对应 REF**：`REF-alarm-analysis.md`（告警分析）、`REF-exec-page.md`（执行页面/流布局/右键菜单）、`REF-exec-detail.md`（查看明细弹窗）、`REF-exec-simple.md`（执行界面简版）、`REF-order-gantt.md`（工单甘特图）。历史见 `2026-09-*.md`。
+> 只留「不知道就会做错」的。**动手前读对应 REF**：`REF-alarm-analysis.md`（告警分析）、`REF-exec-page.md`（执行页面/流布局/右键菜单）、`REF-exec-detail.md`（查看明细弹窗）、`REF-exec-simple.md`（执行界面简版）、`REF-order-gantt.md`（工单甘特图）、`REF-systemProfile.md`（系统画像/链路图）。历史见 `2026-09-*.md`。
 
 ## 项目约定
 - 新页面 = `views/tool/<n>/index.vue` + `api/tool/<n>.js` + `sql/<n>_menu.sql`；菜单走数据库动态路由，**不写** `router/index.js`。Mock 在 `mockData/res.js`。
@@ -47,6 +47,11 @@
 - 配色（2026-09-24 用户要求对调）：**AUTO 自动 = 绿，MANUAL 手动 = 蓝**；变量名不变、只换值，但气泡 `.og-tip__mode` 徽标是**硬编码**的要手动跟。分组标签条量词是「**单**」不是「条」。
 - **AUTO 柱子暂停区域**（2026-10-12）：`node_detail` **先按 plan_start_time 升序排、再串行执行**（⚠️ 曾试过「按数组序」，被 0206（首节点 plan 在跨度外 → 整柱全暂停）证伪，别改回去）；`plan_start_time` = 「最早可开工」不是开始时间，null→外层 beginTime；纯函数 `computeNodeTimeline`（ganttLayout.js）挂 `bar.timeline`，暂停块 % 宽不参与布局。详见 `REF-order-gantt.md` §6。
 - 气泡明细表占比进度条调色板（`BAR_PALETTE`）：**不许有红 / 玫红 / 粉**（2026-10-08 用户要求，原第 2 色粉 `#fbd8e3`/`#f090b1` 撞告警红 → 换蓝 `#d6e6ff`/`#7ba7f5`）。现 6 色 = 绿蓝黄橙青紫；`og_syntax_check.mjs` 有按色相的防回归断言。
+
+## 系统画像（systemProfile）
+- ⚠️ **右侧链路图 = 「当前组件下集群发出的链路」子集**（2026-10-16）：命中判定 `filterLinksByClusters` **只认 fnode（起点）**，不认 snode；而且是**全等 `fnode === 集群名`**，不是「包含」（用户原话「要用全等来判断」）。集群名 = 组件拓扑第二层 key = **链路节点名本身**（别再写 `集群名@角色`，那种名字主机列表里查不到，用户会问「为什么链路上多出这个东西」）。两份链路：`allLinks`（全量，**只给顶部概览「链路」总数**）+ `links`（筛选结果，图表/弹窗/表头计数用）；顶部概览**不跟着组件变**（用户确认）。改 mock 链路前先对一遍组件拓扑的 key，对不上就静默少几条。
+- ⚠️ **echarts 4.9 的 `lines` 系列不渲染 label** ⇒ 线段上的 desc 只能用 **scatter** 挂锚点，且 **`symbol:'none'` 会让元素根本不创建**（`SymbolDraw.symbolNeedsDraw` 里判了 `!== 'none'`），必须 `symbol:'circle'` + **`symbolSize: 2`**（Symbol 把图形建成 2×2 再按 symbolSize/2 缩放，2 才是缩放比 1，文字才是真实字号）。⚠️ **文字横着画、锚在曲线中点**（用户 2026-10-16 否掉了「顺着线段转」和「离线偏移」两版：竖线上的中文会竖排，读起来费劲）。「空间合适」= 节点≤14 且线段≤12 且每条带 desc 的线段都放得下 ≥60px；desc 过长**按线段实际宽度逐字估算后截断**（不能按「字数×常量」估，中英混排会忽长忽短，上限 200px），一条不满足就**全部**退回悬浮卡片（卡片里给全文）。
+- 细节（`refreshTopo`/`applyComponentLinks`/`disposeTopoChart`、空态两种文案、`topoLabelOf` 不许削两段式名字、校验脚本、像素断言要 A/B 不要 hex 匹配）→ **`REF-systemProfile.md`**。
 
 ## 校验 / 协作
 - node 校验：`cd C:/Users/lenovo/AppData/Local/Temp && node --experimental-loader ./resolve_ext_loader.mjs ./test_xxx.mjs`；浏览器像素校验见技能 `ruoyi-ui-node-verify`。**dev server 日志认人**：根目录 `frontend.log` 是旧的，真正在写的是 `ruoyi-ui/npm-dev.log`。

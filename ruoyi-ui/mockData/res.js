@@ -1527,80 +1527,238 @@ let systemProfileRes = {
     },
   },
   链路: [
-    // 生产网真实链路：只有 fnode → snode 两个字段，没有描述信息。
-    // 节点名字带着集群前缀（bpc@SZ-XX-YY@角色），但这里一视同仁 ——
-    // 就是一张有向链接表，位置完全由链路关系决定，不做任何特殊标记。
-    // HAProxy 接入
-    { fnode: "bpc-nw-haproxy-1", snode: "zddy" },
-    { fnode: "bpc-kjy-haproxy01", snode: "zddy" },
-    // CS 机房应用 / 批处理
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "starcard-act.gw.khx.cc" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "armprod-ocp-gw.itcs.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "cp-mail.szprod.cb.cc" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "sth.eureka1.cb.cc" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "prod-ocp.sm.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "starcard-dasp.gw.khx.cc" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-app", snode: "prod-pccmt.bpc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-batch", snode: "starcard-dasp.gw.khx.cc" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-batch", snode: "cp-mail.szprod.cb.cc" },
-    // 科技园机房应用 / 批处理 / API 网关
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "armprod-ocp-gw.itcs.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "cp-mail.szprod.cb.cc" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "prod-ocp.sm.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "starcard-act.gw.khx.cc" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-app", snode: "starcard-dasp.gw.khx.cc" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-batch", snode: "cp-mail.szprod.cb.cc" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-batch", snode: "sth.eureka1.cb.cc" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-batch", snode: "starcard-dasp.gw.khx.cc" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-api-gateway", snode: "starcard-dasp.gw.khx.cc" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-api-gateway", snode: "lb.uc.citicbank.com" },
-    // CS 调度
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "starcard-act.gw.khx.cc" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "starcard-dasp.gw.khx.cc" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "dify-app-bpc.aiap.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "opt-bpc.testapps.oa.citicbank.com" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "prod-c86-pccmt.newmedia.eprod-kzx.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "prd-bjb.strosys.prod-kzx.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "stor-sza.strosys.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "alt.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "armprod-ocp-gw.itcs.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-scheduler", snode: "sth.eureka1.cb.cc" },
-    // 科技园调度
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "opt-bpc.testapps.oa.citicbank.com" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "dify-app-bpc.aiap.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "prd-bjbstar.strosys.prod-kzx.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "prod-c86-pccmt.newmedia.eprod-kzx.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "stor-sza2.strosys.eprod-kzx1.cncb:8060" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "stor-sza.strosys.eprod-kzx1.cncb:8060" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "alt.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "armprod-ocp-gw.itcs.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-scheduler", snode: "cp-mail.szprod.cb.cc" },
-    // 统一接入网关
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "agent.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "behavior.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "task.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "sso.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "gray.serverUrl" },
-    { fnode: "bpc@SZ-CS-SCYW-CSPROD@bpc-unity-in-gateway", snode: "prod-pccmt.bpc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "agent.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "behavior.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "task.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-SCYW-PBSPROD@bpc-unity-in-gateway", snode: "sso.ipcc.eprod-kzx1.cncb" },
-    // 统一接出网关
-    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "agent.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "behavior.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "task.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "sso.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-NW-YWAPP-NWAPP@bpc-unity-out-gateway", snode: "prod-pccmt.bpc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "agent.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "behavior.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "task.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "sso.ipcc.eprod-kzx1.cncb" },
-    { fnode: "bpc@SZ-KJY-WYAPP-PBSAPP@bpc-unity-out-gateway", snode: "prod-pccmt.bpc.eprod-kzx1.cncb" },
+    // ⚠️ 节点名 = **集群名本身**（组件拓扑第二层的 key，也就是主机列表里
+    //    profile-cluster__title 显示的那个名字），而且必须是**全等**：
+    //    右侧链路图的筛选就是 `fnode === 当前组件下的某个集群名`，不是「包含」。
+    //    所以这里**不要**再写 `集群名@角色` 这种拼出来的名字 —— 那种名字在主机列表里
+    //    查不到，会让人以为链路图凭空多出一台机器。
+    // 筛选只看 fnode（起点），不看 snode：选上游组件不该把指向它的下游链路也带出来。
+    // 终点可以是别的组件的集群名，也可以是外部服务域名 —— 不影响筛选，只影响图的样子。
+    // desc：图够稀疏（节点 / 线段少）且线段放得下时，desc 直接画在线段上；
+    //    放不下（比如「应用」那种十几条线的图）就只在悬浮线段时的卡片里显示。
+    // 每个组件只列它自己发出的链路，互不重叠；「测试」组件**故意一条都没配**，
+    //    用来验证「无链路」空态（选它右侧会显示「无链路」）。
+
+    // ---------- NGINX：3 个集群 → 统一接入网关。节点少，desc 直接画在线上 ----------
+    {
+      fnode: "bjb-dasp-nginx-kzx",
+      snode: "bpc-unity-in-gateway.prod.kzx.cncb",
+      desc: "北向入口负载均衡",
+    },
+    {
+      fnode: "bjc-dasp-nginx-kzx",
+      snode: "bpc-unity-in-gateway.prod.kzx.cncb",
+      desc: "南方机房入口负载均衡",
+    },
+    {
+      fnode: "hfa-dasp-nginx-kzx",
+      snode: "bpc-unity-in-gateway.prod.kzx.cncb",
+    },
+    // ---------- HAPROXY：两套接入集群，分别对进出网关 ----------
+    {
+      fnode: "dasp_ht_haproxy_4",
+      snode: "bpc-unity-out-gateway.prod.kzx.cncb",
+    },
+    {
+      fnode: "dasp_ht_haproxy_5",
+      snode: "bpc-unity-out-gateway.prod.kzx.cncb",
+    },
+    {
+      fnode: "dasp_cym_haproxy_4",
+      snode: "bpc-unity-in-gateway.prod.kzx.cncb",
+    },
+    {
+      fnode: "dasp_cym_haproxy_8",
+      snode: "bpc-unity-in-gateway.prod.kzx.cncb",
+    },
+    // ---------- 容器云：三个机房的 k8s 集群 ----------
+    {
+      fnode: "bjb-dasp-k8s-kzx",
+      snode: "bpc-unity-in-gateway.prod.kzx.cncb",
+      // 故意写长一点：超过线段能放的宽度，会被按实际宽度截断（全文在悬浮卡片里）。
+      // 这条线在这个图里是唯一带 desc 的，不会和别的标签挤在一起，正好演示截断
+      desc: "容器平台入口流量，东西向流量由服务网格接管，南北向统一走网关",
+    },
+    {
+      fnode: "bjb-dasp-k8s-kzx",
+      snode: "bjb-dasp-mysql-kzx",
+    },
+    {
+      fnode: "bjc-dasp-k8s-kzx",
+      snode: "bpc-unity-in-gateway.prod.kzx.cncb",
+    },
+    {
+      fnode: "hfa-dasp-k8s-kzx",
+      snode: "bpc-unity-out-gateway.prod.kzx.cncb",
+    },
+    // ---------- 应用：4 个管理集群，15 个节点 / 14 条线，desc 只在悬浮卡片里给 ----------
+    {
+      fnode: "dasp-azkaban-mgr-4d86",
+      snode: "cp-mail.szprod.cb.cc",
+    },
+    {
+      fnode: "dasp-azkaban-mgr-4d86",
+      snode: "sth.eureka1.cb.cc",
+    },
+    {
+      fnode: "dasp-azkaban-mgr-4d86",
+      snode: "bjb-dasp-kafka-kzx",
+    },
+    {
+      fnode: "dasp-app-mgr-d5c7",
+      snode: "starcard-act.gw.khx.cc",
+      desc: "对账批次调度入口，日切窗口内批量触发",
+    },
+    {
+      fnode: "dasp-app-mgr-d5c7",
+      snode: "starcard-dasp.gw.khx.cc",
+    },
+    {
+      fnode: "dasp-app-mgr-d5c7",
+      snode: "prod-ocp.sm.eprod-kzx1.cncb",
+    },
+    {
+      fnode: "dasp-app-mgr-d5c7",
+      snode: "bjb-dasp-mysql-kzx",
+    },
+    {
+      fnode: "dasp-app-mgr-d5c7",
+      snode: "alt.eprod-kzx1.cncb",
+    },
+    {
+      fnode: "bjc-dasp-mgr-7384",
+      snode: "sth.eureka1.cb.cc",
+    },
+    {
+      fnode: "bjc-dasp-mgr-7384",
+      snode: "cp-mail.szprod.cb.cc",
+    },
+    {
+      fnode: "bjc-dasp-mgr-7384",
+      snode: "dify-app-bpc.aiap.eprod-kzx1.cncb",
+    },
+    {
+      fnode: "bjc-dasp-mgr-3174",
+      snode: "prod-ocp.sm.eprod-kzx1.cncb",
+    },
+    {
+      fnode: "bjc-dasp-mgr-3174",
+      snode: "stor-sza.strosys.eprod-kzx1.cncb:8060",
+      desc: "报表归档走专线，单次传输量大，需关注带宽占用",
+    },
+    {
+      fnode: "bjc-dasp-mgr-3174",
+      snode: "agent.ipcc.eprod-kzx1.cncb",
+    },
+    // ---------- MYSQL：跨机房主从 + binlog 交给 CANAL，三层结构 ----------
+    {
+      fnode: "bjb-dasp-mysql-kzx",
+      snode: "bjb-dasp-canal-kzx",
+      desc: "提供 binlog 供下游同步",
+    },
+    {
+      fnode: "hfa-dasp-mysql-kzx",
+      snode: "bjb-dasp-mysql-kzx",
+      desc: "跨机房主从复制",
+    },
+    {
+      fnode: "bjc-dasp-mysql-kzx",
+      snode: "bjc-dasp-canal-kzx",
+    },
+    {
+      fnode: "hfa-dasp-mysql-kzx",
+      snode: "hfa-dasp-canal-kzx",
+    },
+    // ---------- CANAL：解析 binlog 后投递到 KAFKA ----------
+    {
+      fnode: "bjb-dasp-canal-kzx",
+      snode: "bjb-dasp-kafka-kzx",
+      desc: "解析 MySQL binlog",
+    },
+    {
+      fnode: "bjc-dasp-canal-kzx",
+      snode: "bjc-dasp-kafka-kzx",
+    },
+    {
+      fnode: "hfa-dasp-canal-kzx",
+      snode: "hfa-dasp-kafka-kzx",
+    },
+    // ---------- ZOOKEEPER：给 KAFKA 提供选主与元数据 ----------
+    {
+      fnode: "bjb-dasp-zk-kzx",
+      snode: "bjb-dasp-kafka-kzx",
+    },
+    {
+      fnode: "bjc-dasp-zk-kzx",
+      snode: "bjc-dasp-kafka-kzx",
+    },
+    {
+      fnode: "hfa-dasp-zk-kzx",
+      snode: "hfa-dasp-kafka-kzx",
+    },
+    // ---------- KAFKA：消息落 ES 供检索 ----------
+    {
+      fnode: "bjb-dasp-kafka-kzx",
+      snode: "bjb-dasp-es-kzx",
+    },
+    {
+      fnode: "bjc-dasp-kafka-kzx",
+      snode: "bjc-dasp-es-kzx",
+    },
+    {
+      fnode: "hfa-dasp-kafka-kzx",
+      snode: "hfa-dasp-es-kzx",
+    },
+    // ---------- ES：对上层提供检索入口 ----------
+    {
+      fnode: "bjb-dasp-es-kzx",
+      snode: "starcard-dasp.gw.khx.cc",
+    },
+    {
+      fnode: "bjc-dasp-es-kzx",
+      snode: "starcard-dasp.gw.khx.cc",
+    },
+    {
+      fnode: "hfa-dasp-es-kzx",
+      snode: "starcard-dasp.gw.khx.cc",
+    },
+    // ---------- GREATDB：同样交给 CANAL 做下游同步 ----------
+    {
+      fnode: "bjb-dasp-greatdb-kzx",
+      snode: "bjb-dasp-canal-kzx",
+    },
+    {
+      fnode: "bjc-dasp-greatdb-kzx",
+      snode: "bjc-dasp-canal-kzx",
+    },
+    {
+      fnode: "hfa-dasp-greatdb-kzx",
+      snode: "hfa-dasp-canal-kzx",
+    },
+    // ---------- HADOOP：两个机房的 NameNode 互为备份（双向边，曲率自动分开）----------
+    {
+      fnode: "bjb-dasp-hadoop-kzx",
+      snode: "hfa-dasp-hadoop-kzx",
+      desc: "HDFS 主备元数据同步",
+    },
+    {
+      fnode: "hfa-dasp-hadoop-kzx",
+      snode: "bjb-dasp-hadoop-kzx",
+      desc: "灾备反向心跳",
+    },
+    // ---------- 微服务：授权服务的三个集群 ----------
+    {
+      fnode: "BJ-DB@auth-adapt-mcd",
+      snode: "BJ-DB@auth-service-pay",
+    },
+    {
+      fnode: "BJ-DB@auth-service-pay",
+      snode: "BJ-DB@auth-service-switchadapt",
+    },
+    {
+      fnode: "BJ-DB@auth-service-switchadapt",
+      snode: "starcard-act.gw.khx.cc",
+    },
   ],
   集群关系: {
     CANAL: [
