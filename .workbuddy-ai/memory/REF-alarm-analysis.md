@@ -50,15 +50,22 @@ AI处置量 AI处置率 AI关闭 AI关单率 人工关闭 人工关单率 自动
 - 容器 `flex-wrap: nowrap` + `overflow-x: auto`：指标再多也在一行，装不下就横滚。
   验收看 `scrollWidth === clientWidth`（不靠滚动条藏数据）。
 
-## 概览区的「告警总量」——已知重名，**用户暂不处理**
+## 概览区的「告警总量」——**2026-10-16 已删除**（曾长期「暂不处理」）
 
-筛选栏右侧概览区写着「告警总量」（= 页面实际渲染出的明细行数，mock 里 428），
+筛选栏右侧概览区原来写着「告警总量」（= 页面实际渲染出的明细行数，mock 里 428），
 指标条里也有「告警总量」（= 后端统计值，mock 里 530）→ **同名不同值**。
 
-- 我第一版把它改名「明细条数」（computed `totalCount` → `detailCount`），**随第一版一起被用户回退了**。
-- 用户的要求很明确：本次只做「不区分 P1/P2 + 指标顺序」。
-  **不要再顺手改概览**（断言 `/告警总量/.test(idxTpl)` 钉住「本次不动概览」）。
-- 想提就只在回复里提一句，让用户决定。
+- 沿革：2026-09-21 我把它改名「明细条数」被用户回退（当时用户只要求「不区分 P1/P2 + 指标顺序」，
+  概览要**原样不动**）；**2026-10-16 用户明确要求「把这里的告警总量删掉」** → 现在概览区不再有它。
+- 现状：概览区只剩「重复性分析 N 组」，因此整块 `v-if` 改成
+  **`searched && hasData && duplicateGroupCount > 0`** —— 不然没有重复性分析时会剩一个
+  空的 `border-left: 1px dashed` 分隔框（`padding-left: 20px` 也白占位）。
+- 连带清理：`totalCount` computed（只服务这个展示）与 `sectionRowCount` 导入一并移除；
+  `sectionRowCount` 在 `shape.js` 里**仍然导出**（测试还在用）。
+- ⚠️ **指标条里的「告警总量」不受影响**，`METRIC_ORDER` 那 10 项一个没动。
+- ⚠️ 断言坑：模板注释里为了说明「已删除」会写出「告警总量」四个字 →
+  「模板里没有告警总量」这类断言必须**先剥掉 HTML 注释再匹配**（`idxTpl.replace(/<!--[\s\S]*?-->/g, '')`），
+  否则假红。和 `misInfoReason` 是同一个坑。
 
 ## `AI处置`（nested 型）`components/NestedGroups.vue`
 
@@ -90,18 +97,40 @@ AI处置量 AI处置率 AI关闭 AI关单率 人工关闭 人工关单率 自动
 ## `buildQueryParams`：systemId 选填，teamName 始终带（2026-09-21）
 
 - **用户不填系统 ID 时，参数里压根不能有 `systemId` 这个 key**（不是空串、不是 `null`）。
-- **`teamName` 相反，始终带上**：下拉框默认「不限定组别」，它本身就是「不按组别过滤」这个有效语义。
-  默认值直接写死字符串 `'不限定组别'`（= 字典 `dict_system_group` 第一项，label 与 value 相同）。
+- **`teamName` 相反，始终带上**：下拉框默认值（现在是「全量」，见下）本身就是有效语义。
+  默认值直接写死字符串（= 字典里对应项的 label，label 与 value 相同）。
 
-## 组别字典 `dict_system_group`（2026-09-21）
+## 组别字典 `dict_system_group`（2026-09-21 建，2026-10-15 换默认项）
 
 - SQL：`sql/dict_system_group.sql`（照 `release_execute_status_dict.sql` 的写法，delete + insert，可重复执行）。
-- 三项：**不限定组别**（is_default=Y）/ **全量** / **基础平台域**。
+- 三项：**不限定组别** / **全量** / **基础平台域**。
 - ⚠️ **dict_label 与 dict_value 完全相同**（都是中文）—— 前端 el-select 绑的就是中文，
-  `teamName` 的默认值才能和第一项对上。**别把 value 改成拼音/英文码。**
+  `teamName` 的默认值才能和字典项对上。**别把 value 改成拼音/英文码。**
 - 页面：`dicts: ['dict_system_group']`，el-select 放在系统 ID 输入框**后面**（`.aa-bar__team`，150px）。
-- ⚠️ **截至 2026-09-21 收尾，数据库里还没这个字典**（`/dev-api/system/dict/data/type/dict_system_group`
-  返回 `{"code":200,"rows":[]}`）→ 下拉框展开是空的，等用户执行 SQL。
+- ⚠️ **默认项 2026-10-15 从「不限定组别」改成「全量」**：`index.vue` 里 `teamName: '全量'` 是**硬编码**
+  （页面不读 `is_default`）；SQL 里 `is_default='Y'` 也挪到「全量」了，但 **dict_sort 顺序没动**
+  （「不限定组别」仍是第一项）。SQL 未重跑时 DB 里还是旧值，不影响页面。
+- ⚠️ 截至 2026-09-21 收尾，数据库里**可能还没有这个字典**（`/dev-api/system/dict/data/type/dict_system_group`
+  曾返回 `{"code":200,"rows":[]}`）→ 下拉框展开是空的，等用户执行 SQL。**2026-10-15 未复核。**
+
+## ⚠️ 同一层级一律「按条数降序」（2026-10-15）
+
+用户要求「数量多的排到上面 / 从左到右也降序」：
+
+| 位置 | 数据 | 排法 |
+|---|---|---|
+| AI处置 左侧竖排导航 | `section.levels`（一级 = 处置结果） | 按该一级**总行数**降序 |
+| P3 / 人工关单 / 自动化关单 的 tab 条 | `section.lists`（分类） | 按该分类**行数**降序 |
+
+- 唯一实现处：`shape.js` 的纯函数 **`sortByCountDesc(items, countOf)`**（降序 + 同数按传入 index 稳定）。
+  `makeTableSection` 排 `lists`；`makeNestedSection` 排 `levels`（countOf = `levelRowCount`）。
+- **只在展示层排，mock / 接口数据一个字节没动。**
+- 连带效果：`activeTabs[key] = section.lists[0].name` ⇒ 多 tab 区块**默认选中的变成条数最多的那个**
+  （mock 里 P3 默认从「Agent关闭失败」15 条 → 「告警未恢复」27 条）；
+  AI处置 默认一级从「AI关闭失败」→「AI关闭成功」（172 条）。
+- ⚠️ **AI处置 里的二级「告警源」chip 没排**（用户只说了「左侧选择列」和「tab」，没提 chip）。
+  脚本里有断言钉住「chip 顺序 = 全部 + 后端返回顺序」。要排先跟用户确认。
+- ⚠️ 用户确认「tab 上的数量」就是排序依据 → **tab 标签上的 `(N)` 必须和排序一致**（`${name} (${rows.length})`）。
 
 ## 表格列 / 字段名 / 外部跳转（2026-09-21）
 
@@ -112,17 +141,43 @@ AI处置量 AI处置率 AI关闭 AI关单率 人工关闭 人工关单率 自动
   写断言时注意：「模板里没有 misInfoReason」要**只匹配属性值**（`prop="misInfoReason"`），
   因为注释里为了提醒「别写错」会把这个串写出来，全串匹配会假红。
 - **`alertSource` / `closedBy` 不展示**：表格列删了，`FieldDialog` 里也进了 `HIDDEN_KEYS`（弹窗里也不列）。
-- 按钮改名：output 列「告警报告」→ **「告警详情」**（弹窗标题同步）；more 列「更多字段」→ **「查看简报」**。
-  ⚠️ **「更多字段」弹窗（`type === 'more'`）因此没有入口了**，代码留着没删，需要时能接回来。
+- 按钮文字（⚠️ **2026-10-15 又对调过一次，现在的状态是**）：
+  - `output` 列 = **「查看简报」**（`$emit('view-field','report')` → 弹窗渲染 output 的 markdown）
+  - `more` 列 = **「告警详情」**（跳外部 gdb_screen，用 `runId`）
+  - ⚠️ **只换了按钮文字**，行为没换；`FieldDialog` 里 `report` 的弹窗标题**仍然是「告警详情」**。
+    用户明确说「只换文字，其他都不变」→ **这个不一致是刻意的**，别顺手「修好」（脚本里有断言钉住）。
+  - 沿革：output 原来是「告警报告」→ 09-21 改「告警详情」；more 原来是「更多字段」→ 09-21 改「查看简报」→ 10-15 两者对调。
+  - 「更多字段」弹窗（`type === 'more'`）**仍然没有入口**，代码留着没删，需要时能接回来。
 - **两个外部跳转**（常量写在 AlarmTable 顶部，都是新开 tab）：
 
   | 触发 | 字段 | 地址 |
   |---|---|---|
   | alertKey 列的值（`<a target="_blank">`） | `alertKey` | `http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<alertKey>` |
-  | more 列「查看简报」按钮 | `runId` | `http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>` |
+  | more 列「告警详情」按钮 | `runId` | `http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>` |
 
   - ⚠️ 判空用 `=== undefined || === null || === ''`，**不要用 `||`**（`runId: 0` 会被当空）。
   - 缺 `alertKey` → 值退化成纯文本（不出死链）；缺 `runId` → 按钮 `disabled`。
+
+## 表格高度：AI处置 = 固定 `height=420`，其余 = `max-height=420`（2026-10-15 定稿）
+
+`AlarmTable.vue` 一个组件被四处复用，靠 **`fixedHeight` 开关**（Boolean，默认 `false`）分两种模式：
+
+| 位置 | 传参 | 根元素行内 style | 效果 |
+|---|---|---|---|
+| **AI处置**（`NestedGroups.vue`） | `fixed-height` | `height: 420px` | 永远 420 高，给左侧导航做「等高」参照 |
+| P3 / 人工关单 / 自动化关单（`index.vue`） | 不传 | `max-height: 420px` | 行少时跟着变矮，超过 420 才滚动 |
+
+`DuplicateTable.vue`（重复性分析）**不受影响**，仍是 `max-height="520"`。
+
+- ⚠️ **高度值必须写成模板里看得见的字面量**（`:height="fixedHeight ? 420 : undefined"`）。
+  我第一版写成模块级 `const TABLE_HEIGHT = 420`，**模板里是 undefined**（模板只能访问实例属性），
+  于是 `fixedHeight ? C : undefined` 两边都算成 undefined → AI处置 根本没高度。
+  **node 断言全绿但浏览器里是坏的** —— 是 `aa_height_verify.mjs` 抓到 `[Vue warn] Property or method "TABLE_HEIGHT" is not defined`。
+- 判据（Element 实现：`table-layout.js` 的 `setHeight(value, prop)` → `el.style[prop] = value + 'px'`，
+  作用在 `.el-table` **根元素**上）：读根元素的行内 `style.height` / `style.max-height` 就是权威结论。
+- 行为级验证：把非 AI处置 的行 DOM 藏到只剩 2 行 → AI处置 仍 420，其余缩到 ~123。见 `aa_height_verify.mjs`。
+- 沿革：10-15 我先做了一版又被用户要求整条回退（当时他只是在**描述现状**），随后他给出明确数值
+  （「height=420 / max-height=420」）才算定稿。⇒ **这类只提属性的模糊描述，先问清是「要改」还是「在描述现状」。**
 
 ## ⚠️ 全局元素选择器会漏进 scoped 组件
 
@@ -159,13 +214,20 @@ Element 的 `.el-table--border { border-right: none; border-bottom: none }` **�
 
 ## 校验脚本
 
-- `C:/Users/lenovo/AppData/Local/Temp/test_alarm_analysis.mjs`（**309 条**，node）
+- `C:/Users/lenovo/AppData/Local/Temp/test_alarm_analysis.mjs`（**344 条**，node）
   9 个分组：shape.js 纯函数 / 真实 mock 跑 buildSections / 「不返回就不渲染」与容错 / SFC 模板+script /
   SCSS 产物 / 页面级集成（抠 index.vue 跑真实 mock）/ NestedGroups 组件行为 / MetricCards /
-  **[9] 列·字段名·外部链接·组别字典**。
+  **[9] 列·字段名·外部链接·组别字典·默认查询条件**。
+  ⚠️ **SFC script 语法检查用 `@babel/parser`（`babelParse(src, {sourceType:'module'})`），
+  不要用 `execFileSync(process.execPath, ['--check', tmp])`** —— 本机沙箱里「node 里再 spawn node」
+  必然 `EBUSY`，6 个文件全假红（2026-10-15 踩过，已改）。
   ⚠️ 里面有**反向断言**：`!/el-tabs/` + `!/el-radio-group/` 钉住「不许退回横向 tab / 单行分段」；
   `!/p1Data|p2Data|p3Data/`；`!/\bres\.data\b|\bres\.rows\b/`；
-  `!/AI处置量/`（页面不许抄指标顺序）；`/告警总量/.test(idxTpl)`（本次不动概览）。
+  `!/AI处置量/`（页面不许抄指标顺序）；`!/告警总量/.test(idxTplNoComment)`（2026-10-16 起概览不再有「告警总量」，
+  ⚠️ **必须先剥 HTML 注释**再匹配，见上文断言坑）；
+  `!/29 \* 24 \* 60 \* 60 \* 1000/`（默认日期不许退回 30 天）；
+  `/report: '告警详情'/` + `!/report: '查看简报'/`（output 弹窗标题**刻意**不跟着按钮改）；
+  output / more 两列**按列切开**断言按钮文字（整模板匹配会两处都命中，改反了也测不出来）。
   MetricCards 的「单组不渲染标签」用 `compiler.compileToFunctions(...).render` 拿 vnode 数 `.mc__tag`，**不需要浏览器**。
 - `C:/Users/lenovo/AppData/Local/Temp/aa_fields_verify.mjs`（**新增 2026-09-21**，playwright + 本机 Chrome）
   专测本次 6 条需求：下拉位置/默认值/选项/选中后 `form.teamName` 变化、查询参数带 teamName 且 systemId 仍不填不带、
@@ -175,7 +237,7 @@ Element 的 `.el-table--border { border-right: none; border-bottom: none }` **�
   ⚠️ 字典没配时**注入一份字典数据**到 `aa.dict.type` 再验证选项渲染（不改数据库）。
 - `C:/Users/lenovo/AppData/Local/Temp/aa_metric_verify.mjs`（**新增 2026-09-21**，playwright + 本机 Chrome）
   专测指标条：10 项 / 顺序 / 数值 / 无 `.mc__tag` / 只有 1 组 / 同一行（`offsetTop` 去重后 = 1）/
-  `scrollWidth === clientWidth` / 末项右边界 ≤ 容器右边界 / 概览不重名 / 无 JS 报错。
+  `scrollWidth === clientWidth` / 末项右边界 ≤ 容器右边界 / **B 段：概览区只剩「重复性分析」且不含「告警总量」** / 无 JS 报错。
   ⚠️ 要过滤 `[WDS] Disconnected!`（dev-server HMR 的正常日志）和
   `Failed to load resource`（外部字体/CDN 超时，网络抖动就会冒出来）—— 都不是业务报错。
 - `C:/Users/lenovo/AppData/Local/Temp/aa_fix_verify.mjs`（**29 条**，playwright + 本机 Chrome，像素级）

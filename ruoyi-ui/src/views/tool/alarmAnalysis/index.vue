@@ -14,7 +14,7 @@
           @input="onSystemInput"
           @keyup.enter.native="handleQuery"
         />
-        <!-- 组别：字典 dict_system_group（label 与 value 相同），默认「不限定组别」 -->
+        <!-- 组别：字典 dict_system_group（label 与 value 相同），默认「全量」 -->
         <el-select
           v-model="form.teamName"
           class="aa-bar__team"
@@ -61,12 +61,9 @@
         </el-button>
       </div>
 
-      <!-- 查询成功后的概览 -->
-      <div v-if="searched && hasData" class="aa-bar__overview">
+      <!-- 查询成功后的概览（2026-10-16 起不再展示「告警总量」，只剩重复性分析） -->
+      <div v-if="searched && hasData && duplicateGroupCount > 0" class="aa-bar__overview">
         <span class="aa-bar__overview-item">
-          告警总量 <b>{{ totalCount }}</b>
-        </span>
-        <span v-if="duplicateGroupCount > 0" class="aa-bar__overview-item">
           重复性分析 <b>{{ duplicateGroupCount }}</b> 组
         </span>
       </div>
@@ -123,6 +120,8 @@
           />
 
           <!-- 表格型：分类内只有一张表就直接展示，多张表用 tab 切换 -->
+          <!-- ⚠️ 这里**不要**加 `fixed-height`：只有 AI处置 用固定 height=420，
+               P3 / 人工关单 / 自动化关单 一律 max-height=420（行少时不留空白） -->
           <alarm-table
             v-else-if="section.lists.length === 1"
             :rows="section.lists[0].rows"
@@ -151,7 +150,7 @@
 
 <script>
 import { getAlarmAnalysis, pickPayload } from '@/api/tool/alarmAnalysis'
-import { buildSections, buildQueryParams, sectionRowCount, METRICS_KEY } from './shape'
+import { buildSections, buildQueryParams, METRICS_KEY } from './shape'
 import CollapseSection from './components/CollapseSection'
 import MetricCards from './components/MetricCards'
 import AlarmTable from './components/AlarmTable'
@@ -161,11 +160,10 @@ import FieldDialog from './components/FieldDialog'
 
 const pad = (n) => String(n).padStart(2, '0')
 const fmtDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-// 默认最近 30 天（含今天）
+// 默认「当天 - 当天」（起止都是今天）
 const defaultRange = () => {
-  const end = new Date()
-  const start = new Date(end.getTime() - 29 * 24 * 60 * 60 * 1000)
-  return [fmtDate(start), fmtDate(end)]
+  const today = fmtDate(new Date())
+  return [today, today]
 }
 
 export default {
@@ -184,9 +182,9 @@ export default {
     return {
       form: {
         systemId: '',
-        // 组别：字典 dict_system_group 的第一项，本身就是有效语义（= 不按组别过滤），所以始终传给接口
-        teamName: '不限定组别',
-        dateRange: defaultRange() // [startDate, endDate]，yyyy-MM-dd
+        // 组别：字典 dict_system_group 里的「全量」（页面默认选中项），本身就是有效语义，所以始终传给接口
+        teamName: '全量',
+        dateRange: defaultRange() // [startDate, endDate]，yyyy-MM-dd；默认当天 - 当天
       },
       loading: false,
       searched: false,
@@ -214,12 +212,6 @@ export default {
       const count = this.metricGroups.reduce((sum, group) => sum + group.metrics.length, 0)
       // 指标已合并成一条，不再有「N 组」的概念
       return this.metricGroups.length > 1 ? `${this.metricGroups.length} 组 · ${count} 项` : `${count} 项`
-    },
-    // 告警总量：表格型 + 两级型里的告警条数（重复性分析单独统计）
-    totalCount() {
-      return this.sections.reduce((sum, section) => {
-        return sum + (section.kind === 'duplicate' ? 0 : sectionRowCount(section))
-      }, 0)
     },
     duplicateSection() {
       return this.sections.find((section) => section.kind === 'duplicate') || null

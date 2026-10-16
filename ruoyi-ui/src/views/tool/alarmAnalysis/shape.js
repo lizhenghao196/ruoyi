@@ -7,8 +7,8 @@
  * 而是按形态动态渲染：
  *
  *   metrics    指标型：{ 指标名: 标量 }                 → 所有指标型 key **合并成一条**指标条（不再按 P1/P2 分组）
- *   table      表格型：{ 分类名: [告警行] }              → 一张表 / 多分类 el-tabs
- *   nested     两级型：{ 一级: { 二级: [告警行] } }      → 一级 el-tabs + 二级切换 + 表格（本项目 = AI处置）
+ *   table      表格型：{ 分类名: [告警行] }              → 一张表 / 多分类 el-tabs（分类按条数降序）
+ *   nested     两级型：{ 一级: { 二级: [告警行] } }      → 一级左侧导航 + 二级切换 + 表格（本项目 = AI处置）
  *   duplicate  重复型：[ { data: [...], 重复性说明 } ]   → 重复性分析表
  *   rows       行数组：[ 告警行 ]                       → 单表
  *   empty      空（{} / []）                          → 不渲染
@@ -17,6 +17,11 @@
  *
  * 「重复性分析」这类 key 后端**可能不返回** —— 本模块按 key 存在与否决定是否产出区块，
  * 页面只渲染产出的区块，因此不返回就是不渲染（不需要页面写任何特判）。
+ *
+ * ⚠️ **同一层级内一律「按条数降序」**（2026-10-15 用户要求）：
+ *   - 表格型（`table`）的分类 → `lists` 按行数降序（数量多的 tab 在左边）；
+ *   - 两级型（`nested`）的一级 → `levels` 按该一级总行数降序（数量多的在左侧导航上面）。
+ *   条数相同时保持后端返回的相对顺序；**只在展示层排序，不动数据**。
  */
 
 const ICONS = {
@@ -157,9 +162,29 @@ export function toMetrics(obj) {
   })
 }
 
-/** 分类列表 → 表格区块描述 */
+/**
+ * 按条数降序排（数量多的排前面），条数相同的保持传入的相对顺序。
+ *
+ * ⚠️ 排序只在**展示层**做，不改数据：同一个 key 下后端返回的分类顺序被无视，
+ * 页面上一律「多的在前」。稳定排序用传入 index 兜底（不依赖引擎的 sort 稳定性）。
+ *
+ * @param {Array} items 每项需带 `rows` 数组（表格分类）或由 `countOf` 取条数
+ * @param {(item: *) => number} countOf 取条数的函数
+ * @returns {Array} 新数组
+ */
+export function sortByCountDesc(items, countOf) {
+  return items
+    .map((item, index) => ({ item: item, index: index, count: countOf(item) }))
+    .sort((a, b) => (b.count - a.count) || (a.index - b.index))
+    .map((entry) => entry.item)
+}
+
+/** 分类列表 → 表格区块描述（分类按条数降序，数量多的 tab 排在左边） */
 function makeTableSection(key, lists) {
-  const items = lists.map((l) => ({ name: l.name, rows: l.rows }))
+  const items = sortByCountDesc(
+    lists.map((l) => ({ name: l.name, rows: l.rows })),
+    (item) => item.rows.length
+  )
   if (items.length === 0) return null
   const total = items.reduce((sum, item) => sum + item.rows.length, 0)
   const single = items.length === 1
@@ -173,17 +198,20 @@ function makeTableSection(key, lists) {
   }
 }
 
-/** 两级型 → 区块描述： levels[].groups[].rows[] */
+/** 两级型 → 区块描述： levels[].groups[].rows[]（一级按条数降序，数量多的排在前面） */
 function makeNestedSection(key, value) {
-  const levels = Object.keys(value).map((name) => ({
-    name: name,
-    groups: Object.keys(value[name] || {}).map((groupName) => ({
-      name: groupName,
-      rows: Array.isArray(value[name][groupName])
-        ? value[name][groupName].filter(isPlain)
-        : []
-    }))
-  }))
+  const levels = sortByCountDesc(
+    Object.keys(value).map((name) => ({
+      name: name,
+      groups: Object.keys(value[name] || {}).map((groupName) => ({
+        name: groupName,
+        rows: Array.isArray(value[name][groupName])
+          ? value[name][groupName].filter(isPlain)
+          : []
+      }))
+    })),
+    levelRowCount
+  )
   if (levels.length === 0) return null
   const total = levels.reduce(
     (sum, level) => sum + level.groups.reduce((s, group) => s + group.rows.length, 0),
@@ -340,8 +368,8 @@ export function flattenLevel(level, filter) {
  *
  * ⚠️ 系统 ID 是**选填**的：用户没填时**不要带 `systemId` 字段**（不是空串，是压根没有这个 key）。
  *
- * 组别 `teamName` 相反 —— 下拉框有默认值「不限定组别」（字典 `dict_system_group` 的第一项），
- * 它本身就是一个有效的筛选语义（= 不按组别过滤），所以**始终带上**，不做「空就不带」的处理。
+ * 组别 `teamName` 相反 —— 下拉框有默认值「全量」（字典 `dict_system_group` 的选项之一，
+ * 页面默认选中它），它本身就是一个有效的筛选语义，所以**始终带上**，不做「空就不带」的处理。
  */
 export function buildQueryParams(form) {
   const src = form || {}
@@ -387,6 +415,7 @@ export default {
   metricTone,
   toMetrics,
   orderMetrics,
+  sortByCountDesc,
   buildSections,
   sectionRowCount,
   levelRowCount,

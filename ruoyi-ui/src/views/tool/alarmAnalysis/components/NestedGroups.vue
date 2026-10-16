@@ -40,7 +40,9 @@
           </div>
         </div>
 
-        <alarm-table :rows="rows" @view-field="forwardViewField" />
+        <!-- ⚠️ fixed-height：**只有 AI处置** 的表格用固定 height=420
+             （左侧导航要靠它做等高参照）；P3 / 人工关单 / 自动化关单 等一律 max-height=420 -->
+        <alarm-table :rows="rows" fixed-height @view-field="forwardViewField" />
       </div>
     </template>
 

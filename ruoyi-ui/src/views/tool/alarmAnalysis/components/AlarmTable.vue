@@ -1,11 +1,17 @@
 <template>
   <div class="at">
+    <!-- ⚠️ 表格高度：**只有 AI处置** 传 fixed-height → 固定 `height=420`；
+         其余表格（P3 / 人工关单 / 自动化关单 …）→ `max-height=420`，行少时跟着内容变矮。
+         两种模式用的是同一个数值 420，所以这里直接写字面量 ——
+         ⚠️ **不能**写成模块级常量（如 TABLE_HEIGHT）：模板只能访问实例上的属性，
+         模块常量在模板里是 undefined，`fixedHeight ? C : undefined` 两边都会算成 undefined。 -->
     <el-table
       v-if="rows.length > 0"
       :data="rows"
       size="mini"
       border
-      height="420"
+      :height="fixedHeight ? 420 : undefined"
+      :max-height="fixedHeight ? undefined : 420"
     >
       <!-- alertKey：值本身可点击，新开 tab 跳到外部告警详情页（链接后面拼 alertKey） -->
       <el-table-column
@@ -55,6 +61,7 @@
           </el-button>
         </template>
       </el-table-column>
+      <!-- output 列：打开弹窗看该告警的简报（渲染 output 的 markdown） -->
       <el-table-column label="output" width="110" align="center">
         <template slot-scope="scope">
           <el-button
@@ -62,11 +69,11 @@
             size="mini"
             @click="$emit('view-field', 'report', scope.row)"
           >
-            告警详情
+            查看简报
           </el-button>
         </template>
       </el-table-column>
-      <!-- 查看简报：新开 tab 跳到外部简报页（链接后面拼 runId）；没有 runId 时置灰 -->
+      <!-- more 列：新开 tab 跳到外部告警详情页（链接后面拼 runId）；没有 runId 时置灰 -->
       <el-table-column label="more" width="110" align="center">
         <template slot-scope="scope">
           <el-button
@@ -75,7 +82,7 @@
             :disabled="!briefUrl(scope.row)"
             @click="openBrief(scope.row)"
           >
-            查看简报
+            告警详情
           </el-button>
         </template>
       </el-table-column>
@@ -90,8 +97,8 @@
 
 <script>
 // 外部系统地址：前缀固定，后面直接拼字段值
-//   告警详情（alertKey 列 / 值可点）：http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<alertKey>
-//   简报（「查看简报」按钮）：        http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>
+//   alertKey 列的值可点（告警详情页）：http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<alertKey>
+//   more 列「告警详情」按钮：         http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>
 const ALERT_DETAIL_URL = 'http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey='
 const BRIEF_URL = 'http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId='
 
@@ -101,6 +108,15 @@ export default {
     rows: {
       type: Array,
       default: () => []
+    },
+    // 高度模式（2026-10-15 用户要求）：
+    //   true  → 固定 `height=420`：**只有 AI处置** 用。表格永远 420 高，
+    //           给左侧导航一个稳定的「等高」参照（`.ng` 是 align-items:stretch）。
+    //   false → `max-height=420`：**其余表格**（P3 / 人工关单 / 自动化关单 …）。
+    //           行少时表格跟着内容变矮，不留一大片空白；超过 420 才出滚动条。
+    fixedHeight: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
@@ -110,7 +126,7 @@ export default {
       if (value === undefined || value === null || value === '') return ''
       return ALERT_DETAIL_URL + encodeURIComponent(String(value))
     },
-    // runId -> 简报链接；没有 runId 时返回空串，按钮置灰（避免跳到带空参数的坏链接）
+    // runId -> more 列「告警详情」按钮的外部链接；没有 runId 时返回空串，按钮置灰（避免跳到带空参数的坏链接）
     briefUrl(row) {
       const value = row && row.runId
       if (value === undefined || value === null || value === '') return ''

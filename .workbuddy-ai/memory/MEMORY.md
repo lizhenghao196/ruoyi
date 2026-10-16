@@ -11,6 +11,7 @@
 ## 启动 / 运行
 - 顺序：Redis（`C:/Users/lenovo/.codex/tools/ruoyi-vue/redis-5.0.14.1` 下跑 `redis-server.exe redis.windows.conf`）→ 后端 → 前端。MySQL 3306 常驻。
 - 后端：工具链 jdk17 `java -jar ruoyi-admin/target/ruoyi-admin.jar`，端口 8080。前端：`ruoyi-ui` 下 `npm run dev`，端口 80，proxy 到 8080。
+- ⚠️ **后台启动三个服务时命令尾部绝不能加 `&`**：包装 shell 会立即退出并把子进程（redis-server/java/npm）一起回收。表面症状极具误导性——后端日志停在 druid profile 不动、`tasklist` 里没有 java（看着像「启动慢」）。`> log 2>&1` 重定向可以有，`&` 不能有；正确做法是把整条命令直接交给后台任务机制常驻。Redis 被回收的连带后果是后端报 `RedisConnectionFailureException` 导致整个上下文启动失败。
 - ⚠️ **启动后端必须显式加 `--server.port=8080`**：WorkBuddy 的 shell 注入了 `SERVER__PORT=60044`（双下划线），被 Spring Boot 宽松绑定成 `server.port`，会抢 60044 导致 `Port 60044 was already in use` 启动失败。顺手 `unset SERVER__PORT` 更稳。
 
 ## Element 弹窗两个通用坑（跨页面复用）
@@ -24,9 +25,12 @@
 ## 告警分析（alarmAnalysis）
 - **页面不认 P1/P2/P3，只认「形态」**：唯一判定处 `alarmAnalysis/shape.js`（纯函数）。`metrics` 型 key 合并成**一条**指标条，其余按 key 顺序出区块，不返回的 key 不产出区块；顺序唯一来源是 `shape.js` 的 `METRIC_ORDER`，**页面不许再抄一份**。
 - ⚠️ **接口/mock 数据不要擅自改**：用户要的是「页面上不这么分」，不是「数据层合并」（把 mock 的 P1+P2 合并成一个 key 被打回过）。**要改展示就只改展示层**；**用户点名要改的**才改。
-- 表格列 `alertKey / summary / misinfoReason / alertReasonDesc / AgentTrace / output / more`；⚠️ **`misinfoReason` 的 i 是小写**；`alertSource`/`closedBy` 不展示。
-- 两个外部跳转（新开 tab，常量在 `AlarmTable.vue` 顶部）：`alertKey` → `http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<值>`；more 列「查看简报」→ `http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>`。判空别用 `||`（`runId: 0` 会被当空）。「更多字段」弹窗因此没了入口。
-- 组别下拉走字典 `dict_system_group`；`form.teamName` 默认「不限定组别」且**始终进请求参数**（systemId 不填不带）。概览区与指标条的「告警总量」**同名不同值**，用户明确不动。`AI处置` 是 nested 型、两级数量不固定（二级 chip 是**筛选**）。
+- 表格列 `alertKey / summary / misinfoReason / alertReasonDesc / AgentTrace / output / more`；⚠️ **`misinfoReason` 的 i 是小写**；`alertSource`/`closedBy` 不展示。**按钮文字 2026-10-15 对调过**：output = 「查看简报」（开弹窗）、more = 「告警详情」（跳外链）——**只换文字**，弹窗标题仍叫「告警详情」（刻意的不一致，别改）。
+- 两个外部跳转（新开 tab，常量在 `AlarmTable.vue` 顶部）：`alertKey` → `http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<值>`；more 列「告警详情」→ `http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>`。判空别用 `||`（`runId: 0` 会被当空）。「更多字段」弹窗因此没了入口。
+- 组别下拉走字典 `dict_system_group`，`form.teamName` 默认**「全量」**（2026-10-15 由「不限定组别」改）且**始终进请求参数**（systemId 不填不带）；日期默认**当天 - 当天**（原为最近 30 天）。
+- ⚠️ **同一层级一律「按条数降序」**（2026-10-15）：`shape.js / sortByCountDesc` 排 `section.lists`（表格 tab）与 `section.levels`（AI处置 一级导航）；**二级「告警源」chip 没排**。只在展示层排、不动数据；副作用是多 tab 区块默认选中条数最多的那个。
+- ⚠️ **表格高度分两种**（2026-10-15 定稿）：`AlarmTable.vue` 的 `fixedHeight` 开关 —— **AI处置** 传 `fixed-height` → 固定 `height=420`；**P3/人工关单/自动化关单** 不传 → `max-height=420`（行少时变矮）。⚠️ 高度值**必须写成模板字面量**，写成模块级常量模板取不到（踩过：node 断言全绿但页面没高度）。
+- ⚠️ **概览区的「告警总量」2026-10-16 已按用户要求删除**（指标条里的「告警总量」保留 —— 那是后端统计值，两者同名不同值，删的是概览那个「页面明细行数」）。删后概览区只剩「重复性分析」，**整块 v-if 以 `duplicateGroupCount > 0` 为前提**（否则会留一个空的虚线分隔框）；`totalCount` computed 与 `sectionRowCount` 导入一并移除。`AI处置` 是 nested 型、两级数量不固定（二级 chip 是**筛选**）。
 - **细节（`levelTone` 顺序、`flattenLevel` 兜底、窄屏降级、三个校验脚本、字典 SQL）→ `REF-alarm-analysis.md`。**
 
 ## 执行页面 / 明细弹窗 / 执行界面简版

@@ -26,13 +26,15 @@ import { analyzeRes } from '../../../mockData/res'
  *
  * 告警行字段：表格直接展示 alertKey / summary / misinfoReason（⚠️ i 是小写）/ alertReasonDesc；
  * alertSource / closedBy **不展示**；AgentTrace 通过「使用到的智能体」弹窗查看，
- * output 通过「告警详情」弹窗查看（按 markdown 渲染）。
- * alertKey 的值可点击、新开 tab 跳到外部告警详情页；「查看简报」按钮用 runId 跳外部简报页。
+ * output 通过「查看简报」弹窗查看（按 markdown 渲染）。
+ * alertKey 的值可点击、新开 tab 跳到外部告警详情页；more 列「告警详情」按钮用 runId 跳外部页。
+ *
+ * ⚠️ 同一层级内一律**按条数降序**（表格分类 / 两级型的一级），见 shape.js。
  *
  * 查询条件（页面上的 systemId / teamName / startDate / endDate）只做透传，Mock 数据不做任何筛选，
  * 无论传什么条件都返回全量示例数据；真实接口由后端按这些条件过滤。
- * ⚠️ `systemId` 选填（不填时参数里压根没有这个 key）；`teamName` 有默认值「不限定组别」（字典
- * `dict_system_group` 的第一项），始终带上 —— 它本身就是「不按组别过滤」这个有效语义。
+ * ⚠️ `systemId` 选填（不填时参数里压根没有这个 key）；`teamName` 有默认值「全量」（字典
+ * `dict_system_group` 的选项之一，页面默认选中），始终带上。
  */
 
 /**
