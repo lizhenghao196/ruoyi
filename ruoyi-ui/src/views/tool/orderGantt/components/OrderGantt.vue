@@ -124,7 +124,7 @@
 
           <!-- 工单矩形 -->
           <div
-            v-for="bar in bars"
+            v-for="bar in visibleBars"
             :key="bar.key"
             class="og-bar"
             :class="[
@@ -279,6 +279,7 @@ import {
   measureTimeAxis,
   measureRowPlan,
   fitRowPlan,
+  buildDayWindow,
   formatDateTimeShort,
   formatDuration,
   canFitLabel
@@ -442,6 +443,19 @@ export default {
     orders: {
       type: Array,
       default: () => []
+    },
+    /**
+     * 甘特图横坐标的**基准日期**（'YYYY-MM-DD'），由页面弹窗的日期选择器传进来。
+     *
+     * 2026-10-16 用户要求：横坐标**固定**为「当天 18:00 → 次日 06:00」。
+     * 「当天」就是这里给的日期 —— 今天打开是今天 18:00，明天打开是明天 18:00，
+     * **日期一律现算、不写死**；写死的只有 18 / 06 这两个时刻。
+     *
+     * 传空 / 解析失败时退回「按数据自适应」（组件可脱离页面单独使用）。
+     */
+    windowDate: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -470,18 +484,31 @@ export default {
     }
   },
   computed: {
-    /** 时间轴（只跟数据有关，跟宽度无关） */
+    /**
+     * 固定的时间窗口 `[当天 18:00, 次日 06:00]`（2026-10-16 用户要求横坐标固定）。
+     *
+     * 基准日取 prop `windowDate`（页面弹窗里选的日期，默认当天）——
+     * 所以窗口是**动态**的，跨过 0 点 / 换了日期都会跟着变，不存在写死的日期。
+     * 解析失败返回 null → 退回「按数据自适应」（见 ganttLayout 的 measureTimeAxis）。
+     */
+    timeWindow() {
+      return this.windowDate ? buildDayWindow(this.windowDate) : null
+    },
+    /** 时间轴（只跟数据 + 固定窗口有关，跟宽度无关） */
     axis() {
-      return measureTimeAxis(this.orders, MAX_TICKS)
+      return measureTimeAxis(this.orders, MAX_TICKS, this.timeWindow)
     },
     /**
      * 绘图区宽度 = **容器宽度**，铺满、不横向滚动（用户要求「不要滚动条」）。
      *
-     * 代价：跨度大（最多 3 天）时矩形会被压窄。压到 MIN_BAR_WIDTH 就不再缩了 ——
+     * 代价：跨度大时矩形会被压窄。压到 MIN_BAR_WIDTH 就不再缩了 ——
      * 宁可略微重叠，也保证每根矩形都还悬浮得出来（否则气泡就没法触发）。
      * 之前的做法是按 MIN_PX_PER_HOUR 把绘图区撑开、横向滚动，观感更舒展，
      * 但和「一眼看全」冲突，所以改掉了；要还原只需把 plotWidth 换成
      * `max(容器宽, 跨度小时数 × 48)`。
+     *
+     * ⚠️ 横坐标现在固定成 12 小时（见 timeWindow），柱子宽度只跟「耗时 / 12 小时」
+     *    有关 —— 不再随数据跨度变化，所以柱子普遍比自适应时宽，工单号也显示得下了。
      */
     plotWidth() {
       return Math.max(MIN_PLOT_WIDTH, this.containerWidth)
@@ -514,7 +541,9 @@ export default {
         barHeight: this.geometry.barHeight,
         groupGap: this.geometry.groupGap,
         maxTicks: MAX_TICKS,
-        minBarWidth: MIN_BAR_WIDTH
+        minBarWidth: MIN_BAR_WIDTH,
+        // 固定横坐标窗口：当天 18:00 → 次日 06:00（null 时退回自适应）
+        window: this.timeWindow
       })
     },
     hasData() {
@@ -522,6 +551,16 @@ export default {
     },
     bars() {
       return this.layout.bars
+    },
+    /**
+     * 真正要渲染的柱子 —— **宽度为 0 的不渲染**。
+     *
+     * 横坐标固定成「当天 18:00 → 次日 06:00」之后，落在窗口外的工单会被
+     * buildLayout 裁成 0 宽（见那里的注释）。它们仍留在 `bars` 里（工单总数照数），
+     * 但不该往 DOM 里塞一个宽度 0 的空盒子 —— 绝对定位 + 边框/阴影会在图边缘留下痕迹。
+     */
+    visibleBars() {
+      return this.bars.filter((b) => b.width > 0)
     },
     rows() {
       return this.layout.rows

@@ -31,6 +31,58 @@ function mockApi(name, ...args) {
   return import("./_mockOrderGantt").then((mod) => mod[name](...args));
 }
 
+/* ---------------------------------------------------- mock 数据的日期
+ * 2026-10-16：甘特图横坐标固定成「当天 18:00 → 次日 06:00」（见
+ * ganttLayout.js 的 buildDayWindow），所以 mock 样例的时间也必须落在窗口内。
+ *
+ * 样例里的时间一律写成**占位日期**：
+ *   `2026-09-17` = 窗口当天（18:00 之后的那半天）
+ *   `2026-09-18` = 次日（0 点之后的那半天）
+ * 返回前统一替换成「用户选的日期」/「次日」—— 这样横坐标和数据的日期永远一致，
+ * 而且**日期不写死**：今天查是今天 18:00，明天查就是明天 18:00。
+ * ------------------------------------------------------------------ */
+const MOCK_DAY_PLACEHOLDER = "2026-09-17";
+const MOCK_NEXT_PLACEHOLDER = "2026-09-18";
+
+function pad2(n) {
+  return n < 10 ? "0" + n : String(n);
+}
+
+/** Date -> 'YYYY-MM-DD'（本地时区，和页面弹窗的 value-format 一致） */
+function formatDate(d) {
+  return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+}
+
+/** 'YYYY-MM-DD' + n 天；解析不出来就原样返回 */
+function addDays(dateStr, n) {
+  const m = String(dateStr).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!m) {
+    return dateStr;
+  }
+  return formatDate(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + n));
+}
+
+/**
+ * 把样例里的占位日期换成真实日期（当天 / 次日）。
+ *
+ * ⚠️ 用**单次正则替换**，不是两轮 split/join：两轮的话，当用户选的日期恰好等于
+ *    某个占位值时（比如选了 09-18），第一轮刚换出来的字符串会被第二轮再换一次。
+ *
+ * @param {Array} data 样例数组
+ * @param {string} [date] 'YYYY-MM-DD'，页面弹窗传进来的；缺省取今天
+ */
+function shiftMockDates(data, date) {
+  const base = /^\d{4}-\d{1,2}-\d{1,2}$/.test(String(date || ""))
+    ? date
+    : formatDate(new Date());
+  const next = addDays(base, 1);
+  const text = JSON.stringify(data).replace(
+    new RegExp(MOCK_DAY_PLACEHOLDER + "|" + MOCK_NEXT_PLACEHOLDER, "g"),
+    (m) => (m === MOCK_DAY_PLACEHOLDER ? base : next)
+  );
+  return JSON.parse(text);
+}
+
 /**
  * 获取工单列表（甘特图数据源）
  *
@@ -39,10 +91,10 @@ function mockApi(name, ...args) {
  * 入参：{ date } —— 'YYYY-MM-DD'，页面弹窗里的日期选择器直接传过来
  *       （默认**当天**，见 views/tool/orderGantt/index.vue 的 defaultDate）
  *
- * ⚠️ **下面的 mock 分支刻意不按 `date` 过滤**：
- *    那 3 条样例工单的时间是 09-17 / 09-18，而默认日期是「今天」，
- *    一旦真过滤，页面上永远是「未取到任何工单数据」、弹窗都打不开。
- *    所以别顺手给它加过滤 —— 要看过滤效果请接真实接口（USE_MOCK = false）。
+ * ⚠️ **下面的 mock 分支不按 `date` 过滤**（那 3+5 条样例是「全量」，不是「某一天的」），
+ *    但它会**把样例里的占位日期重写成所选日期**（见 shiftMockDates）——
+ *    因为甘特图横坐标固定成「当天 18:00 → 次日 06:00」，数据日期必须跟着横坐标走，
+ *    否则一条都画不出来。要按 date 真过滤请接真实接口（USE_MOCK = false）。
  *
  * 返回：{ code, msg, data: [ ... ] }
  *   data 里每条：
@@ -86,7 +138,8 @@ export function getOrderList(params) {
     return {
       code: 200,
       msg: "查询成功",
-      data: [
+      // 占位日期 -> 真实日期（当天 / 次日），见 shiftMockDates 的说明
+      data: shiftMockDates([
         {
           orderId: "CHGU-20260909-0086",
           total_cost: 30, // 耗时 - 分钟
@@ -179,8 +232,8 @@ export function getOrderList(params) {
         {
           orderId: "CHGU-20260917-0110",
           total_cost: 120,
-          beginTime: "2026-09-17 09:00:00",
-          endTime: "2026-09-17 11:00:00",
+          beginTime: "2026-09-17 19:00:00",
+          endTime: "2026-09-17 21:00:00",
           mode: "AUTO",
           detail: [
             { type: "容器云工程发布/重启", count: 2, type_cost: 50 },
@@ -196,7 +249,7 @@ export function getOrderList(params) {
               node_type: "容器云工程发布/重启",
               orderId: "CHGU-20260917-0110",
               plan_id: 90001,
-              plan_start_time: "2026-09-17 09:00:00",
+              plan_start_time: "2026-09-17 19:00:00",
               workflow_id: 60281,
             },
             {
@@ -206,8 +259,8 @@ export function getOrderList(params) {
               node_type: "数据库发布",
               orderId: "CHGU-20260917-0110",
               plan_id: 90001,
-              // 09:50 才能开始，而上一节点 09:20 就做完了 → 中间休息 09:20~09:50
-              plan_start_time: "2026-09-17 09:50:00",
+              // 19:50 才能开始，而上一节点 19:20 就做完了 → 中间暂停 19:20~19:50
+              plan_start_time: "2026-09-17 19:50:00",
               workflow_id: 60281,
             },
             {
@@ -217,7 +270,7 @@ export function getOrderList(params) {
               node_type: "配置发布",
               orderId: "CHGU-20260917-0110",
               plan_id: 90001,
-              // null → 取外层 beginTime（09:00 后即可），实际 10:20 上一节点做完才开始
+              // null → 取外层 beginTime（19:00 后即可），实际 20:20 上一节点做完才开始
               plan_start_time: null,
               workflow_id: 60281,
             },
@@ -226,8 +279,8 @@ export function getOrderList(params) {
         {
           orderId: "CHGU-20260917-0111",
           total_cost: 155,
-          beginTime: "2026-09-17 13:00:00",
-          endTime: "2026-09-17 15:35:00",
+          beginTime: "2026-09-17 21:30:00",
+          endTime: "2026-09-18 00:05:00",
           mode: "AUTO",
           detail: [
             { type: "ITSM_原子变更_YUM包更新", count: 3, type_cost: 45 },
@@ -243,7 +296,7 @@ export function getOrderList(params) {
               node_type: "ITSM_原子变更_YUM包更新",
               orderId: "CHGU-20260917-0111",
               plan_id: 90002,
-              plan_start_time: "2026-09-17 13:00:00",
+              plan_start_time: "2026-09-17 21:30:00",
               workflow_id: 60282,
             },
             {
@@ -253,8 +306,8 @@ export function getOrderList(params) {
               node_type: "人工确认",
               orderId: "CHGU-20260917-0111",
               plan_id: 90002,
-              // 14:30 才能开始，上一节点 13:40 做完 → 中间休息 50 分钟
-              plan_start_time: "2026-09-17 14:30:00",
+              // 23:00 才能开始，上一节点 22:10 做完 → 中间暂停 50 分钟
+              plan_start_time: "2026-09-17 23:00:00",
               workflow_id: 60282,
             },
             {
@@ -272,8 +325,8 @@ export function getOrderList(params) {
         {
           orderId: "CHGU-20260918-0205",
           total_cost: 100,
-          beginTime: "2026-09-18 10:00:00",
-          endTime: "2026-09-18 11:40:00",
+          beginTime: "2026-09-18 02:00:00",
+          endTime: "2026-09-18 03:40:00",
           mode: "AUTO",
           detail: [
             { type: "容器云工程发布/重启", count: 1, type_cost: 25 },
@@ -289,7 +342,7 @@ export function getOrderList(params) {
               node_type: "容器云工程发布/重启",
               orderId: "CHGU-20260918-0205",
               plan_id: 90003,
-              plan_start_time: "2026-09-18 10:00:00",
+              plan_start_time: "2026-09-18 02:00:00",
               workflow_id: 60283,
             },
             {
@@ -299,8 +352,8 @@ export function getOrderList(params) {
               node_type: "数据库发布",
               orderId: "CHGU-20260918-0205",
               plan_id: 90003,
-              // plan（10:20）早于上一节点的真正结束（10:35）→ 排队等到 10:35 才开始
-              plan_start_time: "2026-09-18 10:20:00",
+              // plan（02:20）早于上一节点的真正结束（02:35）→ 排队等到 02:35 才开始
+              plan_start_time: "2026-09-18 02:20:00",
               workflow_id: 60283,
             },
             {
@@ -393,7 +446,7 @@ export function getOrderList(params) {
             },
           ],
         },
-      ],
+      ], params && params.date),
     };
   }
   return request({

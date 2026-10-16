@@ -1,6 +1,6 @@
 # REF — 工单甘特图（orderGantt）
 
-> 2026-09-21 新增，2026-09-22 / 09-23 更新。**改这个页面前必读。**
+> 2026-09-21 新增，2026-09-22 / 09-23 更新，**2026-10-16 横坐标改为固定窗口（见 §7，动手前先看）**。
 > 三层结构：`views/tool/orderGantt/index.vue`（单按钮「查看」+ el-dialog）
 > → `components/OrderGantt.vue`（props `orders`，只负责把算好的数字贴到 style）
 > → **纯函数 `ganttLayout.js`**（时间域/刻度/行分配/像素几何，全部可在 node 里断言）。
@@ -124,6 +124,7 @@
   1px 宽的网格线右边缘顶到 plotWidth+1 → `overflow-x: auto` 就冒出一根横向滚动条。
   网格线/刻度短线走 `gridTicks`（过滤过），**标签仍用完整 `ticks`**。
 - 时间域跨度大时**不横向撑开**（`plotWidth = max(360, 容器宽)`）；真到 3 天时矩形被压窄但保证 ≥8px 仍可悬浮。
+  （自适应模式下才成立；**默认走固定窗口 §7，恒 12 小时**。）
 - 其余：AUTO 分组置底、尾部外溢要偏置、`packRows` 副本坑、对齐后要重校验格数 → 见 `2026-09-21.md`。
 
 ## 3. 校验（脚本都在 `C:/Users/lenovo/AppData/Local/Temp/`）
@@ -282,3 +283,38 @@
   （AUTO 组实测 3 行）—— og_probe_rest_live 第 5 节断言「同组同行柱子两两不重叠」。
 - 校验：og_verify §3.7 纯函数断言（含用户样例 0086 的 5 分钟尾部暂停、排队、乱序不重排、
   null plan 边界、clamp、buildLayout 挂载）；og_probe_rest_live.mjs 真实浏览器全量几何断言。
+
+## 7. 横坐标固定为「当天 18:00 → 次日 06:00」（2026-10-16 用户要求）
+
+**需求原话**：甘特图的横坐标改为当天 18:00 - 第二天的 06:00 固定住；数据本来就在这个范围内，
+不是的话可以改 mock；**注意时间不要写死，因为甘特图的横坐标是当天，到了第二天第二天就是当天了**。
+
+- **「当天」的来源 = 页面弹窗的日期选择器**（`index.vue` 的 `date`，默认当天）→ 传给组件的
+  prop `windowDate`。所以窗口是**动态**的，今天打开是今天 18:00、明天是明天 18:00。
+  写死的只有 **18 / 06 这两个时刻**（`ganttLayout.js` 的 `WINDOW_START_HOUR = 18` /
+  `WINDOW_END_HOUR = 30`，30 点直接加在当天 00:00 上，省掉跨天判断）。
+  判定只此一处 = 纯函数 `buildDayWindow(date)`，**页面/组件不许再算一遍**。
+- `measureTimeAxis(items, maxTicks, timeWindow)` 第三参 + `buildLayout` 的 `options.window`：
+  **传了就用窗口**（`spans` 非空时），不传就退回自适应 —— 组件仍可脱离页面单独使用，
+  `og_preview*.mjs` / `og_diag.mjs` 那些老脚本（2 参调用）行为不变。
+- 窗口 = 12 小时 → `pickStepMinutes(720, 12)` 选到 **60 分钟**步长，13 个刻度
+  （18:00…23:00 / 00:00…06:00），日期带 2 段（当天 + 次日），`00:00` 那根是 `is-day`。
+- ⚠️ **原代码潜伏的裁剪 bug，固定窗口后才可达**（务必别改回去）：`buildLayout` 的
+  `if (left < 0) { width += left }` **没有下限** —— 窗口外的工单算出**负宽度**
+  （CSS 当无效声明忽略 → 柱子按内容撑开），且 `left > plotWidth` 时会把
+  `overflow-x: auto` 的容器**撑出一根横向滚动条**。现在：
+  `width = Math.max(0, width + left)` + `left > plotWidth` 时 `left=plotWidth, width=0`。
+  宽度 0 = 整条不画，由组件 computed `visibleBars`（`filter(b => b.width > 0)`）过滤 ——
+  **工单仍计入 `stats.total`**，只是不渲染。模板的 `v-for` 已从 `bars` 换成 `visibleBars`。
+- **mock 数据的日期也跟着动态化**（`api/tool/orderGantt.js`）：样例里的时间写成**占位日期**
+  `2026-09-17`（= 窗口当天）/ `2026-09-18`（= 次日），返回前走 `shiftMockDates(data, params.date)`
+  替换成真实日期。⚠️ 替换必须用**单次正则回调**，不能两轮 `split/join` ——
+  用户选的日期恰好等于某个占位值时，第一轮刚换出来的会被第二轮再换一次（已写成断言）。
+- **三条样例被挪进窗口**（原来在窗口外）：0110 由 09:00 改 **19:00**、0111 由 13:00 改 **21:30**
+  （endTime 顺延到次日 00:05）、0205 由 10:00 改 **02:00**；node_detail 的 `plan_start_time`
+  与注释里的时间一起改（三条各自演示的语义不变：中间暂停 / 长暂停 50 分钟 / 排队）。
+- 副作用（正面）：柱子变宽，**柱体文字从 2/8 条涨到 6/8 条**（原来只有 0111 和 0206 放得下）。
+- 校验：`og_window_check.mjs`（纯函数边界含跨月/跨年/闰年 + mock 端到端 + 源码接线，
+  **FAILURES 0**）；`og_probe_window_live.mjs`（真实浏览器：13 个刻度序列、日期带是今天/次日、
+  柱子像素位置反算回时间与「开始时间 + 耗时」一致、无横纵滚动，**FAILURES 0**）。
+  改了横坐标相关的东西，这两个脚本要一起跑。

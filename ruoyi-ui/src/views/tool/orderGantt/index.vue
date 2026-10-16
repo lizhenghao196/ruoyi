@@ -82,8 +82,10 @@
           </span>
         </div>
 
-        <!-- v-if 保证每次打开都重建：宽度要重新量，悬浮状态也要清干净 -->
-        <order-gantt v-if="dialogVisible" :orders="orders" />
+        <!-- v-if 保证每次打开都重建：宽度要重新量，悬浮状态也要清干净。
+             `window-date` = 上面选的日期，甘特图据此把横坐标固定成
+             「当天 18:00 → 次日 06:00」—— 日期跟着选择器走，不写死。 -->
+        <order-gantt v-if="dialogVisible" :orders="orders" :window-date="date" />
       </div>
     </el-dialog>
   </div>

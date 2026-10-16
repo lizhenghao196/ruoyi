@@ -13,7 +13,9 @@
  *   2. **AUTO 工单排在下方（贴近 x 轴）**，其余（含 MANUAL 和任何未知 mode）排在上面。
  *      两组各自贪心装箱；**每个分组上方都有一条带标签的「标签条」**（`chipTop`），
  *      两组之间额外画一条虚线分隔带（`separatorTop`，只有两组都在时才画）。
- *   3. **x 轴跨度自适应**：12 小时 ~ 3 天都能画，刻度步长从候选表里挑，
+ *   3. **x 轴默认固定为「当天 18:00 → 次日 06:00」**（2026-10-16 用户要求，
+ *      见 `buildDayWindow`；「当天」由页面日期选择器现算，不写死）。
+ *      不传窗口时才退回自适应（12 小时 ~ 3 天都能画），刻度步长从候选表里挑，
  *      保证刻度数不超过 maxTicks。
  *   4. **柱体上的文字要么完整、要么不显示**（`canFitLabel`）：放不下就整条不写，
  *      不做截断 —— 半截工单号（后四位）看着像另一个东西，完整信息在悬浮气泡里。
@@ -109,6 +111,42 @@ export function startOfDay(ts) {
   const d = new Date(ts)
   d.setHours(0, 0, 0, 0)
   return d.getTime()
+}
+
+/* ------------------------------------------------------- 固定时间窗口
+ * 2026-10-16 用户要求：甘特图的横坐标**固定**成「当天 18:00 → 次日 06:00」。
+ *
+ * 之前是自适应（`buildDomain` 取所有工单的并集区间），数据一多跨度就被拉到
+ * 二三十小时，柱子被压得很窄、工单号几乎全放不下。固定成 12 小时之后
+ * 刻度密度和柱子宽度都稳定了，也和「夜间变更窗口」这个业务语义对得上。
+ *
+ * ⚠️ 「当天」是**动态**的：由页面弹窗里的日期选择器给出（`date`，'YYYY-MM-DD'）。
+ *    今天打开是今天 18:00，明天打开就是明天 18:00 —— 日期一律现算，不写死。
+ *    写死的只有 18 / 06 这两个时刻（用户指定的窗口边界）。
+ * ------------------------------------------------------------------ */
+
+/** 窗口起点：当天 18:00 */
+export const WINDOW_START_HOUR = 18
+/** 窗口终点：次日 06:00 —— 写成「30 点」直接加在当天 00:00 上，省掉跨天判断 */
+export const WINDOW_END_HOUR = 30
+
+/**
+ * 按日期算出固定窗口 `[当天 18:00, 次日 06:00]`。
+ *
+ * @param {*} date 'YYYY-MM-DD'（Date / 时间戳也认，走的是同一套 parseTime）
+ * @returns {{start:number, end:number}|null} 解析不出来返回 null
+ *          —— 调用方据此退回「按数据自适应」，别让一个坏日期把整张图变成空白
+ */
+export function buildDayWindow(date) {
+  const ts = parseTime(date)
+  if (ts === null) {
+    return null
+  }
+  const dayStart = startOfDay(ts)
+  return {
+    start: dayStart + WINDOW_START_HOUR * 60 * MINUTE_MS,
+    end: dayStart + WINDOW_END_HOUR * 60 * MINUTE_MS
+  }
 }
 
 function toPositiveNumber(value) {
@@ -707,11 +745,17 @@ export function fitRowPlan(rowPlan, availableHeight) {
  * （宽度不够就横向滚动，见 OrderGantt.vue 的 MIN_PX_PER_HOUR），
  * 而跨度只跟时间有关、跟宽度无关。buildLayout 内部也走这里，规则只此一份。
  *
+ * ⚠️ **固定窗口**（2026-10-16 用户要求）：传了 `timeWindow`（见 buildDayWindow）就用它，
+ *    不再看数据跨度 —— 横坐标因此恒为「当天 18:00 → 次日 06:00」。
+ *    落在窗口外的工单仍会算出来，但由 buildLayout 裁到绘图区边缘（不会跑到图外面去）。
+ *    没传 / 传了个坏值 → 退回原来的自适应，组件可独立使用。
+ *
  * @param {Array<Object>} items
  * @param {number} [maxTicks=10] 刻度格数上限（标签数 = 格数 + 1）
+ * @param {{start:number,end:number}} [timeWindow] 固定时间窗口（可选）
  * @returns {{domain, stepMinutes, spanMinutes, ticks, days}|null} 没有有效工单时 null
  */
-export function measureTimeAxis(items, maxTicks) {
+export function measureTimeAxis(items, maxTicks, timeWindow) {
   const spans = []
   ;(Array.isArray(items) ? items : []).forEach((item) => {
     const s = resolveSpan(item)
@@ -719,7 +763,19 @@ export function measureTimeAxis(items, maxTicks) {
       spans.push(s)
     }
   })
-  const raw = buildDomain(spans)
+  // 一条有效工单都没有 → 还是走空态（固定窗口不改变这一点：
+  // 没有数据时画一条空的时间轴没有意义）
+  if (!spans.length) {
+    return null
+  }
+  const fixed =
+    timeWindow &&
+    isFinite(timeWindow.start) &&
+    isFinite(timeWindow.end) &&
+    timeWindow.end > timeWindow.start
+      ? { start: timeWindow.start, end: timeWindow.end }
+      : null
+  const raw = fixed || buildDomain(spans)
   if (!raw) {
     return null
   }
@@ -803,6 +859,8 @@ const EMPTY_LAYOUT = {
  * @param {number} [options.minBarWidth=8] 矩形最小宽度（太窄的矩形没法悬浮）
  * @param {boolean} [options.fromBottom=true] 行装箱方向：true = 优先靠近 x 轴（推荐）
  * @param {number} [options.now]           画「现在」竖线用的时间戳，默认取当前时刻
+ * @param {{start:number,end:number}} [options.window] 固定时间窗口
+ *        （见 buildDayWindow）—— 传了就按它画横坐标，不再自适应
  * @returns {Object} 布局结果，见 EMPTY_LAYOUT 的字段说明
  */
 export function buildLayout(items, options) {
@@ -850,7 +908,7 @@ export function buildLayout(items, options) {
     })
   })
 
-  const axis = measureTimeAxis(list, maxTicks)
+  const axis = measureTimeAxis(list, maxTicks, opts.window)
   if (!axis) {
     return Object.assign({}, EMPTY_LAYOUT, {
       plotWidth,
@@ -909,12 +967,25 @@ export function buildLayout(items, options) {
       if (width < minBarWidth) {
         width = minBarWidth
       }
+      // 裁到绘图区。⚠️ 固定窗口（见 buildDayWindow）之后这段才真正会被走到 ——
+      // 窗口外的工单在这里被裁掉：
+      //   - 左缘在窗口左边 → 推回 0，宽度相应缩短；
+      //   - 整条都在窗口右边 → left 夹到 plotWidth、宽度归 0；
+      //   - 右缘超出绘图区 → 收窄到边界。
+      // ⚠️ 两处都必须夹到 **0**（原来只写 `width += left`）：窗口外的工单会算出
+      //    **负宽度** —— CSS 视作无效声明直接忽略，柱子反而按内容撑开；
+      //    而 left 超过 plotWidth 还会把 `overflow-x: auto` 的容器撑出一根横向滚动条。
+      //    宽度为 0 = 整条不画（模板按 `width > 0` 过滤），但工单仍计入 stats.total。
       if (left < 0) {
-        width += left
+        width = Math.max(0, width + left)
         left = 0
       }
+      if (left > plotWidth) {
+        left = plotWidth
+        width = 0
+      }
       if (left + width > plotWidth) {
-        width = Math.max(1, plotWidth - left)
+        width = Math.max(0, plotWidth - left)
       }
       bar.left = left
       bar.width = width
