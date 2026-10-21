@@ -156,6 +156,33 @@
             <span class="profile-hosts__count"
               >{{ filteredTotal }} / {{ activeHostTotal }} 台</span
             >
+            <!-- 一键收起 / 一键展开：集群的展开状态同时决定右侧链路图里画哪些集群的
+                 节点与连线（展开了才画），所以这个按钮也会连带改链路图 -->
+            <el-tooltip
+              :content="
+                allClustersExpanded
+                  ? '收起全部集群（右侧链路图也一起收）'
+                  : '展开全部集群（右侧链路图也一起展开）'
+              "
+              placement="top"
+              :open-delay="300"
+            >
+              <button
+                type="button"
+                class="profile-hosts__toggle"
+                :disabled="!activeClusters.length"
+                @click="toggleAllClusters"
+              >
+                <i
+                  :class="
+                    allClustersExpanded
+                      ? 'el-icon-s-fold'
+                      : 'el-icon-s-unfold'
+                  "
+                />
+                {{ allClustersExpanded ? "一键收起" : "一键展开" }}
+              </button>
+            </el-tooltip>
             <el-input
               v-model="searchQuery"
               size="mini"
@@ -167,7 +194,8 @@
           </header>
 
           <div ref="hostsPanel" class="profile-hosts__panel">
-            <!-- 每个集群一个可展开收起的表格，默认展开第一个 -->
+            <!-- 每个集群一个可展开收起的表格；**默认全部展开**，展开状态同时决定
+                 右侧链路图画哪些集群（收起一个集群，它的节点和连线也跟着从图上消失） -->
             <el-collapse
               v-if="filteredGroups.length"
               :value="openClusters"
@@ -253,9 +281,9 @@
             <span class="profile-link__count"
               >{{ links.length }} 条链路 · {{ linkNodeCount }} 个节点</span
             >
-            <!-- 右侧：小图不显示节点名，给一句提示 + 放大入口，避免用户不知道要悬浮 -->
+            <!-- 右侧：节点名常显时不用提示「悬浮查看节点」；空间不够常显才给这句提示 -->
             <div class="profile-link__actions">
-              <span v-if="links.length" class="profile-link__tip"
+              <span v-if="links.length && !inlineNodeLabels" class="profile-link__tip"
                 >悬浮查看节点</span
               >
               <!-- 视图被动过（拖过节点 / 缩放平移过）才出现，平时不占位 -->
@@ -532,6 +560,13 @@ const TOPO_LABEL_MAX_DIALOG = 26;
 const TOPO_LABEL_MIN_DIALOG = 6;
 // 11px 字号下拉丁字符的近似宽度（含字距）
 const TOPO_LABEL_CHAR_W = 6.6;
+// 节点名的排布参数：画在节点正下方，距节点 6px、行高 13px。
+// 抽成常量是因为「小图要不要常显节点名」的判定要按同样的尺寸去摆矩形（见 inlineLabelsFit），
+// 两边写死两个数迟早会对不上
+const TOPO_NODE_LABEL_DISTANCE = 6;
+const TOPO_NODE_LABEL_LINE_H = 13;
+// 小图里常显节点名时，名字之间至少留的空隙（px）
+const TOPO_INLINE_LABEL_GAP = 10;
 
 // ---- 线段上的 desc（「空间合适就直出，不合适退回悬浮卡片」的判定）----
 // 密度上限：节点 / 线段任一超了就不直出。十几个节点起步的图上到处挂文字等于糊成一片，
@@ -721,7 +756,9 @@ export default {
       tableWidth: 0,
       activeComponent: "",
       searchQuery: "",
-      openClusters: [], // 展开的集群（非手风琴，默认展开第一个）
+      // 展开的集群（非手风琴）。**默认全展开**，而且它同时是右侧链路图的筛选依据：
+      // 展开了才画这个集群发出的链路，收起就从图上消失
+      openClusters: [],
       systemQuery: "", // 系统英文名称搜索框
       searched: false, // 是否已执行查询（未查询前仅显示居中的搜索入口）
       switchDialogVisible: false, // 系统切换弹窗
@@ -735,6 +772,9 @@ export default {
       topoHover: null,
       // 视图是否被用户动过（拖过节点 / 缩放 / 平移）：动过才显示「重置视图」
       topoDirty: { inline: false, dialog: false },
+      // 页面内小图里节点名是不是常显（图够稀疏、名字互相压不上才常显）。
+      // 由 renderTopoChart 按实际排版算出来，用来决定表头那句「悬浮查看节点」还要不要
+      inlineNodeLabels: false,
     };
   },
 
@@ -746,6 +786,7 @@ export default {
 
   watch: {
     // 搜索后若展开的集群全部被过滤掉，自动展开第一个匹配集群
+    // （走 setOpenClusters 是为了让右侧链路图跟着一起变 —— 展开状态就是链路图的筛选依据）
     searchQuery() {
       this.$nextTick(() => {
         if (!this.filteredGroups.length) return;
@@ -753,7 +794,7 @@ export default {
           this.filteredGroups.some((g) => g.name === n)
         );
         if (!hasOpen) {
-          this.openClusters = [this.filteredGroups[0].name];
+          this.setOpenClusters([this.filteredGroups[0].name]);
         }
       });
     },
@@ -922,18 +963,35 @@ export default {
       );
       return comp ? comp.clusters.map((c) => c.name) : [];
     },
+    // **已展开**的集群名 —— 右侧链路图只画这些集群发出的链路。
+    // 主机列表折叠面板的展开状态就是这个数组，两边共用一份状态，天然联动
+    expandedClusters() {
+      const all = this.activeClusters;
+      if (!all.length) return [];
+      const open = this.openClusters;
+      return all.filter((n) => open.indexOf(n) >= 0);
+    },
+    // 是不是「全都展开了」：一键收起 / 一键展开按钮的文字和图标看它
+    allClustersExpanded() {
+      const all = this.activeClusters;
+      if (!all.length) return false;
+      const open = this.openClusters;
+      return all.every((n) => open.indexOf(n) >= 0);
+    },
     // 链路关系图节点数量（瀑布拓扑的节点数，链路里出现过即计入）
     linkNodeCount() {
       return (this.topo && this.topo.nodes.length) || 0;
     },
-    // 空态文案分两种：整份画像没给链路 / 给了链路但当前组件一条都没匹配上
+    // 空态文案分三种：整份画像没给链路 / 集群全被收起 / 展开的集群都没匹配到链路
     linkEmptyTitle() {
       return this.allLinks.length ? "无链路" : "暂无链路数据";
     },
     linkEmptyHint() {
-      return this.allLinks.length
-        ? "当前组件下的集群未匹配到链路，切换组件试试"
-        : "当前系统画像未返回链路关系";
+      if (!this.allLinks.length) return "当前系统画像未返回链路关系";
+      if (!this.expandedClusters.length) {
+        return "左侧集群都收起了，展开后即可看到链路";
+      }
+      return "当前展开的集群未匹配到链路，展开其他集群试试";
     },
   },
 
@@ -978,11 +1036,11 @@ export default {
           this.profileData = res.data || res;
           this.searched = true;
           // 先把默认选中的组件定下来，再建拓扑 —— 顺序反了会先按上一次查询的组件
-          // 筛一遍链路（拓扑白算一次），还得再补一次重算
+          // 筛一遍链路（拓扑白算一次），还得再补一次重算。
+          // 集群默认**全部展开**（第一次进来就是全展示），右侧链路图跟着画全部集群
           const first = this.componentList[0];
           this.activeComponent = first ? first.name : "";
-          this.openClusters =
-            first && first.clusters.length ? [first.clusters[0].name] : [];
+          this.openClusters = this.activeClusters.slice();
           this.prepareData();
         })
         .catch(() => {
@@ -1020,11 +1078,12 @@ export default {
       this.refreshTopo();
     },
 
-    // 按当前选中组件筛链路 + 重建瀑布拓扑。
-    // 组件拓扑的集群名 → 链路起点（fnode）命中词，命中不到的组件就是「无链路」。
+    // 按**当前展开的集群**筛链路 + 重建瀑布拓扑。
+    // 组件拓扑的集群名 → 链路起点（fnode）命中词；集群收起了，它的链路就不画
+    // （主机列表的折叠状态和这里共用 openClusters，所以两边是联动的）。
     // 筛选/建图都只在展示层做，接口返回的链路数据一个字节没动
     refreshTopo() {
-      this.links = filterLinksByClusters(this.allLinks, this.activeClusters);
+      this.links = filterLinksByClusters(this.allLinks, this.expandedClusters);
       // 节点位置只由链路关系决定（分层 + 层内重心排序），没有任何需要特殊标记的节点
       this.topo = buildTopology(this.links, {
         colGap: TOPO_COL_GAP_MIN,
@@ -1082,6 +1141,11 @@ export default {
       const topo = this.topoLayoutFor(mode, el);
       const state = this.topoState(mode, el, topo);
       this._topoStates[mode] = state;
+      // 小图里节点名常显与否会改表头那句提示，同步给模板（值没变就不触发重渲染，
+      // 所以不会和 ResizeObserver 形成来回重排）
+      if (mode === "inline" && this.inlineNodeLabels !== state.showNodeLabels) {
+        this.inlineNodeLabels = state.showNodeLabels;
+      }
       chart.setOption(this.buildTopoOption(mode, state));
       this.bindTopoInteractions(chart, state, mode);
       // 重绘 = 回到初始布局 + 1:1 视图，脏标记跟着清掉
@@ -1531,6 +1595,56 @@ export default {
       return { items, index };
     },
 
+    // 页面内小图要不要**常显**节点名：把每个名字按「节点正下方居中」摆成一块矩形，
+    // 两两不重叠、也不压到别的节点上，才算「空间够」。
+    // 节点 / 线段少的时候名字自然放得下；密了必然互相压，那时候还是退回「悬浮才显示」。
+    // 纯几何判定（posMap 已经是画布像素坐标，和最终渲染同一套尺度），和画布大小无关
+    inlineLabelsFit(topo, posMap, labelMax) {
+      const nodes = (topo && topo.nodes) || [];
+      if (!nodes.length) return false;
+      const r = this.topoNodeMetrics("inline").baseSize / 2;
+      const half = TOPO_INLINE_LABEL_GAP / 2;
+      const boxes = [];
+      for (let i = 0; i < nodes.length; i += 1) {
+        const p = posMap.get(nodes[i].id);
+        if (!p) return false;
+        const text = topoNodeLabel(nodes[i].id, labelMax);
+        const lines = text.split("\n");
+        let w = 0;
+        for (let k = 0; k < lines.length; k += 1) {
+          w = Math.max(w, estimateTextWidth(lines[k]));
+        }
+        const top = p[1] + r + TOPO_NODE_LABEL_DISTANCE;
+        boxes.push({
+          x1: p[0] - w / 2 - half,
+          x2: p[0] + w / 2 + half,
+          y1: top - half,
+          y2: top + lines.length * TOPO_NODE_LABEL_LINE_H + half,
+        });
+      }
+      // 名字之间不能压
+      for (let i = 0; i < boxes.length; i += 1) {
+        for (let j = i + 1; j < boxes.length; j += 1) {
+          const a = boxes[i];
+          const b = boxes[j];
+          if (a.x1 < b.x2 && b.x1 < a.x2 && a.y1 < b.y2 && b.y1 < a.y2) {
+            return false;
+          }
+        }
+      }
+      // 名字也不能压到任何一个节点上（自己的节点在名字上方，不会误判）
+      for (let i = 0; i < boxes.length; i += 1) {
+        const b = boxes[i];
+        for (let k = 0; k < nodes.length; k += 1) {
+          const p = posMap.get(nodes[k].id);
+          if (p[0] + r > b.x1 && p[0] - r < b.x2 && p[1] + r > b.y1 && p[1] - r < b.y2) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+
     // 卡片定位：贴在被悬浮的元素上方，容器内放不下就翻到下方，最后整体夹在容器内。
     // 宽度按卡片最大宽度（268px）估，高度按行数估 —— 只影响贴边时的偏移量
     placeTopoHover(mode, el, state, anchor, content) {
@@ -1703,6 +1817,10 @@ export default {
             )
           )
         : TOPO_LABEL_MAX;
+      // 小图里节点名要不要常显（弹窗里一直常显）：摆成矩形两两不压就常显，
+      // 压上了还是退回「悬浮才显示」—— 名字本身不用截，判定用的是真正画出来的那串
+      const showNodeLabels =
+        isDialog || this.inlineLabelsFit(topo, posMap, labelMax);
       const nodeItems = topo.nodes.map((n) => ({
         id: n.id,
         name: n.id,
@@ -1749,6 +1867,8 @@ export default {
         nodeItems,
         // 这个尺寸下节点文字最多能画几个字（buildTopoOption 的 formatter 用）
         labelMax,
+        // 节点名是不是常显（小图看空间够不够，弹窗恒 true）
+        showNodeLabels,
         nodeIndex: new Map(topo.nodes.map((n, i) => [n.id, i])),
         // 命中半径（基准坐标系里的半径，随视图缩放一起放大）
         radius: new Map(
@@ -1901,9 +2021,11 @@ export default {
             // 数据为空 = 空间不合适，desc 退回悬浮卡片；zlevel 和节点同层、z 更低，
             // 保证文字压在连线之上、节点之下
             //
-            // ⚠️ symbolSize 必须是 2：Symbol 内部把图形建成 2×2 再按 symbolSize/2 缩放，
-            // 而 label 是挂在这个被缩放的图形元素上的 —— symbolSize=2 时缩放比正好是 1，
-            // 文字才是 fontSize 指定的真实大小（顺手用一个 2px 透明圆点当锚，看不见）
+            // symbolSize: 2 只是拿一个 2px 的透明圆点当锚（看不见，silent 也不接事件）。
+            // ⚠️ 别指望靠 symbolSize 控制文字大小：zrender 的 RectText 默认只把**矩形**
+            // applyTransform 到视图空间、并不 setTransform，所以 label 永远按 style.fontSize
+            // 的像素值画，和元素自身的 scale 无关 —— 节点系列 symbolSize=14（缩放 7 倍）
+            // 的文字也照样是 11px。改字号请改 label.fontSize
             id: TOPO_EDGE_LABEL_SERIES,
             type: "scatter",
             clip: false,
@@ -1938,13 +2060,14 @@ export default {
             symbol: TOPO_NODE_SYMBOL,
             symbolSize: baseSize,
             label: {
-              // 小图默认不显示文字（悬浮时经 emphasis 显示）；弹窗内常显
-              show: isDialog,
+              // 弹窗里一直常显；小图里只有「摆得下」才常显（见 inlineLabelsFit），
+              // 放不下就退回「悬浮才显示」
+              show: isDialog || state.showNodeLabels,
               position: "bottom",
-              distance: 6,
+              distance: TOPO_NODE_LABEL_DISTANCE,
               color: c.label,
               fontSize: 11,
-              lineHeight: 13,
+              lineHeight: TOPO_NODE_LABEL_LINE_H,
               formatter: (p) => topoNodeLabel(p.name, state.labelMax),
             },
             emphasis: {
@@ -1953,7 +2076,7 @@ export default {
                 color: c.label,
                 fontSize: isDialog ? 12 : 11,
                 fontWeight: 700,
-                lineHeight: 13,
+                lineHeight: TOPO_NODE_LABEL_LINE_H,
                 formatter: (p) => topoNodeLabel(p.name, state.labelMax),
               },
             },
@@ -2058,20 +2181,39 @@ export default {
       this.panelObserver.observe(el);
     },
 
-    // 切换组件类型：左侧主机列表联动筛选（默认展开其第一个集群），
+    // 切换组件类型：左侧主机列表联动筛选（默认**全部展开**），
     // 右侧链路图也换成「这个组件下集群发出的链路」；重复点同一个组件不用重算
     selectComponent(name) {
       const changed = name !== this.activeComponent;
       this.activeComponent = name;
-      const comp = this.componentList.find((c) => c.name === name);
-      this.openClusters =
-        comp && comp.clusters.length ? [comp.clusters[0].name] : [];
+      // activeClusters 是 computed，跟着 activeComponent 走 —— 换组件就全部展开
+      this.openClusters = this.activeClusters.slice();
       if (changed) this.applyComponentLinks();
     },
 
-    // 展开/收起集群（非手风琴，value 为展开的集群名数组）
+    // 展开/收起集群（非手风琴，value 为展开的集群名数组）。
+    // 这是主机列表和右侧链路图的联动点：收起一个集群，它的节点和连线也从图上消失
     onClusterToggle(val) {
-      this.openClusters = val || [];
+      this.setOpenClusters(val || []);
+    },
+
+    // 设置展开的集群并刷新链路图。集合没变（比如 el-collapse 回吐同一个值）就不重算，
+    // 否则每次点折叠头都会白重建一遍拓扑
+    setOpenClusters(names) {
+      const next = (Array.isArray(names) ? names : []).slice();
+      const open = this.openClusters;
+      const same =
+        next.length === open.length && next.every((n) => open.indexOf(n) >= 0);
+      if (same) return;
+      this.openClusters = next;
+      this.applyComponentLinks();
+    },
+
+    // 一键收起 / 一键展开（全展开时收起，否则全部展开）
+    toggleAllClusters() {
+      this.setOpenClusters(
+        this.allClustersExpanded ? [] : this.activeClusters.slice()
+      );
     },
 
     // 打开集群关系弹窗（数据来自 relationGroups computed）
@@ -2635,6 +2777,41 @@ $stat-colors: (
     padding: 1px 8px;
     border-radius: 8px;
     line-height: 18px;
+  }
+
+  /* 一键收起 / 一键展开：紧挨搜索框左边（搜索框自己 margin-left:auto，把它俩一起推到右边） */
+  &__toggle {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 10px;
+    border: 1px solid $profile-card-border;
+    border-radius: 6px;
+    background: $profile-card-bg;
+    color: #606266;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    i {
+      font-size: 13px;
+      align-self: center;
+    }
+
+    &:hover:not(:disabled) {
+      color: $profile-accent;
+      border-color: $profile-accent;
+      background: #ecf5ff;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 
   &__search {

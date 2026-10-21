@@ -211,8 +211,9 @@
         <span><i class="el-icon-time" />{{ hoverBeginText }}</span>
         <i class="el-icon-right og-tip__arrow" />
         <span>{{ hoverEndText }}</span>
-        <!-- 两枚时长胶囊：**总耗时在上、节点耗时在下**竖排，整体贴右
-             （2026-10-13 用户要求「节点耗时放到总耗时下面」）。
+        <!-- 三枚时长胶囊：**总耗时 → 节点耗时 → 实际耗时**竖排，整体贴右
+             （2026-10-13 用户要求「节点耗时放到总耗时下面」；
+              2026-10-16 用户要求「实际耗时显示在节点耗时下面」）。
              贴右靠这层容器的 margin-left:auto，pill 自己不再吃 ——
              两个 pill 都设 auto 会被平分剩余空间、左右分开，竖不起来。 -->
         <div class="og-tip__costs">
@@ -224,6 +225,12 @@
                total_cost 缺失 / 非法时整项不渲染。 -->
           <span v-if="hoverNodeCostText" class="og-tip__nodecost">
             <i class="el-icon-set-up" />节点耗时 {{ hoverNodeCostText }}
+          </span>
+          <!-- 实际耗时 = 原始数据 actualCostTime（2026-10-16 用户要求）。
+               ⚠️ 这个字段后端已经换算好单位，**原样取值展示**；
+               空串时显示「暂无」，所以这一项**始终渲染**（不加 v-if）。 -->
+          <span class="og-tip__actualcost">
+            <i class="el-icon-alarm-clock" />实际耗时 {{ hoverActualCostText }}
           </span>
         </div>
       </div>
@@ -722,6 +729,27 @@ export default {
         return ''
       }
       return formatDuration(n)
+    },
+    /**
+     * 「实际耗时」= 原始数据的 `actualCostTime`（2026-10-16 用户要求：显示在节点耗时下面）。
+     *
+     * ⚠️ 和上面两枚**不一样**：这个字段**后端已经把单位换算好了**，
+     *    页面**原样取值展示，不做任何换算 / 格式化**（所以这里不调 formatDuration，
+     *    也不当数字处理 —— 它可能是「2 小时 20 分」这种已经带单位的字符串）。
+     *
+     * 取值只有两种：空串 或 有值。空串 → 显示「暂无」。
+     * 另外把 null / undefined / 纯空白也一并兜底成「暂无」——
+     * 后端漏给字段时页面上不该出现一个空胶囊。
+     * 因为空串也有文案，这一项**始终渲染**（模板上不加 v-if）。
+     */
+    hoverActualCostText() {
+      const raw = this.hover && this.hover.raw
+      const value = raw ? raw.actualCostTime : null
+      if (value === null || value === undefined) {
+        return '暂无'
+      }
+      const text = String(value).trim()
+      return text === '' ? '暂无' : text
     },
     /**
      * 气泡里工单号的跳转地址（2026-10-12 用户要求：工单号变蓝色超链接，
@@ -1801,8 +1829,9 @@ export default {
   color: var(--og-text-3);
 }
 
-/* 两枚时长胶囊的右侧容器：竖排、贴右（2026-10-13 用户要求「节点耗时放总耗时下面」）。
-   margin-left:auto 在这层而不是 pill 上 —— 两个 pill 各设 auto 会被平分剩余空间、
+/* 三枚时长胶囊的右侧容器：竖排、贴右（2026-10-13 用户要求「节点耗时放总耗时下面」，
+   2026-10-16 用户又加了「实际耗时」）。
+   margin-left:auto 在这层而不是 pill 上 —— 几个 pill 各设 auto 会被平分剩余空间、
    同一行左右分开，竖不起来。 */
 .og-tip__costs {
   display: flex;
@@ -1812,16 +1841,11 @@ export default {
   margin-left: auto;
 }
 
-.og-tip__cost {
-  padding: 1px 7px;
-  border-radius: 9px;
-  background: #f2f5fa;
-  color: var(--og-text-2);
-}
-
-/* 节点耗时（2026-10-13 用户要求）：和 .og-tip__cost 同款胶囊，共用一套视觉，
-   让「总耗时 / 节点耗时」看起来是一对。 */
-.og-tip__nodecost {
+/* 三枚胶囊共用一套视觉（总耗时 / 节点耗时 / 实际耗时），看起来是一组。
+   ⚠️ 以后再加胶囊，把类名补进这个列表就行 —— 别各写一份，改配色时容易漏。 */
+.og-tip__cost,
+.og-tip__nodecost,
+.og-tip__actualcost {
   padding: 1px 7px;
   border-radius: 9px;
   background: #f2f5fa;

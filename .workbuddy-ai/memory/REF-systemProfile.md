@@ -36,6 +36,17 @@
   - 集群名为空数组 -> 返回**空数组**，不退回全量。
 - 命中唯一性靠「集群名全局唯一」保证（全等匹配下重名会让一条链路归属两个组件）。
   `sp_verify.mjs` 的 C 段有断言：每个 fnode 全等于某个集群名、每条链路恰好归属一个组件。
+
+### 筛选的输入是「**已展开**的集群」，不是「组件下所有集群」
+
+主机列表折叠面板的展开状态（`data.openClusters`）和右侧链路图**共用一份状态**：
+- `activeClusters` = 当前组件下的全部集群（候选）；
+- `expandedClusters` = `activeClusters ∩ openClusters` —— **这才是链路图的筛选输入**。
+- 收起一个集群 ⇒ 它的 fnode（节点 + 连线）从图上消失；全部收起 ⇒ 「无链路」，
+  空态文案是「左侧集群都收起了，展开后即可看到链路」（第三种文案，别和「画像没返回链路」混）。
+- 写 `openClusters` 一律走 `setOpenClusters(names)`（集合没变就不重算拓扑）；
+  入口有 `selectComponent` / `onClusterToggle` / `toggleAllClusters` / 搜索框那个 watcher。
+- `toggleAllClusters` 是**切换**语义：全展开 → 收，否则 → 展开（按钮文案跟着变）。
 - `index.vue` 的两份链路：
   - `allLinks` —— 全量（`prepareData` 里 `normalizeLinks` 一次），**只给顶部概览的「链路」总数用**；
   - `links` —— 当前组件的筛选结果，右侧链路图 / 放大弹窗 / 表头计数都用它。
@@ -81,17 +92,20 @@
   （只有预算不足 `MIN_W`(60) 才整体不画）。全文始终能在悬浮卡片里看到。
 - mock 里「容器云」那条 desc 故意写长（30 字），用来演示截断：线上画 18 字 193px，卡片里给全文。
 
-### ⚠️ echarts 4.9 的三个硬事实（改这块之前必读）
+### ⚠️ echarts 4.9 / zrender 的硬事实（改这块之前必读）
 
 - **`lines` 系列不渲染 label**：`LinesView` 走 `LineDraw` / `EffectLine`，整条链路没有 label 分支；
   `linesSeries.js` 的默认 option 里虽然有 `label` 字段，但没有任何地方消费它。
   ⇒ 线段上的文字只能用 **scatter** 挂在锚点上（二次贝塞尔 t=0.5，`curveMidpoint`）。
 - **`symbol: 'none'` 会连 label 一起没有**：`SymbolDraw.symbolNeedsDraw` 里有一句
   `data.getItemVisual(idx, 'symbol') !== 'none'` —— 为 `none` 时**图形元素压根不创建**。
-  正确写法：`symbol: 'circle'` + `symbolSize: 2` + `itemStyle: { color: 'transparent' }`。
-- **`symbolSize` 必须是 2**：`Symbol._createSymbol` 把图形建成 **2×2** 再 `scale = symbolSize/2`，
-  而 label 就挂在**这个被缩放的元素**上 ⇒ symbolSize=14 会让文字被放大 7 倍、=1 会缩一半。
-  2 是唯一让缩放比为 1 的值。
+  正确写法：`symbol: 'circle'` + `itemStyle: { color: 'transparent' }`（anchor 用 symbolSize 2）。
+- **label 的字号和元素 scale 无关**（2026-10-16 实测纠正，之前记错过）：
+  zrender 的 `RectText` mixin 默认只把**矩形** `applyTransform` 到视图空间、**不** `setTransform`，
+  所以文字永远按 `style.fontSize` 的像素值画 —— 节点系列 `symbolSize:14`（缩放 7 倍）的文字
+  照样是 11px。**改字号要改 `label.fontSize`，别去动 symbolSize。**
+- 文字位置**会**受 scale 影响（矩形被变换）：所以 `inlineLabelsFit` 按
+  `posMap + baseSize/2 + distance` 摆矩形是对得上真实渲染的。
 - 旋转能不能刷新（**现在没用到，留着备查**）：`label.rotate` 会被 `setTextStyleCommon` 转成**弧度**
   存进 `style.textRotation`；`SymbolDraw.updateData` 的 update 分支里会 `symbolPath.setStyle(...)`
   （标记脏）+ 同层节点动画，所以拖拽时重设数据项能让角度跟着变。⚠️ 但拖拽时要**整颗替换**数据项
@@ -106,6 +120,19 @@
   `state.refresh(all)` 里也要带上这个系列（否则拖完标签留在原地）。
 - zlevel 与节点同层（`TOPO_ZLEVEL_NODE`）、`z: 3` 低于节点的 4 ⇒ 文字压在连线之上、节点之下。
 
+### 节点名：小图里空间够就常显（2026-10-16 需求 1）
+
+判定 = `inlineLabelsFit(topo, posMap, labelMax)`：把每个名字按「**节点正下方居中**」摆成一块矩形
+（起点 = 节点中心 + 半径 + `TOPO_NODE_LABEL_DISTANCE`，高 = 行数 × `TOPO_NODE_LABEL_LINE_H`），
+**两两不重叠、也不压到任何一个节点**就常显，否则还是「悬浮才显示」。
+- 纯几何判定，`posMap` 已经是画布像素坐标，和最终渲染同一套尺度。
+- 弹窗里恒常显（`show = isDialog || state.showNodeLabels`）。
+- 判定与渲染**共用** `TOPO_NODE_LABEL_DISTANCE` / `TOPO_NODE_LABEL_LINE_H` 两个常量 ——
+  早期分别在判定和 option 里写死 `6` / `13`，迟早会对不上。
+- 常显时表头那句「悬浮查看节点」要藏起来（`inlineNodeLabels` data 由 `renderTopoChart` 回写，
+  只在值变化时赋值，避免和 ResizeObserver 形成来回重排）。
+- 实测：NGINX（4 节点）常显；「应用」（15 节点）不常显。
+
 ## 4. 校验脚本（都在 `C:/Users/lenovo/AppData/Local/Temp/`）
 
 ```bash
@@ -119,18 +146,24 @@ cd "C:/Users/lenovo/AppData/Local/Temp" && \
 - `sp_verify.mjs`：A SFC 语法/模板；B `filterLinksByClusters` 边界（含「全等，不是包含」）；
   **C mock ↔ 组件拓扑的对应关系**（每个 fnode 全等于某个集群名、每条链路恰好归属一个组件、
   集群名全局唯一）；D **抠 `index.vue` 的 `<script>` 在 node 里跑**（echarts 换桩、
-  `./linkTopology` 换 `@/` 别名），断言默认组件 / 切组件 / 空态 / 重复点击不重算；
-  E `edgeLabelPlans` 的密度 / 预算 / 自适应截断边界 + 「锚点就是曲线中点、计划里没有旋转角」
-  + 真实数据上 NGINX 直出、应用不直出、容器云长 desc 被截断；
-  F SCSS 产物；G 源码防回归（含**不许出现 `symbol: 'none'`**、`symbolSize: 2`、逐字估宽，
-  以及**反向断言**：不许再出现 `label:{rotate}` / `lineAngle` / `edgeLabelAnchor` /
-  `TOPO_EDGE_LABEL_OFFSET` / `quadsOverlap` —— 用户否掉过的那版不许被"好心"加回来）。
+  `./linkTopology` 换 `@/` 别名），断言默认组件 / 切组件 / 空态 / 重复点击不重算 /
+  **折叠联动（收起一个集群链路少一条、全收起空态、一键收起展开、setOpenClusters 幂等）** /
+  `inlineLabelsFit` 六组边界；E `edgeLabelPlans` 的密度 / 预算 / 自适应截断边界 +
+  「锚点就是曲线中点、计划里没有旋转角」+ 真实数据上 NGINX 直出、应用不直出、容器云长 desc 被截断；
+  F SCSS 产物；G 源码防回归（含**不许出现 `symbol: 'none'`**、锚点 symbolSize 2 + 字号写在
+  `label.fontSize`、逐字估宽，以及**反向断言**：不许再出现 `label:{rotate}` / `lineAngle` /
+  `edgeLabelAnchor` / `TOPO_EDGE_LABEL_OFFSET` / `quadsOverlap` —— 用户否掉过的那版不许被"好心"加回来；
+  还要断言 `refreshTopo` 筛的是 `expandedClusters`、写 `openClusters` 都走 `setOpenClusters`、
+  按钮在搜索框左边）。
 - `sp_shot.mjs`：浏览器侧。登录 → `/tool/systemProfile` → 输入系统名查询 → 依次切组件，
   断言 chip / 表头计数 / 画布上的文字（读 `vm.linkChart.getZr().storage.getDisplayList()` 的
   `style.text`）/ 悬浮卡片里的 desc / 空态 / 顶部概览总数 / 控制台无报错；
   还断言**链路起点全等于集群名且能在左侧主机列表标题里找到**、**悬浮节点卡片标题就是集群名**、
-  **desc 过长时按宽度截断带省略号**、**旋转角真的落到渲染元素上**
-  （`style.textRotation` 是弧度，换算回度比对）、**放大弹窗里重新排版后角度也对**。
+  **desc 过长时按宽度截断带省略号（浮空卡片里给全文）**、**文字不旋转、锚点=曲线中点**、
+  **需求 1：稀疏图节点名常显 / 稠密图不常显 / 常显时不显示「悬浮查看节点」**、
+  **需求 2：点折叠头联动链路图、一键收起/展开、按钮文案随状态切换**。
+  ⚠️ 画布上的文字**有两类**（desc 标签 + 节点名），统计必须用 `splitTexts(texts, descs)` 分类
+  （desc 可能带省略号，不能直接用 `indexOf` 全等比较），否则断言会数错。
   **含开·关标签的 A/B 像素对照**：清空 `topo-edge-labels` 系列数据前后各数一次「有墨」像素
   （`(r+g+b)/3 < 200`），差值就是文字贡献（实测 750 vs 352）。
   ⚠️ 文字是**斜着画**的，像素对照的取样框要用方形的（140×120）才能兜住任意角度；
@@ -140,7 +173,8 @@ cd "C:/Users/lenovo/AppData/Local/Temp" && \
 核心像素被抗锯齿提亮（`#41678f` 实测读成 `(102,132,165)`），精确匹配必然假红。
 同理 `el.getBoundingRect()` 量 label 也没用 —— scatter 的 label 挂在 symbol 图形元素上，
 那个元素的 boundingRect 只算形状本身（2×2 的圆点），量出来永远 2px。
-量字号看 `el.style.fontSize` + `el.scale`，量角度看 `el.style.textRotation`。
+量字号看 `el.style.fontSize`（**文字实际就是这个字号，与元素 scale 无关**），
+量角度看 `el.style.textRotation`。
 
 ## 5. 其它零散约定
 
@@ -149,7 +183,8 @@ cd "C:/Users/lenovo/AppData/Local/Temp" && \
   ⚠️ **两段式 `xxx@yyy` 不削**（`BJ-DB@auth-adapt-mcd` 这种集群名）—— 早期版本只留 `@` 后面那段，
   结果图上叫 `auth-adapt-mcd`、主机列表里叫 `BJ-DB@auth-adapt-mcd`，又是一处对不上。
 - `TOPO_LABEL_MAX` = 24 / `TOPO_LABEL_MAX_DIALOG` = 26：集群名 19~30 字符，上限放宽后
-  38 个集群里只有 `BJ-DB@auth-service-switchadapt` 一个会被截。小图文字只在悬浮时出现（一次一条），放宽不会压字。
+  38 个集群里只有 `BJ-DB@auth-service-switchadapt` 一个会被截。小图文字现在**空间够就会常显**，
+  所以上限放宽不会造成"到处都写着字"。
 - 悬浮卡片宽度 268px（`.profile-hover` 的 `max-width`），`placeTopoHover` 按它估高度 —— 改 desc
   字号/行数要一起看。
 - 主机列表的列宽按 `tableWidth` 等比压缩，`ResizeObserver` 盯的是**卡片**不是面板（见 `observeHostsCard`）。

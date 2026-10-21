@@ -13,6 +13,7 @@
 - 后端：工具链 jdk17 `java -jar ruoyi-admin/target/ruoyi-admin.jar`，端口 8080。前端：`ruoyi-ui` 下 `npm run dev`，端口 80，proxy 到 8080。
 - ⚠️ **后台启动三个服务时命令尾部绝不能加 `&`**：包装 shell 会立即退出并把子进程（redis-server/java/npm）一起回收。表面症状极具误导性——后端日志停在 druid profile 不动、`tasklist` 里没有 java（看着像「启动慢」）。`> log 2>&1` 重定向可以有，`&` 不能有；正确做法是把整条命令直接交给后台任务机制常驻。Redis 被回收的连带后果是后端报 `RedisConnectionFailureException` 导致整个上下文启动失败。
 - ⚠️ **启动后端必须显式加 `--server.port=8080`**：WorkBuddy 的 shell 注入了 `SERVER__PORT=60044`（双下划线），被 Spring Boot 宽松绑定成 `server.port`，会抢 60044 导致 `Port 60044 was already in use` 启动失败。顺手 `unset SERVER__PORT` 更稳。
+- ⚠️ **WorkBuddy 的 bash shell 里 `java` 不在 PATH**（2026-10-21 实测 `java: command not found`）：启动后端必须用绝对路径 `C:/Users/lenovo/.codex/tools/ruoyi-vue/jdk17/jdk-17.0.19+10/bin/java.exe`。
 
 ## Element 弹窗两个通用坑（跨页面复用）
 - ⚠️ **`append-to-body` 的弹窗里，写在页面根节点的 CSS 变量继承不到**：弹窗 DOM 被挪到 `body` 下，不再是页面组件的后代。要用 `--xxx` 就在弹窗内容自己的包裹层上**再声明一份**，否则 `var(--xxx)` 静默失效（边框消失、颜色退回默认）。
@@ -43,15 +44,18 @@
 
 ## 工单甘特图（orderGantt）
 - ⚠️ **横坐标固定为「当天 18:00 → 次日 06:00」**（2026-10-16）：唯一判定处 = `ganttLayout.js` 的 `buildDayWindow(date)`（常量 `WINDOW_START_HOUR=18` / `WINDOW_END_HOUR=30`），「当天」= 页面弹窗的 `date`（**动态、不写死**，写死的只有 18/06 两个时刻）；`measureTimeAxis(items,maxTicks,timeWindow)` 第三参 / `buildLayout` 的 `options.window`，**不传就退回自适应**。窗口外工单被裁成 **width 0**（组件 computed `visibleBars` 过滤，仍计入 `stats.total`）—— ⚠️ 原来 `width += left` 没下限，会算出负宽度、`left>plotWidth` 还会撑出横向滚动条，已修。mock 日期走 `shiftMockDates` **单次正则回调**替换占位日期（两轮 split/join 会在「所选日期=占位值」时二次替换）。校验：`og_window_check.mjs` + `og_probe_window_live.mjs`，改横坐标必跑。
+- **气泡右侧三枚胶囊** = 总耗时 → 节点耗时 → **实际耗时**（2026-10-16 加第三枚）。实际耗时取 `hover.raw.actualCostTime`，**原样展示、不换算**（后端已带单位，形如 `"1.5小时"`），**空串/null → 「暂无」** ⇒ 这一枚**始终渲染、不加 `v-if`**；唯一计算处 = computed `hoverActualCostText`。⚠️ hover 类校验脚本每次 hover 前要先 `moveAway()` —— 420px 宽的气泡会盖住相邻行的柱子，鼠标落在气泡上触发不了 `onBarEnter`，会读到上一个工单（`og_probe_rest_live` 踩过）。
 - ⚠️ **矩形宽度按 mode 拆**：**MANUAL** 结束 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求）；**AUTO 例外**（2026-10-12 需求变更）= `max(beginTime+total_cost, node_detail 末位节点真正结束)`。判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`（AUTO 分支把 `computeNodeTimeline` 挂 `span.timeline` 供 buildLayout 复用）。**改这个页面前读 `REF-order-gantt.md`**（硬规则 9 条、气泡可达性、分组标签条 chip、柱体文字「完整或没有」、气泡占比进度条、弹窗**日期**过滤条 `date`、校验脚本）。
 - 配色（2026-09-24 用户要求对调）：**AUTO 自动 = 绿，MANUAL 手动 = 蓝**；变量名不变、只换值，但气泡 `.og-tip__mode` 徽标是**硬编码**的要手动跟。分组标签条量词是「**单**」不是「条」。
 - **AUTO 柱子暂停区域**（2026-10-12）：`node_detail` **先按 plan_start_time 升序排、再串行执行**（⚠️ 曾试过「按数组序」，被 0206（首节点 plan 在跨度外 → 整柱全暂停）证伪，别改回去）；`plan_start_time` = 「最早可开工」不是开始时间，null→外层 beginTime；纯函数 `computeNodeTimeline`（ganttLayout.js）挂 `bar.timeline`，暂停块 % 宽不参与布局。详见 `REF-order-gantt.md` §6。
 - 气泡明细表占比进度条调色板（`BAR_PALETTE`）：**不许有红 / 玫红 / 粉**（2026-10-08 用户要求，原第 2 色粉 `#fbd8e3`/`#f090b1` 撞告警红 → 换蓝 `#d6e6ff`/`#7ba7f5`）。现 6 色 = 绿蓝黄橙青紫；`og_syntax_check.mjs` 有按色相的防回归断言。
 
 ## 系统画像（systemProfile）
-- ⚠️ **右侧链路图 = 「当前组件下集群发出的链路」子集**（2026-10-16）：命中判定 `filterLinksByClusters` **只认 fnode（起点）**，不认 snode；而且是**全等 `fnode === 集群名`**，不是「包含」（用户原话「要用全等来判断」）。集群名 = 组件拓扑第二层 key = **链路节点名本身**（别再写 `集群名@角色`，那种名字主机列表里查不到，用户会问「为什么链路上多出这个东西」）。两份链路：`allLinks`（全量，**只给顶部概览「链路」总数**）+ `links`（筛选结果，图表/弹窗/表头计数用）；顶部概览**不跟着组件变**（用户确认）。改 mock 链路前先对一遍组件拓扑的 key，对不上就静默少几条。
-- ⚠️ **echarts 4.9 的 `lines` 系列不渲染 label** ⇒ 线段上的 desc 只能用 **scatter** 挂锚点，且 **`symbol:'none'` 会让元素根本不创建**（`SymbolDraw.symbolNeedsDraw` 里判了 `!== 'none'`），必须 `symbol:'circle'` + **`symbolSize: 2`**（Symbol 把图形建成 2×2 再按 symbolSize/2 缩放，2 才是缩放比 1，文字才是真实字号）。⚠️ **文字横着画、锚在曲线中点**（用户 2026-10-16 否掉了「顺着线段转」和「离线偏移」两版：竖线上的中文会竖排，读起来费劲）。「空间合适」= 节点≤14 且线段≤12 且每条带 desc 的线段都放得下 ≥60px；desc 过长**按线段实际宽度逐字估算后截断**（不能按「字数×常量」估，中英混排会忽长忽短，上限 200px），一条不满足就**全部**退回悬浮卡片（卡片里给全文）。
-- 细节（`refreshTopo`/`applyComponentLinks`/`disposeTopoChart`、空态两种文案、`topoLabelOf` 不许削两段式名字、校验脚本、像素断言要 A/B 不要 hex 匹配）→ **`REF-systemProfile.md`**。
+- ⚠️ **右侧链路图 = 「当前组件下、已展开集群发出的链路」子集**（2026-10-16）：命中判定 `filterLinksByClusters` **只认 fnode（起点）**，不认 snode；而且是**全等 `fnode === 集群名`**，不是「包含」（用户原话「要用全等来判断」）。集群名 = 组件拓扑第二层 key = **链路节点名本身**（别再写 `集群名@角色`，那种名字主机列表里查不到）。两份链路：`allLinks`（全量，**只给顶部概览「链路」总数**）+ `links`（筛选结果）；顶部概览**不跟着组件变**（用户确认）。改 mock 链路前先对一遍组件拓扑的 key，对不上就静默少几条。
+- ⚠️ **主机列表折叠状态和右侧链路图共用一份 `openClusters`**：链路筛选输入是 `expandedClusters`（已展开的集群），收起一个集群它的 fnode（节点+连线）就从图上消失；**默认全展开**；写 `openClusters` 一律走 `setOpenClusters()`（集合没变不重算）；`toggleAllClusters` 是切换语义（全展开→收，否则→展），按钮在搜索框左边。空态文案三种（没链路 / 全收起 / 展开的没匹配到）。
+- ⚠️ **小图节点名空间够就常显**：`inlineLabelsFit` 把每个名字按「节点正下方」摆矩形，两两不压、不压任何节点才常显；判定与渲染共用 `TOPO_NODE_LABEL_DISTANCE`/`TOPO_NODE_LABEL_LINE_H`；常显时表头藏掉「悬浮查看节点」。
+- ⚠️ **echarts 4.9 的 `lines` 系列不渲染 label** ⇒ 线段上的 desc 只能用 **scatter** 挂锚点，且 **`symbol:'none'` 会让元素根本不创建**（`SymbolDraw.symbolNeedsDraw` 里判了 `!== 'none'`），锚点用 `symbol:'circle'`+透明色。⚠️ **label 字号与元素 scale 无关**（zrender 的 `RectText` 只 applyTransform 矩形、不 setTransform）——改字号改 `label.fontSize`，别动 `symbolSize`。**文字横着画、锚在曲线中点**（用户否掉了「顺着线段转」和「离线偏移」两版）。「空间合适」= 节点≤14 且线段≤12 且每条带 desc 的线段放得下 ≥60px；desc 过长**按线段实际宽度逐字估算后截断**（不能按「字数×常量」估，中英混排会忽长忽短，上限 200px），一条不满足就**全部**退回悬浮卡片（卡片里给全文）。
+- 细节（`refreshTopo`/`applyComponentLinks`/`disposeTopoChart`、`setOpenClusters`/`inlineLabelsFit`、空态三种文案、`topoLabelOf` 不许削两段式名字、校验脚本、像素断言要 A/B 不要 hex 匹配）→ **`REF-systemProfile.md`**。
 
 ## 校验 / 协作
 - node 校验：`cd C:/Users/lenovo/AppData/Local/Temp && node --experimental-loader ./resolve_ext_loader.mjs ./test_xxx.mjs`；浏览器像素校验见技能 `ruoyi-ui-node-verify`。**dev server 日志认人**：根目录 `frontend.log` 是旧的，真正在写的是 `ruoyi-ui/npm-dev.log`。
