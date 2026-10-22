@@ -475,9 +475,40 @@ export function getOrderList(params) {
   });
 }
 
+/**
+ * 推送「额外变更支持人数」计算结果到企微（2026-10-22 用户需求）。
+ *
+ * ⚠️ 真实接口路径是**占位值**，还没跟后端对过 —— 联调前必须确认。
+ *    当前 USE_MOCK = true，走 mock 分支：把将要发送的参数打到控制台
+ *    （联调时肉眼核对请求体），停留 300ms 后模拟一次成功。
+ *
+ * 入参就是甘特图页「获取额外变更支持人数」算出来、并打印到控制台的那个 par：
+ *   { peopleNum: g, detail: [ 五个时间段各一项 ] }
+ * 原样透传，页面不做二次加工 —— 后台要什么字段以后在这里对齐。
+ *
+ * @param {Object} [params] par 对象
+ * @returns {Promise<{code, msg, data}>}
+ */
+export function pushExtraStaff(params) {
+  if (USE_MOCK) {
+    console.log('[mock] 推送到企微参数：', params)
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ code: 200, msg: "推送成功（mock）", data: null });
+      }, 300);
+    });
+  }
+  return request({
+    url: "/python/api/cicd/pushStaffToWecom",
+    method: "post",
+    data: params || {},
+  });
+}
+
 export { pickPayload };
 
 export default {
   getOrderList,
+  pushExtraStaff,
   pickPayload,
 };

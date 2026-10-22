@@ -33,6 +33,19 @@
           {{ invalidCount }} 条时间无效未展示
         </span>
       </div>
+
+      <!-- 「获取额外变更支持人数」（2026-10-21 用户需求，10-22 改名 + 结果弹窗）。
+           计算全部在纯函数 workloadCalc.js 里（和 ganttLayout 一样可 node 断言），
+           组件只负责触发；结果 par 打到控制台，同时弹出结果弹窗（人数 + 五段明细），
+           弹窗里可「推送到企微」。
+           数据源 = 当前弹窗里的工单 + 当前日期（横坐标窗口就是据此算的），
+           所以算出来和图上画出来的永远是同一批数据。 -->
+      <button class="og__calc" type="button" @click="handleCalcStaff">
+        <span class="og__calc__icon">
+          <i class="el-icon-s-management" />
+        </span>
+        <span>获取额外变更支持人数</span>
+      </button>
     </div>
 
     <!-- ==================== 空态 ==================== -->
@@ -277,6 +290,18 @@
         <div v-else class="og-tip__nodetail">该工单没有 detail</div>
       </div>
     </div>
+
+    <!-- ==================== 额外变更支持人数 · 结果弹窗（2026-10-22 用户需求） ====================
+         哑组件：接口调用、推送态、关闭时机都在这里（父组件）决定，弹窗只负责展示和抛事件。
+         不用 :visible.sync，只用 :visible + @close —— 推送进行中弹窗内部会拦关闭，
+         走 sync 的话 × 号会绕过那道拦截直接把对话框放掉。 -->
+    <workload-result-dialog
+      :visible="staffDialogVisible"
+      :result="staffResult"
+      :pushing="staffPushing"
+      @push="handleStaffPush"
+      @close="staffDialogVisible = false"
+    />
   </div>
 </template>
 
@@ -291,6 +316,11 @@ import {
   formatDuration,
   canFitLabel
 } from '../ganttLayout'
+// 额外支持人员计算（2026-10-21 用户需求，纯函数，见 workloadCalc.js 顶部规则说明）
+import { calcExtraStaff } from '../workloadCalc'
+// 推送到企微的接口（2026-10-22 用户需求；USE_MOCK 下是模拟成功）
+import { pushExtraStaff } from '@/api/tool/orderGantt'
+import WorkloadResultDialog from './WorkloadResultDialog'
 
 /** 刻度格数上限（标签数 = 格数 + 1） */
 const MAX_TICKS = 12
@@ -441,6 +471,7 @@ const LABEL_FALLBACK_CHAR_W = 6
 
 export default {
   name: 'OrderGantt',
+  components: { WorkloadResultDialog },
   props: {
     /**
      * 工单数组，与 orderRes.data 同形：
@@ -487,7 +518,14 @@ export default {
        * 免得在错误的估算位置闪一下。
        */
       tipSize: { w: 0, h: 0 },
-      closeTimer: null
+      closeTimer: null,
+      /* ---------------- 额外变更支持人数（2026-10-22 用户需求） ---------------- */
+      /** 算出的 par：{ peopleNum, detail: [五段] }；null = 还没算过 */
+      staffResult: null,
+      /** 结果弹窗是否打开 */
+      staffDialogVisible: false,
+      /** 正在推送到企微（请求进行中）—— 弹窗按钮态 + 推送中不许关弹窗 */
+      staffPushing: false
     }
   },
   computed: {
@@ -972,6 +1010,66 @@ export default {
     restBlockTitle(r) {
       return '暂停时间 ' + formatDuration(r.minutes)
     },
+
+    /* --------------------- 额外支持人员计算（2026-10-21 用户需求） --------------------- */
+
+    /**
+     * 「获取额外变更支持人数」（2026-10-21 用户需求，10-22 改名并加结果弹窗）。
+     *
+     * 规则（用户原话整理，实现全在 workloadCalc.js 的纯函数里）：
+     *   1. 18:00 - 06:00 拆五段（18-20 / 20-22 / 22-24 / 0-2 / 2-6）；
+     *   2. 每段统计 手动单数 x、手动耗时 y、自动单数 z、自动耗时 a（H）。
+     *      耗时 = **该时间段内的节点耗时**；跨段的工单在每个段内分别计算；
+     *   3. 手动数值 = max(x, y) / 4，自动数值 = max(z, a) / 10，段总分 = 两者之和；
+     *   4. 逻辑一：五段总分取最大 d，d > 2 起每超过 1 加 1 人 → e；
+     *      逻辑二：连续 N 段总分 > 1 就加 N - 1 人 → f；
+     *   5. g = max(e, f) 即最终额外需要增加的人数。
+     *
+     * 结果 par = { peopleNum: g, detail: [五个时间段各一项] }：
+     *   - 打到控制台（联调 / 核数用）；
+     *   - 弹结果弹窗展示，弹窗里可「推送到企微」。
+     *
+     * ⚠️ 数据源是**当前弹窗的工单**（props orders）和**当前日期**（props windowDate，
+     *    18:00-06:00 窗口就是由它算出来的）—— 算出来和图上是同一批数据。
+     */
+    handleCalcStaff() {
+      const par = calcExtraStaff(this.orders, this.windowDate)
+      if (!par) {
+        // 日期解析不出来时 buildDayWindow 返回 null —— 别拿 0 骗人
+        this.$message.warning('日期无效，无法计算')
+        return
+      }
+      console.log(par)
+      this.staffResult = par
+      this.staffDialogVisible = true
+    },
+
+    /**
+     * 结果弹窗的「推送到企微」（2026-10-22 用户需求）。
+     *
+     * 把算出来的 par **原样** POST 给后端（用户：「把打印的参数传进去」）。
+     * 真实接口还没对接 —— USE_MOCK 下 api 层模拟成功并把参数打到控制台；
+     * 接真实接口只改 api/tool/orderGantt.js 的 pushExtraStaff 一处。
+     *
+     * 成功 → 提示 + 关弹窗；失败 → 提示、**弹窗留着**（用户改天还能重推）。
+     * ⚠️ 不判 res.code：拦截器已拦掉业务错误，能 resolve 就当成功
+     *    （python 侧成功码可能是 0，判 === 200 会误杀，见 MEMORY.md 的教训）。
+     */
+    async handleStaffPush() {
+      if (this.staffPushing || !this.staffResult) {
+        return
+      }
+      this.staffPushing = true
+      try {
+        await pushExtraStaff(this.staffResult)
+        this.$message.success('推送成功')
+        this.staffDialogVisible = false
+      } catch (e) {
+        this.$message.error('推送失败，请重试')
+      } finally {
+        this.staffPushing = false
+      }
+    },
     /**
      * 量一段文字在**柱体字号**下的真实宽度（px）。
      *
@@ -1394,6 +1492,47 @@ export default {
 
   i {
     margin-right: 4px;
+  }
+}
+
+/* 「一键计算额外需要变更支持人员人数」按钮（2026-10-21 用户需求）：
+   放在页头最右侧、和图例同一行。刻意做成**描边小按钮**而不是实心主按钮 ——
+   它是个顺手点的工具，不该抢主操作的份量（页面的主操作「查看」在卡片上，不在这里）。
+   hover 时反色成实心，反馈足够明显。 */
+.og__calc {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--og-accent);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--og-accent);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    background: var(--og-accent);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  /* ⚠️ icon 必须 flex 居中（项目约定）—— 字体图标的行高会把基线拽偏 */
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+    font-size: 13px;
   }
 }
 

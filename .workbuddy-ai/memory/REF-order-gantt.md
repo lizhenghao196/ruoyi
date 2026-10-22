@@ -334,7 +334,61 @@
   （endTime 顺延到次日 00:05）、0205 由 10:00 改 **02:00**；node_detail 的 `plan_start_time`
   与注释里的时间一起改（三条各自演示的语义不变：中间暂停 / 长暂停 50 分钟 / 排队）。
 - 副作用（正面）：柱子变宽，**柱体文字从 2/8 条涨到 6/8 条**（原来只有 0111 和 0206 放得下）。
-- 校验：`og_window_check.mjs`（纯函数边界含跨月/跨年/闰年 + mock 端到端 + 源码接线，
+-   校验：`og_window_check.mjs`（纯函数边界含跨月/跨年/闰年 + mock 端到端 + 源码接线，
   **FAILURES 0**）；`og_probe_window_live.mjs`（真实浏览器：13 个刻度序列、日期带是今天/次日、
   柱子像素位置反算回时间与「开始时间 + 耗时」一致、无横纵滚动，**FAILURES 0**）。
   改了横坐标相关的东西，这两个脚本要一起跑。
+
+## 8. 一键计算额外需要变更支持人员人数（2026-10-21 新增）
+
+**需求**：甘特图页头加按钮「一键计算额外需要变更支持人员人数」，点击后按五段统计
+算 `par = { peopleNum, detail[] }` 打到控制台，供后端后续对接。
+
+- **纯函数模块 = `views/tool/orderGantt/workloadCalc.js`**（`calcExtraStaff(orders, date)`）：
+  窗口/时间线判定全部复用 ganttLayout（`buildDayWindow` / `resolveSpan`），**不另写一套**。
+  date 解析失败 → 返回 null（组件提示，不出假数据）。
+- **五段划分**（`WORKLOAD_SEGMENTS`）：18-20 / 20-22 / 22-24 / 0-2 / **2-6（4 小时）**，
+  从窗口起点累计、末段夹到 `win.end`。窗口本身还是 §7 的「当天 18:00 → 次日 06:00」。
+- **每段统计**：手动单数 x / 手动耗时 y、自动单数 z / 自动耗时 a（单位 H）。
+  - 耗时 = **该时间段内的节点耗时**；AUTO 走 `span.timeline.segments`（computeNodeTimeline
+    串行排好的执行段，**节点间暂停不计**）；MANUAL 没有 node_detail →
+    按工单区间 `[beginTime, beginTime+total_cost)`（resolveSpan 判定，和柱宽同源）。
+  - 一个工单跨多段 → 每段各算各的重合分钟数（`overlapMinutes` 求交，不切时间片）。
+  - 某段内零占用的工单不计单也不计耗时。
+- **数值**：`b = max(x,y)/4`、`c = max(z,a)/10`、段总分 = b+c；`MANUAL_DIVISOR=4` /
+  `AUTO_DIVISOR=10` 是导出常量。**显示值 round2，后续比较也用 round2 后的值**
+  （保持「打出来的人数」和「打印的分数」自洽）。
+- **两条逻辑**：d = 五段总分最大 ⇒ **逻辑一 `e = d > 2 ? Math.ceil(d - 2) : 0`**
+  （⚠️ 向上取整是**当前解读**：用户原话「d大于2则需要增加人手，每超过1则增加一人」，
+  取 ceil 才能保证 d=2.05 也出 1 人；若用户要 floor，只改 `Math.ceil` 一处，
+  `og_workload_check.mjs` 的 B5 有对应断言会红）。逻辑二：最长连续 N 段总分 > 1 ⇒
+  `f = N - 1`（N<2 为 0）。**g = max(e, f)** = `peopleNum`。
+- **按钮与接线**：`OrderGantt.vue` 的 `.og__head` 里、图例右侧（`.og__calc` 描边小按钮，
+  icon flex 居中）→ `handleCalcStaff()`：`calcExtraStaff(this.orders, this.windowDate)` →
+  `console.log(par)` + 打开结果弹窗。数据源 = 当前弹窗工单 + 当前日期（和图同源，
+  换日期/搜索后点的就是图上这批数据）。
+- **按钮文案**（2026-10-22 改名）：「**获取额外变更支持人数**」（原「一键计算额外需要变更支持人员人数」）。
+- **结果弹窗 = `components/WorkloadResultDialog.vue`**（2026-10-22 用户需求）：
+  - 哑组件（同 AtomConfirmDialog 规矩）：**不自己调接口**，`@push` / `@close` 抛给父组件；
+    接口调用、`staffPushing` 态、关闭时机全在 OrderGantt.vue 一处决定。
+  - 内容：结论行「额外需要变更支持人数: x人」+ 五段明细表（时间段 / 手动单数 /
+    手动耗时(H) / 自动单数 / 自动耗时(H) / 段总分）+ footer「关闭」「推送到企微」。
+  - ⚠️ **`:visible` 不要加 `.sync`**：弹窗内部「推送中不许关」靠 onClose 早退实现，
+    走 sync 的话 × 号会绕过拦截直接放掉对话框。
+  - ⚠️ **`--wrd-*` 变量声明在非 scoped 的 `.wrd-dialog` 上**：那是 body 内容与
+    footer slot 的**共同祖先**；声明在 `.wrd`（body 内）的话 footer 按钮拿不到
+    （scoped 下 slot 内容不是 `.wrd` 的后代）—— 和 append-to-body 变量继承是同一类坑。
+  - 弹窗本身也 `:close-on-click-modal="false"` + `:close-on-press-escape="false"`（防误触）。
+- **推送到企微**：`api/tool/orderGantt.js` 的 `pushExtraStaff(par)`，**POST**，
+  请求体就是打印的那个 par 原样透传；真实路径是占位（`/python/api/cicd/pushStaffToWecom`），
+  **USE_MOCK 下 mock 成功**（console.log 参数 + 300ms 延迟）。接真实接口只改这一处。
+  成功 → `$message.success('推送成功')` + 关弹窗；失败 → 提示、弹窗留着。
+  ⚠️ 不判 `res.code`（拦截器已拦业务错误；python 侧成功码可能是 0，判 === 200 会误杀）。
+- ⚠️ **`computeNodeTimeline` 排序坑**（本次连踩两次）：null 的 `plan_start_time`
+  取外层 beginTime **参与排序**，所以 0110/0111/0205 的真实执行序是
+  n1 → n3(null) → n2(晚 plan)，不是数组序；手推期望值必错，以脚本输出为准。
+- 校验：`og_workload_check.mjs`（接线 + 纯函数全规则 + mock 8 条端到端，FAILURES 0）；
+  `og_probe_workload_live.mjs`（真实浏览器：按钮位置/文案、点击后控制台 par 与
+  node 侧期望值 JSON 完全一致、结果弹窗结论行/表头/5 行、推送到企微成功并自动关窗、
+  关闭按钮、连点幂等 + 截图 `og_workload_head.png` / `og_workload_result.png`，FAILURES 0）。
+  联动回归：og_syntax_check / og_window_check 均 FAILURES 0。
