@@ -1047,7 +1047,11 @@ export default {
     /**
      * 结果弹窗的「推送到企微」（2026-10-22 用户需求）。
      *
-     * 把算出来的 par **原样** POST 给后端（用户：「把打印的参数传进去」）。
+     * 把算出来的 par **原样** POST 给后端（用户：「把打印的参数传进去」），
+     * 并**附带左上角日期选择器的日期**（字段名 `date`，'YYYY-MM-DD'，
+     * 用户 10-22 要求随 par 一起推过去）—— 就是横坐标窗口「当天 18:00 → 次日 06:00」
+     * 的那个当天，后端拿到能知道这是哪一晚的账。
+     *
      * 真实接口还没对接 —— USE_MOCK 下 api 层模拟成功并把参数打到控制台；
      * 接真实接口只改 api/tool/orderGantt.js 的 pushExtraStaff 一处。
      *
@@ -1061,7 +1065,12 @@ export default {
       }
       this.staffPushing = true
       try {
-        await pushExtraStaff(this.staffResult)
+        const payload = {
+          ...this.staffResult,
+          // 左上角日期选择器的值（弹窗过滤条那个，'YYYY-MM-DD'）
+          date: this.windowDate
+        }
+        await pushExtraStaff(payload)
         this.$message.success('推送成功')
         this.staffDialogVisible = false
       } catch (e) {

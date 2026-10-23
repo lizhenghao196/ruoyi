@@ -482,11 +482,12 @@ export function getOrderList(params) {
  *    当前 USE_MOCK = true，走 mock 分支：把将要发送的参数打到控制台
  *    （联调时肉眼核对请求体），停留 300ms 后模拟一次成功。
  *
- * 入参就是甘特图页「获取额外变更支持人数」算出来、并打印到控制台的那个 par：
- *   { peopleNum: g, detail: [ 五个时间段各一项 ] }
+ * 入参 = 甘特图页「获取额外变更支持人数」算出来、并打印到控制台的那个 par，
+ * **外加左上角日期选择器的日期**（字段名 `date`）：
+ *   { peopleNum: g, detail: [ 五个时间段各一项 ], date: 'YYYY-MM-DD' }
  * 原样透传，页面不做二次加工 —— 后台要什么字段以后在这里对齐。
  *
- * @param {Object} [params] par 对象
+ * @param {Object} [params] par + date
  * @returns {Promise<{code, msg, data}>}
  */
 export function pushExtraStaff(params) {

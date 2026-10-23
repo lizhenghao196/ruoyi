@@ -379,8 +379,10 @@
     footer slot 的**共同祖先**；声明在 `.wrd`（body 内）的话 footer 按钮拿不到
     （scoped 下 slot 内容不是 `.wrd` 的后代）—— 和 append-to-body 变量继承是同一类坑。
   - 弹窗本身也 `:close-on-click-modal="false"` + `:close-on-press-escape="false"`（防误触）。
-- **推送到企微**：`api/tool/orderGantt.js` 的 `pushExtraStaff(par)`，**POST**，
-  请求体就是打印的那个 par 原样透传；真实路径是占位（`/python/api/cicd/pushStaffToWecom`），
+- **推送到企微**：`api/tool/orderGantt.js` 的 `pushExtraStaff(payload)`，**POST**，
+  请求体 = 打印的 par **+ `date`**（左上角日期选择器的值，'YYYY-MM-DD'，
+  2026-10-22 用户要求「把左上角的日期也传过去」；即 `{ ...par, date: windowDate }`）；
+  真实路径是占位（`/python/api/cicd/pushStaffToWecom`），
   **USE_MOCK 下 mock 成功**（console.log 参数 + 300ms 延迟）。接真实接口只改这一处。
   成功 → `$message.success('推送成功')` + 关弹窗；失败 → 提示、弹窗留着。
   ⚠️ 不判 `res.code`（拦截器已拦业务错误；python 侧成功码可能是 0，判 === 200 会误杀）。
