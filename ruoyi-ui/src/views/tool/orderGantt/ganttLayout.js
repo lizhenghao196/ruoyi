@@ -17,8 +17,11 @@
  *      见 `buildDayWindow`；「当天」由页面日期选择器现算，不写死）。
  *      不传窗口时才退回自适应（12 小时 ~ 3 天都能画），刻度步长从候选表里挑，
  *      保证刻度数不超过 maxTicks。
- *   4. **柱体上的文字要么完整、要么不显示**（`canFitLabel`）：放不下就整条不写，
- *      不做截断 —— 半截工单号（后四位）看着像另一个东西，完整信息在悬浮气泡里。
+ *   4. **柱体上的工单号统一显示，放不下就截断加省略号**（`truncateLabel`，
+ *      2026-10-23 用户要求，取代 09-23 的「完整或没有」）：截断从**头部保留** ——
+ *      工单号形如 `CHGU-20260917-0206`，前缀是系统/批次信息，
+ *      用户原话「主要是能看到前面的系统」，所以截出来是 `CHGU-20260917-0…`
+ *      而不是后四位或 `…0206`。
  *
  * 行分配算法
  *   贪心区间装箱：把工单按开始时间排序，逐个塞进「最后一个 bar 已经结束」的一行；
@@ -1116,12 +1119,8 @@ export function barTextCapacity(barWidth) {
 /**
  * 柱体上的工单号能不能**完整**显示。
  *
- * 用户明确要求：**不能完全展示就不展示**。原来的做法是「宽 148 以上写全号、
- * 52~148 写后四位、再窄不写」—— 后四位看着像另一个工单号，信息量反而更低，
- * 而且 `text-overflow: ellipsis` 还会把长号截成「CHGU-20260909-0…」，
- * 那种半截号比不写更容易误读。完整信息本来就在悬浮气泡里。
- *
- * 文字宽度由组件用 canvas 量出来（纯函数量不了字体），这里只管判定。
+ * 这是 `truncateLabel` 内部第一步的快路径判定（完整放得下就直接用原文），
+ * 也保留给校验脚本做「完整显示」的语义断言用。
  *
  * @param {number} textWidth 文字的真实宽度（px）
  * @param {number} barWidth 矩形宽度（px）
@@ -1132,6 +1131,73 @@ export function canFitLabel(textWidth, barWidth) {
     return false
   }
   return t + BAR_LABEL_SAFE <= barTextCapacity(barWidth)
+}
+
+/** 截断省略号 —— 工单号放不下时加在末尾的那个字符 */
+export const BAR_LABEL_ELLIPSIS = '…'
+/**
+ * 量不出文字宽度时的兜底**每字宽度**（px）—— 与 OrderGantt.vue 的同名常量同源，
+ * 组件直接 import 这里，避免「改那边忘了改这里」。
+ * 取 6px 是刻意偏大的：宁可多截掉几个字，也不能让省略号顶到矩形外面去。
+ */
+export const BAR_LABEL_FALLBACK_CHAR_W = 6
+
+/**
+ * 柱体上的工单号文字 —— **统一显示，放不下就截断加省略号**。
+ *
+ * 2026-10-23 用户要求（原话）：「甘特图柱子上都显示出工单号，看起来统一一点；
+ * 显示不完整就用省略号显示，主要是能看到前面的系统」。
+ * 它取代了 09-23 的「要么完整、要么不显示」—— 那条规则下大量窄矩形光秃秃的，
+ * 用户要的是「每根柱子都有字、宽的上全号、窄的用省略号」。
+ *
+ * 三条规则：
+ *   1. **截断保留头部**：工单号前缀（`CHGU-20260917-0206` 的 `CHGU-20260917-0`）
+ *      是系统/批次信息，用户点名要能看到，所以从第 0 个字开始保留。
+ *   2. **至少保留 1 个字符**：只放一个省略号不携带任何信息，不如不显示
+ *      （返回 ''，组件据此不渲染这个 span）。
+ *   3. **容量口径与 CSS 一致**：`barTextCapacity`（窄矩形无内边距）再扣
+ *      `BAR_LABEL_SAFE`，和 `.og-bar` 的 `padding: 0 7px` / `is-narrow` 对齐。
+ *
+ * 文字宽度由调用方注入 `measure`（组件用 canvas.measureText 封装，纯函数量不了字体）。
+ * 找不到最长前缀时用**二分**：`measure(前缀 + '…')` 随前缀变长单调递增，
+ * 所以 O(log n) 次量宽就够（n = 工单号长度，通常 ~18）。
+ *
+ * @param {string} text 工单号
+ * @param {(s:string)=>number} measure 测宽函数；传 null/非函数时按每字 6px 兜底估算
+ * @param {number} barWidth 矩形宽度（px）
+ * @returns {string} 要显示的文字；一个字符都放不下时返回 ''（组件不渲染）
+ */
+export function truncateLabel(text, measure, barWidth) {
+  const s = String(text == null ? '' : text)
+  if (!s) {
+    return ''
+  }
+  const cap = barTextCapacity(barWidth) - BAR_LABEL_SAFE
+  if (cap <= 0) {
+    return ''
+  }
+  const measureOf =
+    typeof measure === 'function' ? measure : (t) => t.length * BAR_LABEL_FALLBACK_CHAR_W
+  // 完整放得下 → 原文（和 canFitLabel 同一口径，快路径省掉二分）
+  if (measureOf(s) <= cap) {
+    return s
+  }
+  // 二分找「能放下的最长前缀 + 省略号」。下界从 1 起（见规则 2）；
+  // 上界是 s.length - 1（k = s.length 就是原文，上面已判定放不下）。
+  let lo = 1
+  let hi = s.length - 1
+  let best = ''
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1
+    const cand = s.slice(0, mid) + BAR_LABEL_ELLIPSIS
+    if (measureOf(cand) <= cap) {
+      best = cand
+      lo = mid + 1
+    } else {
+      hi = mid - 1
+    }
+  }
+  return best
 }
 
 /* ------------------------------------------------------------- 格式化 */

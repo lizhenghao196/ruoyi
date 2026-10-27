@@ -314,7 +314,8 @@ import {
   buildDayWindow,
   formatDateTimeShort,
   formatDuration,
-  canFitLabel
+  truncateLabel,
+  BAR_LABEL_FALLBACK_CHAR_W
 } from '../ganttLayout'
 // 额外支持人员计算（2026-10-21 用户需求，纯函数，见 workloadCalc.js 顶部规则说明）
 import { calcExtraStaff } from '../workloadCalc'
@@ -445,8 +446,9 @@ const BAR_PALETTE = [
 ]
 
 /* ------------------------------------------------------- 柱体文字量宽
- * 柱体上的工单号「要么完整、要么不显示」（用户明确要求），所以必须知道文字的
- * **真实宽度**，不能拿柱体宽度猜。
+ * 柱体上的工单号「统一显示，放不下截断加省略号」（2026-10-23 用户要求，
+ * 取代 09-23 的「完整或没有」），所以必须知道文字的**真实宽度**才能定截断点，
+ * 不能拿柱体宽度猜。
  * 量法：canvas.measureText —— 纯计算，不碰 DOM。
  *   为什么不用「塞一个隐藏节点量 offsetWidth」：柱体最多上百根，每根都要量一次，
  *   每次「改文字 + 读宽度」都会强制同步重排，100 条就是 100 次重排，
@@ -464,10 +466,10 @@ const LABEL_LETTER_SPACING = 0.2
 const LABEL_FONT_FALLBACK =
   'Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif'
 /**
- * 量不出文字宽度时的兜底**每字宽度**（px）。
- * 取 6px 是刻意偏大的：宁可少显示几条，也不能让工单号被截成半截 —— 那正是这次要修的表现。
+ * 量不出文字宽度时的兜底**每字宽度**（px）—— 从 ganttLayout 导入，
+ * 和 truncateLabel 内部「没有量具」时的兜底估算同源（6px 刻意偏大，
+ * 宁可多截几个字，也不能让省略号顶到矩形外面）。
  */
-const LABEL_FALLBACK_CHAR_W = 6
 
 export default {
   name: 'OrderGantt',
@@ -955,21 +957,22 @@ export default {
     /* ------------------------------ 渲染辅助 ------------------------------ */
 
     /**
-     * 矩形上显示的文字 —— **只显示完整的工单号**。
+     * 矩形上显示的文字 —— **统一显示工单号，放不下截断加省略号**。
      *
-     * 用户要求：柱体宽度不够时**不显示**，而不是截断。所以这里没有「写后四位」的
-     * 中间档了（原来 52~148px 写后四位）：后四位和完整工单号看着像两个不同的东西，
-     * 而且 `text-overflow: ellipsis` 会把长号截成「CHGU-20260909-0…」，
-     * 半截号比不写更容易误读。完整信息在悬浮气泡里，鼠标一放就有。
+     * 2026-10-23 用户要求（原话）：「甘特图柱子上都显示出工单号，看起来统一一点；
+     * 显示不完整就用省略号显示，主要是能看到前面的系统」。
+     * 它取代了 09-23 的「完整或没有」（那时放不下就整条不写、秃一片）——
+     * 截断逻辑（保留头部 + 二分找最长前缀）全在纯函数 truncateLabel 里，
+     * 这里只负责把 canvas 测宽函数注入进去。
      *
-     * 判定 = 文字真实宽度（canvas 量）+ 矩形可用宽度（纯函数算），都在 canFitLabel 里。
+     * 返回 '' = 一个字符都放不下（极窄柱），模板的 v-if 据此不渲染这个 span。
      */
     barLabel(bar) {
       const id = bar.orderId
       if (!id) {
         return ''
       }
-      return canFitLabel(this.textWidth(id), bar.width) ? id : ''
+      return truncateLabel(id, (s) => this.textWidth(s), bar.width)
     },
     /**
      * 柱子里要画的**暂停区域块**（2026-10-12 用户要求）。
@@ -1101,7 +1104,7 @@ export default {
       let w = ctx ? ctx.measureText(s).width + LABEL_LETTER_SPACING * s.length : 0
       if (!(w > 0)) {
         // 量不出来（极端环境没有 canvas）：给个偏大的估算，宁可少显示也不截断
-        w = LABEL_FALLBACK_CHAR_W * s.length
+        w = BAR_LABEL_FALLBACK_CHAR_W * s.length
       }
       this._textWidthCache.set(s, w)
       return w
@@ -1803,6 +1806,13 @@ export default {
     color: var(--og-bar-text);
     white-space: nowrap;
     overflow: hidden;
+    /* 省略号是 2026-10-23 用户点名要的（「显示不完整就用省略号显示」）。
+       正常由 JS 的 truncateLabel 按 canvas 实测宽度截好（保留头部前缀），
+       这里是第二道保险：字体度量有亚像素误差时，让浏览器自己收尾，
+       截断形态和 JS 截出来的一致（都是「前缀 + …」）。
+       ⚠️ min-width: 0 必须留：flex 子项默认 min-width:auto（内容宽），
+       少了它 span 宁可撑破柱子也不收缩，ellipsis 永远不触发。 */
+    min-width: 0;
     text-overflow: ellipsis;
     /* 压住暂停区斜纹块（绝对定位）：文字是后写的 flex 子项，
        但没有定位时也可能被绝对定位的兄弟盖住，显式抬一层最稳。 */
