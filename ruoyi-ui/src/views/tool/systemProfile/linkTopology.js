@@ -70,37 +70,72 @@ export function normalizeLinks(raw) {
 }
 
 /**
- * 按「组件下的集群名」筛选链路（纯函数）。
+ * 按「组件下的集群名」筛链路 —— **顺着链路一路向下游展开**（纯函数）。
  *
- * 命中规则：**只看链路的起点**（fnode / normalizeLinks 之后的 source），并且是**全等**判断 ——
- * `fnode === 集群名` 才算命中（不是「包含」）。
- * 节点名就是集群名本身（如 bjb-dasp-nginx-kzx），所以全等等价于
- * 「这条链路的起点就是这个集群」，一个集群名对应链路里一个节点，不会出现
- * `集群名@角色` 这种主机列表里查不到的名字。
+ * 命中分两步：
+ *   1. **定根**：传入的集群名就是根集合，起点要**全等**命中才算（不是「包含」）；
+ *   2. **展开下游**：从根出发沿链路做可达性遍历 —— 根的直接下游、下游的下游、
+ *      再下游……全部收进集合，最后把所有「起点落在集合里」的链路原样返回。
  *
- * 为什么不看终点（snode）：终点是链路的下游，选上游组件时不该把下游组件的链路
- * 一并带出来（选 NGINX 就该只看到 NGINX 发出的链路，而不是所有指向 NGINX 的链路）。
+ * 为什么不能只看第一层：真实链路是一条链，A→B 之后往往还有 B→C、C→D
+ * （例如 MYSQL → CANAL → KAFKA → ES）。只看 `fnode === 集群名` 的话，
+ * 选中 MYSQL 只能看到 MYSQL→CANAL 这一段，后半条链直接断掉；用户要的是
+ * 「这个 key 连同它下游的所有连线都画出来」（孙子节点、曾孙节点都算）。
+ *
+ * 仍然**不看终点**：指向集合内的上游边不画 —— 选 MYSQL 不该把 NGINX→MYSQL
+ * 也带出来（那是 NGINX 组件的视角）。所以这里是「向前的传递闭包」，不是「双向连通块」。
+ *
+ * 环不会死循环：visited 兼作可达集合，进过一次的节点不再入队
+ * （HADOOP 的 bjb↔hfa 双向边这类数据很常见）。
  *
  * 一个集群名都拿不到（没选组件 / 组件下没有集群）时返回空数组 —— 调用方按
  * 「无链路」渲染占位，不要退回「显示全部」。
  *
  * @param {Array<{source:string,target:string}>} links normalizeLinks 的输出
- * @param {Array<string>} clusterNames 选中组件下的集群名（= 组件拓扑第二层的 key）
+ * @param {Array<string>} clusterNames 根节点名（组件拓扑第二层的 key / 集群关系里的节点名）
  * @returns {Array} 命中的链路（保持入参顺序）
  */
 export function filterLinksByClusters(links, clusterNames) {
   const list = Array.isArray(links) ? links : [];
-  // 集群名来自对象 key，两侧可能带空白，先 trim 再参与全等比较
+  // 根节点名来自对象 key / 数组元素，两侧可能带空白，先 trim 再参与全等比较
   const names = (Array.isArray(clusterNames) ? clusterNames : [])
     .map((n) => (n == null ? "" : String(n)).trim())
     .filter(Boolean);
   if (!names.length) return [];
+
+  // 邻接表：起点 -> 下游终点[]。只用于「往下游走」，链路对象本身不改
+  const outMap = new Map();
+  list.forEach((link) => {
+    if (!link) return;
+    const from = link.source == null ? "" : String(link.source);
+    const to = link.target == null ? "" : String(link.target);
+    if (!from || !to) return;
+    const outs = outMap.get(from);
+    if (outs) outs.push(to);
+    else outMap.set(from, [to]);
+  });
+
+  // 迭代 BFS（真实链路节点数可达数百，递归有栈溢出风险）
+  const visited = new Set(names);
+  const queue = names.slice();
+  let head = 0;
+  while (head < queue.length) {
+    const outs = outMap.get(queue[head]);
+    head += 1;
+    if (!outs) continue;
+    outs.forEach((to) => {
+      if (visited.has(to)) return; // 环 / 重复下游：展开过就不再入队
+      visited.add(to);
+      queue.push(to);
+    });
+  }
+
   return list.filter((link) => {
     if (!link) return false;
     // fnode 侧不做 trim / 大小写折叠：要的就是「逐字相同」，宽松匹配会
     // 把「长得像但其实是另一个集群」的链路放进来，那正是要避免的
     const from = link.source == null ? "" : String(link.source);
-    return from !== "" && names.indexOf(from) >= 0;
+    return from !== "" && visited.has(from);
   });
 }
 

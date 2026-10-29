@@ -269,7 +269,9 @@
         </section>
 
         <!-- 链路关系图：瀑布拓扑（节点为原始节点名、链路为边，自上而下分层）。
-             图里只画「选中组件下集群发出的链路」—— 组件拓扑的集群名就是链路起点节点名的前缀，
+             画的是「选中组件下的节点，以及它们下游的整条链」—— 以组件拓扑的集群 key
+             和集群关系里的节点为根，沿链路一路展开下游（根→子→孙→……），
+             所以 MYSQL 下能看到 MYSQL→CANAL→KAFKA→ES 这种多层链路；
              切换组件时整张图重算；该组件一条链路都匹配不上时走下面的「无链路」占位 -->
         <section class="profile-link">
           <header class="profile-link__head">
@@ -956,14 +958,42 @@ export default {
       return this.filteredGroups.reduce((s, g) => s + g.hosts.length, 0);
     },
     // 当前选中组件下的集群名（= 组件拓扑第二层的 key，也是主机列表里 profile-cluster__title
-    // 显示的那个名字）。它同时是「链路筛选的命中词」：链路起点节点名里带这些名字就算这个组件的链路
+    // 显示的那个名字）。它是「链路图的根节点」来源之一：链路起点全等命中某个名字，
+    // 就把这条链路连同它下游的整条链都画出来（见 filterLinksByClusters）
     activeClusters() {
       const comp = this.componentList.find(
         (c) => c.name === this.activeComponent
       );
       return comp ? comp.clusters.map((c) => c.name) : [];
     },
-    // **已展开**的集群名 —— 右侧链路图只画这些集群发出的链路。
+    // 集群关系里的节点名（如 bjb-dasp-mysql-kzx）—— 链路图根节点的**第二个来源**。
+    // 生产上「主机列表里没有这个集群、但链路里确实有它发出的线」是常态（组件拓扑来自
+    // 主机采集，集群关系来自链路侧），只按组件拓扑的 key 找根，这些链路会被整条漏掉。
+    // 所以关系里列出的节点也当根（它们没有折叠面板，恒参与筛选）
+    relationNodeNames() {
+      const groups = this.relationGroups || [];
+      const out = [];
+      groups.forEach((g) => {
+        const nodes = Array.isArray(g && g.nodes) ? g.nodes : [];
+        nodes.forEach((n) => {
+          const name = n == null ? "" : String(n).trim();
+          if (name && out.indexOf(name) < 0) out.push(name);
+        });
+      });
+      return out;
+    },
+    // 链路图的根节点集合 = 已展开的集群 + 集群关系里的节点。
+    // ⚠️ 组件拓扑里有集群、但一个都没展开时直接给空 —— 保持「全部收起 ⇒ 无链路」的老语义，
+    // 否则关系节点会把链路图撑住，用户收起全部却还能看到图，很困惑
+    linkRootNames() {
+      if (this.activeClusters.length && !this.expandedClusters.length) return [];
+      const roots = this.expandedClusters.slice();
+      this.relationNodeNames.forEach((n) => {
+        if (roots.indexOf(n) < 0) roots.push(n);
+      });
+      return roots;
+    },
+    // **已展开**的集群名 —— 右侧链路图以这些集群为根、展开它们下游的整条链。
     // 主机列表折叠面板的展开状态就是这个数组，两边共用一份状态，天然联动
     expandedClusters() {
       const all = this.activeClusters;
@@ -1078,12 +1108,14 @@ export default {
       this.refreshTopo();
     },
 
-    // 按**当前展开的集群**筛链路 + 重建瀑布拓扑。
-    // 组件拓扑的集群名 → 链路起点（fnode）命中词；集群收起了，它的链路就不画
+    // 按**当前根节点**筛链路 + 重建瀑布拓扑。
+    // 根节点 = 已展开的集群 + 集群关系里的节点；筛选不是「只留第一层」，
+    // 而是从根出发沿链路一路展开下游（根 → 子 → 孙 → ……），整条链都画出来
+    // （见 filterLinksByClusters）。集群收起了，以它为根的那条链就不画
     // （主机列表的折叠状态和这里共用 openClusters，所以两边是联动的）。
     // 筛选/建图都只在展示层做，接口返回的链路数据一个字节没动
     refreshTopo() {
-      this.links = filterLinksByClusters(this.allLinks, this.expandedClusters);
+      this.links = filterLinksByClusters(this.allLinks, this.linkRootNames);
       // 节点位置只由链路关系决定（分层 + 层内重心排序），没有任何需要特殊标记的节点
       this.topo = buildTopology(this.links, {
         colGap: TOPO_COL_GAP_MIN,
