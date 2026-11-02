@@ -329,9 +329,30 @@
             <div
               v-if="topoHover && topoHover.mode === 'inline'"
               class="profile-hover"
+              :class="{ 'is-pinned': topoHover.pinned }"
               :style="{ left: topoHover.left + 'px', top: topoHover.top + 'px' }"
             >
-              <div class="profile-hover__title">{{ topoHover.title }}</div>
+              <div class="profile-hover__head">
+                <div class="profile-hover__title">{{ topoHover.title }}</div>
+                <template v-if="topoHover.pinned">
+                  <button
+                    type="button"
+                    class="profile-hover__act"
+                    title="复制卡片内容"
+                    @click.stop="copyTopoHover(topoHover)"
+                  >
+                    <i class="el-icon-document-copy" />
+                  </button>
+                  <button
+                    type="button"
+                    class="profile-hover__act"
+                    title="取消固定（Esc）"
+                    @click.stop="unpinTopoHover"
+                  >
+                    <i class="el-icon-close" />
+                  </button>
+                </template>
+              </div>
               <div v-if="topoHover.meta.length" class="profile-hover__meta">
                 <span v-for="(m, i) in topoHover.meta" :key="i">{{ m }}</span>
               </div>
@@ -339,6 +360,14 @@
               <p v-if="topoHover.desc" class="profile-hover__desc">
                 {{ topoHover.desc }}
               </p>
+              <!-- 固定态/跟随态都留一行提示：高度不变，卡片位置不会跳 -->
+              <div class="profile-hover__foot">
+                {{
+                  topoHover.pinned
+                    ? "已固定 · 可选中复制，按 Esc 取消"
+                    : "单击固定后可选中复制"
+                }}
+              </div>
             </div>
           </div>
           <!-- 没有可画的链路时走这里，两种原因文案分开：
@@ -447,15 +476,43 @@
           <div
             v-if="topoHover && topoHover.mode === 'dialog'"
             class="profile-hover"
+            :class="{ 'is-pinned': topoHover.pinned }"
             :style="{ left: topoHover.left + 'px', top: topoHover.top + 'px' }"
           >
-            <div class="profile-hover__title">{{ topoHover.title }}</div>
+            <div class="profile-hover__head">
+              <div class="profile-hover__title">{{ topoHover.title }}</div>
+              <template v-if="topoHover.pinned">
+                <button
+                  type="button"
+                  class="profile-hover__act"
+                  title="复制卡片内容"
+                  @click.stop="copyTopoHover(topoHover)"
+                >
+                  <i class="el-icon-document-copy" />
+                </button>
+                <button
+                  type="button"
+                  class="profile-hover__act"
+                  title="取消固定（Esc）"
+                  @click.stop="unpinTopoHover"
+                >
+                  <i class="el-icon-close" />
+                </button>
+              </template>
+            </div>
             <div v-if="topoHover.meta.length" class="profile-hover__meta">
               <span v-for="(m, i) in topoHover.meta" :key="i">{{ m }}</span>
             </div>
             <p v-if="topoHover.desc" class="profile-hover__desc">
               {{ topoHover.desc }}
             </p>
+            <div class="profile-hover__foot">
+              {{
+                topoHover.pinned
+                  ? "已固定 · 可选中复制，按 Esc 取消"
+                  : "单击固定后可选中复制"
+              }}
+            </div>
           </div>
         </div>
       </div>
@@ -805,10 +862,13 @@ export default {
   mounted() {
     // 窗口尺寸变化时重绘链路关系图
     window.addEventListener("resize", this.handleResize);
+    // Esc 取消固定的悬浮卡片（和「点空白处」「再点一次」等价）
+    window.addEventListener("keydown", this.onTopoKeydown);
   },
 
   beforeDestroy() {
     window.removeEventListener("resize", this.handleResize);
+    window.removeEventListener("keydown", this.onTopoKeydown);
     if (this._topoRedrawTimer) {
       clearTimeout(this._topoRedrawTimer);
       this._topoRedrawTimer = null;
@@ -982,16 +1042,14 @@ export default {
       });
       return out;
     },
-    // 链路图的根节点集合 = 已展开的集群 + 集群关系里的节点。
-    // ⚠️ 组件拓扑里有集群、但一个都没展开时直接给空 —— 保持「全部收起 ⇒ 无链路」的老语义，
-    // 否则关系节点会把链路图撑住，用户收起全部却还能看到图，很困惑
+    // 链路图的根节点 = **已展开的集群**（组件拓扑第二层的 key）。
+    // ⚠️ 绝不能把「集群关系里的节点」直接并进来：那份数据不随折叠状态变化，
+    // 并进来以后「收起某个集群，右侧链路图跟着变」会彻底失效 —— 收起一个，图上一条不少
+    // （因为关系节点还全在）；一键收起之后只展开一个，又会瞬间显示全部链路。
+    // 关系节点只在「组件拓扑里一个集群都没有」时兜底（生产上组件粒度不同 / 主机采集缺失）
     linkRootNames() {
-      if (this.activeClusters.length && !this.expandedClusters.length) return [];
-      const roots = this.expandedClusters.slice();
-      this.relationNodeNames.forEach((n) => {
-        if (roots.indexOf(n) < 0) roots.push(n);
-      });
-      return roots;
+      if (this.activeClusters.length) return this.expandedClusters.slice();
+      return this.relationNodeNames.slice();
     },
     // **已展开**的集群名 —— 右侧链路图以这些集群为根、展开它们下游的整条链。
     // 主机列表折叠面板的展开状态就是这个数组，两边共用一份状态，天然联动
@@ -1109,13 +1167,41 @@ export default {
     },
 
     // 按**当前根节点**筛链路 + 重建瀑布拓扑。
-    // 根节点 = 已展开的集群 + 集群关系里的节点；筛选不是「只留第一层」，
+    // 根节点 = 已展开的集群（组件拓扑的 key）；筛选不是「只留第一层」，
     // 而是从根出发沿链路一路展开下游（根 → 子 → 孙 → ……），整条链都画出来
     // （见 filterLinksByClusters）。集群收起了，以它为根的那条链就不画
     // （主机列表的折叠状态和这里共用 openClusters，所以两边是联动的）。
     // 筛选/建图都只在展示层做，接口返回的链路数据一个字节没动
     refreshTopo() {
-      this.links = filterLinksByClusters(this.allLinks, this.linkRootNames);
+      const roots = this.linkRootNames;
+      let links = filterLinksByClusters(this.allLinks, roots);
+      // 兜底：**集群全部展开**却一条链路都没命中 —— 说明组件拓扑的集群 key 与链路里的
+      // 节点名口径对不上（组件拓扑来自主机采集、链路来自链路侧，生产上两者不一定同源）。
+      // 这时才退回用「集群关系」里的节点当根，否则整张图会空着。
+      // ⚠️ 条件必须严格：只在「全展开 + 零命中」时兜底。部分展开时兜底会把
+      // 「收起集群 ⇒ 图上少一块」的效果又抹平（关系节点是恒定集合，不随折叠变）
+      const allExpanded =
+        this.activeClusters.length > 0 &&
+        this.expandedClusters.length === this.activeClusters.length;
+      if (!links.length && allExpanded && this.relationNodeNames.length) {
+        const byRelation = filterLinksByClusters(
+          this.allLinks,
+          this.relationNodeNames
+        );
+        if (byRelation.length) links = byRelation;
+      }
+      // 收起一个集群，它**发出的**连线一律不画 —— 即使它还在闭包里。
+      // 为什么会在闭包里：传递闭包是「从根往下游走」，若别的集群指向它
+      // （如 hfa→bjb，bjb 收起后仍被 hfa 可达），它的出边按闭包语义还会保留，
+      // 用户点了收起却一条不少，看着就是「点了没反应」。这里按折叠状态再兜一刀，
+      // 保证「收起哪个集群，它的连线就消失」这个直觉成立
+      const collapsed = this.activeClusters.filter(
+        (n) => this.openClusters.indexOf(n) < 0
+      );
+      if (collapsed.length) {
+        links = links.filter((l) => collapsed.indexOf(l.source) < 0);
+      }
+      this.links = links;
       // 节点位置只由链路关系决定（分层 + 层内重心排序），没有任何需要特殊标记的节点
       this.topo = buildTopology(this.links, {
         colGap: TOPO_COL_GAP_MIN,
@@ -1150,7 +1236,8 @@ export default {
         else this.linkChart = null;
       }
       this._topoStates[mode] = null;
-      this.clearTopoHover(mode);
+      // 实例都没了，卡片必须一起收掉（固定态也收）
+      this.clearTopoHover(mode, true);
     },
 
     // ---------- 链路关系图（瀑布拓扑） ----------
@@ -1182,7 +1269,8 @@ export default {
       this.bindTopoInteractions(chart, state, mode);
       // 重绘 = 回到初始布局 + 1:1 视图，脏标记跟着清掉
       this.topoDirty[mode] = false;
-      this.clearTopoHover(mode);
+      // 重绘后卡片锚点已失效，固定态也一起收掉
+      this.clearTopoHover(mode, true);
     },
 
     // 高亮某个节点的全部相邻连线（nodeId 为空 = 全部恢复）。
@@ -1285,6 +1373,10 @@ export default {
         state.refresh(false);
       };
 
+      // 一次「按下」的记录：用来区分**单击**和拖拽/平移。
+      // 只有按下后几乎没动（<4px）才算单击 —— 拖节点、拖画布都不会误触发固定
+      let down = null;
+
       const stopInteraction = () => {
         if (drag) {
           if (frame) {
@@ -1307,6 +1399,7 @@ export default {
       zr.on("mousedown", (e) => {
         const [mx, my] = zrEventXY(e);
         const hit = this.hitTestTopo(state, mx, my);
+        down = { hit, x: mx, y: my, moved: false };
         if (hit && hit.type === "node") {
           const p = state.posMap.get(hit.id);
           const [bx, by] = toBase(mx, my);
@@ -1315,7 +1408,7 @@ export default {
           // 交互中先关掉流动光点：那一层是 motionBlur 整层重绘，开着拖拽会顿
           this.setTopoInteracting(chart, state, true);
         } else {
-          pan = { x: mx, y: my, vx: state.view.x, vy: state.view.y };
+          pan = { x: mx, y: my, vx: state.view.x, vy: state.view.y, moved: false };
         }
         zr.setCursorStyle("grabbing");
         // 拖拽画布时不要顺带选中页面文字
@@ -1324,6 +1417,14 @@ export default {
 
       zr.on("mousemove", (e) => {
         const [mx, my] = zrEventXY(e);
+        // 超过 4px 才算「动了」：拖动时固定住的卡片要立刻松开（不然它停在原地，
+        // 和拖走的节点对不上），而单纯单击不会误判
+        if (down && !down.moved) {
+          if (Math.abs(mx - down.x) > 4 || Math.abs(my - down.y) > 4) {
+            down.moved = true;
+            this.unpinTopoHover();
+          }
+        }
         if (drag) {
           const [bx, by] = toBase(mx, my);
           pending = [bx - drag.dx, by - drag.dy];
@@ -1336,6 +1437,7 @@ export default {
           return;
         }
         if (pan) {
+          if (!pan.moved) pan.moved = true;
           state.view.x = pan.vx + (mx - pan.x);
           state.view.y = pan.vy + (my - pan.y);
           this.markTopoDirty(mode);
@@ -1348,8 +1450,19 @@ export default {
         this.updateTopoHover(chart, state, mode, hit);
       });
 
-      zr.on("mouseup", stopInteraction);
-      zr.on("globalout", stopInteraction);
+      zr.on("mouseup", () => {
+        // 单击（按下后没动）= 固定 / 取消固定卡片；拖拽和画布平移不算
+        const click = down && !down.moved ? down.hit : null;
+        const isClick = !!(down && !down.moved);
+        stopInteraction();
+        down = null;
+        if (isClick) this.toggleTopoHoverPin(chart, state, mode, click);
+      });
+      zr.on("globalout", () => {
+        // 鼠标离开画布：结束拖拽/平移，但不当成单击
+        stopInteraction();
+        down = null;
+      });
 
       zr.on("mousewheel", (e) => {
         const ev = e.event || {};
@@ -1380,8 +1493,9 @@ export default {
         state.view.k = next;
         this.markTopoDirty(mode);
         state.applyView();
-        // 缩放后原锚点已经不准了，先收起卡片，等下一次移动重新判定
-        this.clearTopoHover(mode);
+        // 缩放后原锚点已经不准了，先收起卡片（固定态也收，位置已失真），
+        // 等下一次移动重新判定
+        this.clearTopoHover(mode, true);
         state.hoverKey = "";
       });
     },
@@ -1491,11 +1605,26 @@ export default {
     // 悬浮态。命中目标变了才动图（setOption / 高亮 / 卡片），没变直接返回 ——
     // 这个方法每次鼠标移动都会调用
     updateTopoHover(chart, state, mode, hit) {
-      const key = hit
-        ? hit.type + ":" + (hit.type === "node" ? hit.id : hit.index)
-        : "";
+      // 卡片被钉住时**完全冻结**：不跟随鼠标、不换目标。
+      // 否则鼠标一动卡片就没了，里面的文字根本选不中（这就是原来不能复制的原因）
+      if (this.topoHover && this.topoHover.pinned && this.topoHover.mode === mode) {
+        return;
+      }
+      const key = this.topoHoverKey(hit);
       if (key === state.hoverKey) return;
       state.hoverKey = key;
+      this.showTopoHover(chart, state, mode, hit);
+    },
+
+    // 命中目标的稳定标识：节点用 id，连线用下标，没命中给空串
+    topoHoverKey(hit) {
+      if (!hit) return "";
+      return hit.type + ":" + (hit.type === "node" ? hit.id : hit.index);
+    },
+
+    // 生成并展示悬浮卡片（内容 + 定位 + 图形高亮）。
+    // pin=true 时卡片带固定标记，之后不再跟随鼠标（单击固定走这里）
+    showTopoHover(chart, state, mode, hit, pin) {
       const el =
         mode === "dialog" ? this.$refs.topoDialogChart : this.$refs.linkChart;
       if (!hit) {
@@ -1525,7 +1654,7 @@ export default {
           el,
           state,
           state.posMap.get(hit.id),
-          { title: hit.id, meta, desc: "" }
+          { title: hit.id, meta, desc: "", pinned: !!pin }
         );
         zrSetCursor(chart, "move");
         return;
@@ -1546,9 +1675,80 @@ export default {
           meta,
           // 后端给了 desc 才显示，没给就是空串（模板里整段不出现）
           desc: item.desc ? String(item.desc) : "",
+          pinned: !!pin,
         }
       );
       zrSetCursor(chart, "pointer");
+    },
+
+    // 单击命中目标 = 固定 / 取消固定卡片。
+    // 固定后卡片接收鼠标事件，里面的文字可以选中、可以点复制按钮
+    toggleTopoHoverPin(chart, state, mode, hit) {
+      const key = this.topoHoverKey(hit);
+      const cur = this.topoHover;
+      if (cur && cur.pinned && cur.mode === mode && cur.pinKey === key) {
+        this.unpinTopoHover();
+        return;
+      }
+      if (!hit) {
+        this.unpinTopoHover();
+        return;
+      }
+      // 强制重算一次卡片（hoverKey 清掉，避免被「没变就返回」挡掉）
+      state.hoverKey = "";
+      this.showTopoHover(chart, state, mode, hit, true);
+      if (this.topoHover) this.topoHover.pinKey = key;
+    },
+
+    // Esc 取消固定（卡片里是可复制的文字，按 Esc 收起来符合预期）
+    onTopoKeydown(e) {
+      const k = e && (e.key != null ? e.key : e.keyCode);
+      if (k === "Escape" || k === "Esc" || k === 27) this.unpinTopoHover();
+    },
+
+    // 取消固定：卡片消失，并让下一次鼠标移动能重新判定悬浮
+    unpinTopoHover() {
+      const cur = this.topoHover;
+      if (!cur || !cur.pinned) return;
+      this.topoHover = null;
+      Object.keys(this._topoStates || {}).forEach((m) => {
+        const st = this._topoStates[m];
+        if (st) st.hoverKey = "";
+      });
+    },
+
+    // 复制卡片内容（标题 + 指标 + 描述）。
+    // 内网是 http，navigator.clipboard 在非安全上下文里不可用，必须有 execCommand 兜底
+    copyTopoHover(card) {
+      if (!card) return;
+      const lines = [card.title];
+      if (card.meta && card.meta.length) lines.push(card.meta.join(" · "));
+      if (card.desc) lines.push(card.desc);
+      const text = lines.join("\n");
+      const done = () => this.$message.success("已复制");
+      const fallback = () => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.top = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        let ok = false;
+        try {
+          ok = document.execCommand("copy");
+        } catch (e) {
+          ok = false;
+        }
+        document.body.removeChild(ta);
+        if (ok) done();
+        else this.$message.warning("复制失败，请手动选中文字复制");
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+      } else {
+        fallback();
+      }
     },
 
     // 二次贝塞尔 t=0.5 的中点（连线上的 desc 文字、悬浮卡片都锚在这里）。
@@ -1686,8 +1886,9 @@ export default {
       const W = (el && el.clientWidth) || 320;
       const H = (el && el.clientHeight) || 240;
       const CW = 268;
+      // 行数 = 标题 1 + 底部提示 1 + meta 1 + desc（按每行 20 字估，最多 3 行）
       const rows =
-        1 +
+        2 +
         (content.meta.length ? 1 : 0) +
         (content.desc ? Math.min(3, Math.ceil(content.desc.length / 20)) : 0);
       const CH = 16 + rows * 19;
@@ -1703,6 +1904,9 @@ export default {
         title: content.title,
         meta: content.meta,
         desc: content.desc,
+        // 固定标记与固定目标（键存在就声明成响应式，后面改值才生效）
+        pinned: !!content.pinned,
+        pinKey: "",
       };
     },
 
@@ -1710,8 +1914,13 @@ export default {
       if (!this.topoDirty[mode]) this.topoDirty[mode] = true;
     },
 
-    clearTopoHover(mode) {
-      if (this.topoHover && this.topoHover.mode === mode) this.topoHover = null;
+    // 收起悬浮卡片。force=false 时**不动固定住的卡片** ——
+    // 鼠标移开就清空的话，固定态等于没固定（文字还是选不中）。
+    // 换组件 / 重绘 / 重置视图这些「卡片内容已失效」的场景传 force=true
+    clearTopoHover(mode, force) {
+      if (!this.topoHover || this.topoHover.mode !== mode) return;
+      if (this.topoHover.pinned && !force) return;
+      this.topoHover = null;
     },
 
     // 单条连线（lines 系列的数据项）。
@@ -2120,6 +2329,8 @@ export default {
 
     // 打开链路关系图放大弹窗（弹窗内文字常显、可缩放/平移）
     openTopoDialog() {
+      // 小图的卡片（含固定态）先收掉：弹窗里的卡片是另一份，留着会残留在页面层
+      this.clearTopoHover("inline", true);
       this.topoDialogVisible = true;
     },
 
@@ -2134,7 +2345,7 @@ export default {
         this.topoDialogChart = null;
       }
       this._topoStates.dialog = null;
-      this.clearTopoHover("dialog");
+      this.clearTopoHover("dialog", true);
       this.topoDirty.dialog = false;
     },
 
@@ -2158,7 +2369,7 @@ export default {
       chart.dispatchAction({ type: "downplay", seriesId: TOPO_NODE_SERIES });
       this.syncTopoFocus(chart, state, []);
       state.refresh(true);
-      this.clearTopoHover(mode);
+      this.clearTopoHover(mode, true);
       this.topoDirty[mode] = false;
       zrSetCursor(chart, "grab");
     },
@@ -3215,14 +3426,56 @@ $stat-colors: (
   background: rgba(255, 255, 255, 0.97);
   box-shadow: 0 8px 24px rgba(31, 66, 116, 0.16);
   color: #303133;
-  /* 卡片浮在画布上，但绝不能挡住命中测试 —— 否则鼠标压到卡片上悬浮态就断了 */
+  /* 跟随态：卡片浮在画布上，但绝不能挡住命中测试 —— 否则鼠标压到卡片上悬浮态就断了 */
   pointer-events: none;
 
+  /* 固定态（单击节点/连线后）：卡片接收鼠标事件，文字可选中、可点复制/关闭按钮。
+     固定期间本来就不跟随鼠标，所以不再有「挡住命中测试」的问题 */
+  &.is-pinned {
+    pointer-events: auto;
+    cursor: auto;
+    user-select: text;
+    border-color: #c3dbf8;
+    box-shadow: 0 10px 28px rgba(31, 66, 116, 0.22);
+  }
+
+  /* 标题 + 右侧两个小按钮 */
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
   &__title {
+    flex: 1;
+    min-width: 0;
     font-size: 12px;
     font-weight: 600;
     line-height: 1.45;
     word-break: break-all;
+    /* 固定态要能划选，这里显式放开（全局样式里可能有 user-select 限制） */
+    user-select: text;
+  }
+
+  /* 复制 / 关闭：只有固定态才出现，弱化成灰色小图标，不抢标题 */
+  &__act {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #a0a6b0;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+
+    &:hover {
+      background: #eef4fd;
+      color: #2f74c0;
+    }
   }
 
   &__meta {
@@ -3243,6 +3496,17 @@ $stat-colors: (
     line-height: 1.55;
     color: #606266;
     word-break: break-all;
+    user-select: text;
+  }
+
+  /* 底部提示：跟随态提示「可以点我固定」，固定态提示怎么取消。
+     两种状态都占一行，卡片高度不变 —— 否则固定的一瞬间卡片会跳位置 */
+  &__foot {
+    margin-top: 6px;
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: #b6bcc6;
+    user-select: none;
   }
 }
 

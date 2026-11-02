@@ -38,15 +38,25 @@
     选 MYSQL 不该把 `NGINX→MYSQL` 带出来（那是 NGINX 的视角）。
   - 环靠 `visited` 兜住（HADOOP 的 `bjb↔hfa` 双向边很常见），不会死循环。
   - 集群名为空数组 -> 返回**空数组**，不退回全量。
-- **根节点的两个来源**（2026-10-29）：`index.vue` 的 `linkRootNames`
-  = `expandedClusters`（组件拓扑第二层 key）**∪** `relationNodeNames`（`集群关系[组件].nodes`）。
-  为什么要第二个：生产上「主机列表里没有这个集群、但链路里确实有它发出的线」是常态
-  （组件拓扑来自主机采集、集群关系来自链路侧），只按组件拓扑 key 找根，整条链会静默漏掉。
-  - 关系节点**没有折叠面板**，恒参与筛选；
-  - ⚠️ 但组件拓扑里有集群、**一个都没展开**时 `linkRootNames` 直接返回 `[]`，
-    保住「全部收起 ⇒ 无链路」的老语义（否则关系节点会把图撑住，用户收起全部却还看得见图）。
-- mock 里 MYSQL/CANAL 等组件的 `集群关系` 大部分是注释掉的，所以 mock 下
-  `relationNodeNames` 基本是空集，行为仍由组件拓扑 key 驱动（改这块不会动 mock 表现）。
+- **根节点只有一个来源**（2026-10-29 当天改过两版，**最终版是这版**）：
+  `index.vue / linkRootNames` = `expandedClusters`（组件拓扑第二层 key）；
+  组件拓扑里**一个集群都没有**时才退回 `relationNodeNames`（`集群关系[组件].nodes`）。
+  - ⚠️ **绝对不能把关系节点并进根集合**（第一版就是并进去的，当天被内网实测打回）。
+    那份数据**不随折叠状态变化**，并进去以后：
+    收起一个集群 → 图上一条不少（看着像「点了没反应」）；
+    一键收起 → 无图（唯一的空集合状态）；
+    只展开一个 → **瞬间显示全部链路**。
+    三个症状会同时出现，而且 mock 里 CANAL/ES/ZOOKEEPER 有集群关系数据，**外网也能复现**。
+  - 关系节点只在 `refreshTopo` 里做**严格条件下的兜底**：
+    `!links.length && allExpanded && relationNodeNames.length`——
+    即「集群全部展开却零命中」（说明组件拓扑 key 与链路 fnode 命名口径不一致）。
+    部分展开时**不许兜底**，否则折叠效果又被抹平。
+- **收起集群的出边必须再兜一刀**（2026-10-29）：传递闭包算完后，把
+  `activeClusters ∖ openClusters` 作为 source 的边全部剔掉。
+  原因：闭包是「从根往下游走」，若别的集群指向它（`hfa→bjb`，收起 bjb 后 bjb 仍被 hfa 可达），
+  按闭包语义它的出边还会留着 → 用户点了收起却一条不少。剔掉后「收起哪个集群，它的连线就消失」才成立。
+  （节点作为**终点**仍然显示，这是对的：上游展开着，线就该在。）
+- mock 里 MYSQL/CANAL 等组件的 `集群关系` 大部分是注释掉的；CANAL/ES/ZOOKEEPER 有数据。
 - 命中唯一性靠「集群名全局唯一」保证。`sp_verify.mjs` 的 C 段有断言：
   每个 fnode 全等于某个集群名、每条链路恰好归属一个组件。
 - 展开后的规模（mock，49 条全量）：MYSQL 4→13 条 / 6 层、CANAL 3→9、GREATDB 3→12、
@@ -147,6 +157,36 @@
 - 常显时表头那句「悬浮查看节点」要藏起来（`inlineNodeLabels` data 由 `renderTopoChart` 回写，
   只在值变化时赋值，避免和 ResizeObserver 形成来回重排）。
 - 实测：NGINX（4 节点）常显；「应用」（15 节点）不常显。
+
+## 3.5 悬浮卡片：单击固定 + 可复制（2026-10-29）
+
+**用户诉求**：悬浮卡片一动就消失，里面的内容复制不了；问能不能让节点下面的字也选中。
+→ 节点名是 **canvas（echarts scatter label）画的，物理上无法选中**，只能把「可复制」做在卡片上。
+
+**交互**：单击节点/连线 → 卡片**固定**（`topoHover.pinned`），不再跟随鼠标，文字可划选、可点「复制」按钮；
+再点同一目标 / 点画布空白 / 按 Esc / 点卡片上的 × / 切组件 / 折叠 / 缩放平移 → 取消固定。
+
+实现要点（改这块必看）：
+- ⚠️ **`updateTopoHover` 开头遇到 `pinned` 必须直接 return**。否则鼠标一动就重新判定、
+  卡片被换掉或清空 —— 这正是原来「不能复制」的根因。
+- ⚠️ **`clearTopoHover(mode, force)` 加了 `force` 参数**：非强制时**不动固定态**。
+  「卡片内容已失效」的场景必须传 `true`：`disposeTopoChart` / `renderTopoChart` /
+  滚轮缩放 / `onTopoDialogClose` / `resetTopoView` / `openTopoDialog`（收掉小图那份）。
+- ⚠️ **`pointer-events` 是两态的**：跟随态 `none`（不能挡命中测试，老规矩），
+  固定态 `.is-pinned` → `auto` + `user-select: text`。**不能图省事全局设 auto**，
+  那会让跟随态卡片挡住 `hitTestTopo`，悬浮链就断了。
+- **单击 vs 拖拽**：`bindTopoInteractions` 里新增 `down = { hit, x, y, moved }`，
+  移动超过 **4px** 才算拖拽（`mousemove` 里置 `moved` 并顺手 `unpinTopoHover()`，
+  否则卡片停在原地、和拖走的节点对不上）。`mouseup` 里 `!down.moved` 才算单击；
+  `globalout`（鼠标离开画布）**不算单击**。
+- **卡片高度恒一行底注**（跟随态「单击固定后可选中复制」/ 固定态「已固定 · 按 Esc 取消」）：
+  两态都占一行，固定的一瞬间卡片不会跳位置。`placeTopoHover` 的 `rows` 相应 +1（标题 + 底注）。
+- **复制走两条路**：优先 `navigator.clipboard.writeText`，失败/不存在时 `textarea + execCommand` 兜底 ——
+  **内网是 http，非安全上下文里 `navigator.clipboard` 根本不存在**，只写前者内网会复制不了。
+  复制内容是「标题 / 指标（· 连接）/ desc」三行。
+- 卡片返回对象里 `pinned` / `pinKey` 必须在 `placeTopoHover` 的**字面量里就声明**（哪怕空值）——
+  Vue 2 在对象赋给 `topoHover` 之后再加的新属性不是响应式的。
+- 校验：`Temp/sp_pin_check.mjs`（38 项：固定/取消/点空白/Esc/连线 desc/复制内容拼装/源码断言）。
 
 ## 4. 校验脚本（都在 `C:/Users/lenovo/AppData/Local/Temp/`）
 
