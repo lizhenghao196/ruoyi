@@ -187,3 +187,214 @@ export function calcExtraStaff(orders, date) {
     detail
   }
 }
+
+/**
+ * 把算好的 par 翻译成「这个人数是怎么来的」的说明数据（2026-11-02 用户需求）。
+ *
+ * 用户原话：「当额外需要变更支持人数大于等于 1 的时候，需要在弹窗里面说明，
+ * 这个数字是怎么来的，根据哪个逻辑，简要的计算过程说明一下」。
+ *
+ * ⚠️ **只做解读、不重算人数**：段总分全部取自 `par.detail`，人数仍用 `par.peopleNum` ——
+ *    说明里的每个数字必须和结论行 / 明细表**完全一致**（同一份数据，不搞第二套算法）。
+ * ⚠️ 入参就是 `calcExtraStaff` 的返回值，**不要往里塞说明字段**：
+ *    那份 par 会原样 POST 到后端（`pushExtraStaff` 是 `{ ...par, date }`），
+ *    多出来的字段会跟着进请求体。说明只在展示层现算。
+ *
+ * @param {{peopleNum:number, detail:Array}} result calcExtraStaff 的返回值
+ * @returns {Object|null} 人数 < 1 / 没有明细 → null（弹窗里整块不渲染）
+ */
+export function explainStaffResult(result) {
+  if (!result || !Array.isArray(result.detail) || !result.detail.length) {
+    return null
+  }
+  const peopleNum = typeof result.peopleNum === 'number' ? result.peopleNum : 0
+  // 用户要求「大于等于 1 才说明」：0 人的情况不解释（弹窗只留结论行 + 明细表）
+  if (!(peopleNum >= 1)) {
+    return null
+  }
+
+  const detail = result.detail
+  const totals = detail.map((d) => d.totalVal)
+
+  /* 逻辑一：最高段总分 d（同分取靠前那段，和 reduce 的 Math.max 语义一致） */
+  let peakIdx = 0
+  totals.forEach((t, i) => {
+    if (t > totals[peakIdx]) {
+      peakIdx = i
+    }
+  })
+  const peakRow = detail[peakIdx]
+  const peakVal = totals[peakIdx]
+  const peakExtra = peakVal > PEAK_THRESHOLD ? Math.ceil(peakVal - PEAK_THRESHOLD) : 0
+
+  /* 逻辑二：最长连续超载段（段总分 > 1），同长取靠前的那一段 */
+  let bestStart = 0
+  let bestLen = 0
+  let curStart = 0
+  let curLen = 0
+  totals.forEach((t, i) => {
+    if (t > RUN_THRESHOLD) {
+      if (curLen === 0) {
+        curStart = i
+      }
+      curLen += 1
+      if (curLen > bestLen) {
+        bestLen = curLen
+        bestStart = curStart
+      }
+    } else {
+      curLen = 0
+    }
+  })
+  const runExtra = bestLen > 1 ? bestLen - 1 : 0
+  const runTimes = bestLen > 0 ? detail.slice(bestStart, bestStart + bestLen).map((d) => d.time) : []
+
+  // 逻辑一那一段的总分是怎么凑出来的（「简要计算过程」用它举例）。
+  // partsSum 单独算：两个 2 位小数相加可能和 totalVal 差 0.01（round2 各自取整），
+  // 这时页面上不摆「= 合计」，免得和明细表的段总分对不上。
+  const partsSum = round2(peakRow.manualVal + peakRow.autoVal)
+
+  return {
+    peopleNum,
+    peak: {
+      time: peakRow.time,
+      value: peakVal,
+      extra: peakExtra,
+      manualNum: peakRow.manualNum,
+      manualCost: peakRow.manualCost,
+      manualVal: peakRow.manualVal,
+      autoNum: peakRow.autoNum,
+      autoCost: peakRow.autoCost,
+      autoVal: peakRow.autoVal,
+      partsSum,
+      partsMatch: partsSum === peakVal
+    },
+    run: {
+      length: bestLen,
+      extra: runExtra,
+      times: runTimes
+    },
+    // 最终由哪条逻辑决定（并列时按 calcExtraStaff 的 max 语义，两条等价，这里报逻辑一）
+    winner: peakExtra >= runExtra ? 'peak' : 'run'
+  }
+}
+
+/**
+ * 把说明数据拼成「可渲染的文字段」（纯函数，2026-11-02 用户需求）。
+ *
+ * 用户要求：**弹窗里只展示当前这个数字走的那条逻辑**，另外挂一个 i 小图标，
+ * 鼠标悬浮才显示完整的两条逻辑 + 取大 + 口径演算。
+ * 所以文案拆成四组，弹窗自己决定渲染哪几组。
+ *
+ * 每段：`{ t: 文字, b?: 数字（加粗变色）, nw?: 时间段（不许断行） }`
+ * - 分段而不是直接给一整串：数字要强调、时间段不能断行，`v-html` 拼标签不安全；
+ * - 放纯函数里：node 里 `parts.map(p => p.t).join('')` 就能断言最终文案，不用起浏览器。
+ *
+ * @param {Object|null} explain explainStaffResult 的返回值
+ * @returns {{peak:Array, run:Array, summary:Array, note:Array}|null}
+ */
+export function buildExplainLines(explain) {
+  if (!explain) {
+    return null
+  }
+  const peak = explain.peak
+  const run = explain.run
+  const peopleNum = explain.peopleNum
+  const winner = explain.winner
+
+  /* 逻辑一：峰值 + ceil(d - 2) */
+  const peakParts = [
+    { t: '五段总分最高 d = ' },
+    { t: String(peak.value), b: true },
+    { t: '（' },
+    { t: peak.time, nw: true },
+    { t: '）' }
+  ]
+  if (peak.extra > 0) {
+    peakParts.push(
+      { t: '，d > 2 → 向上取整(' },
+      { t: String(peak.value), b: true },
+      { t: ' − 2) = ' },
+      { t: peak.extra + ' 人', b: true }
+    )
+  } else {
+    peakParts.push({ t: '，未超过 2 → ' }, { t: '0 人', b: true })
+  }
+
+  /* 逻辑二：最长连续超载段 N → N - 1
+     - `run`      = 完整版（带具体哪几段）→ 悬浮卡片用；
+     - `runBrief` = 精简版（不带时间段）→ 弹窗可见区用：四段的时间串加起来太长，
+       摆进去会把「N 人」挤到下一行，读起来很别扭（时间段在明细表和悬浮卡片里都有）。 */
+  const runParts = []
+  const runBrief = []
+  if (run.extra > 0) {
+    runParts.push({ t: '连续 ' }, { t: String(run.length), b: true }, { t: ' 段总分 > 1（' })
+    run.times.forEach((t, i) => {
+      if (i) {
+        runParts.push({ t: '、' })
+      }
+      runParts.push({ t, nw: true })
+    })
+    runParts.push(
+      { t: '）→ ' },
+      { t: run.length + ' − 1 = ' },
+      { t: run.extra + ' 人', b: true }
+    )
+    runBrief.push(
+      { t: '连续 ' },
+      { t: String(run.length), b: true },
+      { t: ' 段总分 > 1 → ' },
+      { t: run.length + ' − 1 = ' },
+      { t: run.extra + ' 人', b: true }
+    )
+  } else if (run.length === 1) {
+    runParts.push(
+      { t: '只有 1 段总分 > 1（' },
+      { t: run.times[0] || '', nw: true },
+      { t: '），不足 2 段 → ' },
+      { t: '0 人', b: true }
+    )
+    runBrief.push(
+      { t: '只有 1 段总分 > 1，不足 2 段 → ' },
+      { t: '0 人', b: true }
+    )
+  } else {
+    runParts.push({ t: '没有连续 2 段总分 > 1 → ' }, { t: '0 人', b: true })
+    runBrief.push({ t: '没有连续 2 段总分 > 1 → ' }, { t: '0 人', b: true })
+  }
+
+  /* 两条取较大值 */
+  const summary = [
+    { t: 'max(' + peak.extra + ', ' + run.extra + ') = ' },
+    { t: peopleNum + ' 人', b: true },
+    { t: '（由' + (winner === 'run' ? '逻辑二' : '逻辑一') + '决定）' }
+  ]
+
+  /* 段总分口径 + 拿最高分段做一次完整演算 */
+  const note = [
+    { t: '段总分 = max(手动单数, 手动耗时H) ÷ 4 + max(自动单数, 自动耗时H) ÷ 10。以最高分段 ' },
+    { t: peak.time, nw: true },
+    {
+      t:
+        ' 为例：max(' +
+        peak.manualNum +
+        ', ' +
+        peak.manualCost +
+        ') ÷ 4 = ' +
+        peak.manualVal +
+        '，max(' +
+        peak.autoNum +
+        ', ' +
+        peak.autoCost +
+        ') ÷ 10 = ' +
+        peak.autoVal
+    }
+  ]
+  // 两个 2 位小数相加可能与段总分差 0.01（各自 round2），这时不摆「合计」，免得对不上
+  if (peak.partsMatch) {
+    note.push({ t: '，合计 ' + peak.value })
+  }
+  note.push({ t: '。' })
+
+  return { peak: peakParts, run: runParts, runBrief, summary, note }
+}

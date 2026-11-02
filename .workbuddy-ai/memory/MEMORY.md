@@ -1,6 +1,6 @@
 # MEMORY.md — RuoYi-Vue 工作台长期备忘
 
-> 只留「不知道就会做错」的。**动手前读对应 REF**：`REF-alarm-analysis.md`（告警分析）、`REF-exec-page.md`（执行页面/流布局/右键菜单）、`REF-exec-detail.md`（查看明细弹窗）、`REF-exec-simple.md`（执行界面简版）、`REF-order-gantt.md`（工单甘特图）、`REF-systemProfile.md`（系统画像/链路图）。历史见 `2026-09-*.md`。
+> 只留「不知道就会做错」的。**动手前读对应 REF**：`REF-alarm-analysis.md`、`REF-exec-page.md`、`REF-exec-detail.md`、`REF-exec-simple.md`、`REF-order-gantt.md`、`REF-systemProfile.md`。历史细节见 `2026-09-*.md` / `2026-10-*.md`。
 
 ## 项目约定
 - 新页面 = `views/tool/<n>/index.vue` + `api/tool/<n>.js` + `sql/<n>_menu.sql`；菜单走数据库动态路由，**不写** `router/index.js`。Mock 在 `mockData/res.js`。
@@ -8,56 +8,61 @@
 - **`code: 0` 能过拦截器是巧合**（`utils/request.js` 是 `res.data.code || 200`）；python `func/*` 成功码就是 0，**别判 `code === 200`**。
 - **取载荷一律走 `pickPayload(res)`**：载荷可能在 `data` 也可能在 `rows`，`data` 非 undefined/null 就用它（**`[]`/`''`/`0`/`false` 都算有值，别用 `||` 判**）；页面里**不许出现裸 `res.data`/`res.rows`**。
 
-## 启动 / 运行
-- 顺序：Redis（`C:/Users/lenovo/.codex/tools/ruoyi-vue/redis-5.0.14.1` 下跑 `redis-server.exe redis.windows.conf`）→ 后端 → 前端。MySQL 3306 常驻。
-- 后端：工具链 jdk17 `java -jar ruoyi-admin/target/ruoyi-admin.jar`，端口 8080。前端：`ruoyi-ui` 下 `npm run dev`，端口 80，proxy 到 8080。
-- ⚠️ **后台启动三个服务时命令尾部绝不能加 `&`**：包装 shell 会立即退出并把子进程（redis-server/java/npm）一起回收。表面症状极具误导性——后端日志停在 druid profile 不动、`tasklist` 里没有 java（看着像「启动慢」）。`> log 2>&1` 重定向可以有，`&` 不能有；正确做法是把整条命令直接交给后台任务机制常驻。Redis 被回收的连带后果是后端报 `RedisConnectionFailureException` 导致整个上下文启动失败。
-- ⚠️ **启动后端必须显式加 `--server.port=8080`**：WorkBuddy 的 shell 注入了 `SERVER__PORT=60044`（双下划线），被 Spring Boot 宽松绑定成 `server.port`，会抢 60044 导致 `Port 60044 was already in use` 启动失败。顺手 `unset SERVER__PORT` 更稳。
-- ⚠️ **WorkBuddy 的 bash shell 里 `java` 不在 PATH**（2026-10-21 实测 `java: command not found`）：启动后端必须用绝对路径 `C:/Users/lenovo/.codex/tools/ruoyi-vue/jdk17/jdk-17.0.19+10/bin/java.exe`。
+## 启动 / 运行（2026-11-02 复核有效）
+- 顺序：Redis → 后端 → 前端。MySQL 3306 常驻。
+- Redis：`C:/Users/lenovo/.codex/tools/ruoyi-vue/redis-5.0.14.1` 下 `./redis-server.exe redis.windows.conf`（6379）。
+- 后端：`unset SERVER__PORT` + `C:/Users/lenovo/.codex/tools/ruoyi-vue/jdk17/jdk-17.0.19+10/bin/java.exe -jar ruoyi-admin/target/ruoyi-admin.jar --server.port=8080`（约 18s 起完）。
+- 前端：`ruoyi-ui` 下 `npm run dev`，端口 80，proxy → 8080，日志写 `ruoyi-ui/npm-dev.log`（根目录 `frontend.log` 是旧的，别认错）。
+- ⚠️ **后台启动绝不能加 `&`**：包装 shell 立即退出会连带回收 redis/java/npm。症状极具误导——日志停在 druid profile、`tasklist` 里没 java（看着像「启动慢」）。`> log 2>&1` 可以，`&` 不行，用后台任务机制常驻。
+- ⚠️ **必须显式 `--server.port=8080`**：WorkBuddy shell 注入 `SERVER__PORT=60044`（双下划线）被 Spring 宽松绑定成 `server.port`，会抢 60044 启动失败。
+- ⚠️ **bash 里 `java` 不在 PATH**：必须绝对路径（见上）。
 
-## Element 弹窗两个通用坑（跨页面复用）
-- ⚠️ **`append-to-body` 的弹窗里，写在页面根节点的 CSS 变量继承不到**：弹窗 DOM 被挪到 `body` 下，不再是页面组件的后代。要用 `--xxx` 就在弹窗内容自己的包裹层上**再声明一份**，否则 `var(--xxx)` 静默失效（边框消失、颜色退回默认）。
-- ⚠️ **`el-dialog` 里放 `el-date-picker`（或任何带下拉面板的组件），Esc 会把整个弹窗关掉**：面板的 Esc 由组件自己的 `handleKeydown` 处理并 `stopPropagation`，**但前提是焦点在那个 input 上**；焦点不在时 Esc 直接冒到 `document`，被弹窗接走。⇒ 弹窗加 `:close-on-press-escape="false"`（和 `:close-on-click-modal="false"` 一个意思：别让误触把整页状态关掉）。
+## Element 弹窗两个通用坑
+- ⚠️ **`append-to-body` 的弹窗里，页面根节点声明的 CSS 变量继承不到**（DOM 挪到 body 下）：要用 `--xxx` 就在弹窗内容自己的包裹层上再声明一份，否则 `var()` 静默失效。
+- ⚠️ **`el-dialog` 里的 `el-date-picker` 等带下拉面板的组件，Esc 会关掉整个弹窗**（面板只在焦点在 input 时 `stopPropagation`）⇒ 弹窗加 `:close-on-press-escape="false"`（配 `:close-on-click-modal="false"`）。
 
 ## CSS 两个通用坑
-- ⚠️ **全局元素选择器会漏进 scoped 组件**：`assets/styles/index.scss:99` 的 `aside { padding:8px 24px; margin-bottom:20px; line-height:32px; font-size:16px }` 会命中组件里的 `<aside>`。**特异性只对「双方都声明过的属性」生效**，没声明的照样吃全局值（`margin-bottom:20px` 会让 `stretch` 高度被扣 20px）。**scoped 里把这四个属性一起显式重置**。
-- ⚠️ **表格底线靠 `.el-table::before`**（`--border` 变体自身 `border-bottom:none`）。**绝不能给它 `display:none`**，否则底部敞口。
+- ⚠️ **全局元素选择器会漏进 scoped 组件**：`assets/styles/index.scss:99` 的 `aside { padding:8px 24px; margin-bottom:20px; line-height:32px; font-size:16px }` 命中组件里的 `<aside>`；特异性只对「双方都声明过的属性」生效，没声明的照样吃全局值（`margin-bottom:20px` 会扣掉 20px 高度）。scoped 里把这四个属性一起显式重置。
+- ⚠️ **表格底线靠 `.el-table::before`**（`--border` 变体自身 `border-bottom:none`），**绝不能 `display:none`**，否则底部敞口。
 
 ## 告警分析（alarmAnalysis）
-- **页面不认 P1/P2/P3，只认「形态」**：唯一判定处 `alarmAnalysis/shape.js`（纯函数）。`metrics` 型 key 合并成**一条**指标条，其余按 key 顺序出区块，不返回的 key 不产出区块；顺序唯一来源是 `shape.js` 的 `METRIC_ORDER`，**页面不许再抄一份**。
-- ⚠️ **接口/mock 数据不要擅自改**：用户要的是「页面上不这么分」，不是「数据层合并」（把 mock 的 P1+P2 合并成一个 key 被打回过）。**要改展示就只改展示层**；**用户点名要改的**才改。
-- 表格列 `alertKey / summary / misinfoReason / alertReasonDesc / AgentTrace / output / more`；⚠️ **`misinfoReason` 的 i 是小写**；`alertSource`/`closedBy` 不展示。**按钮文字 2026-10-15 对调过**：output = 「查看简报」（开弹窗）、more = 「告警详情」（跳外链）——**只换文字**，弹窗标题仍叫「告警详情」（刻意的不一致，别改）。
-- 两个外部跳转（新开 tab，常量在 `AlarmTable.vue` 顶部）：`alertKey` → `http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<值>`；more 列「告警详情」→ `http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>`。判空别用 `||`（`runId: 0` 会被当空）。「更多字段」弹窗因此没了入口。
-- 组别下拉走字典 `dict_system_group`，`form.teamName` 默认**「全量」**（2026-10-15 由「不限定组别」改）且**始终进请求参数**（systemId 不填不带）；日期默认**当天 - 当天**（原为最近 30 天）。
-- ⚠️ **同一层级一律「按条数降序」**（2026-10-15）：`shape.js / sortByCountDesc` 排 `section.lists`（表格 tab）与 `section.levels`（AI处置 一级导航）；**二级「告警源」chip 没排**。只在展示层排、不动数据；副作用是多 tab 区块默认选中条数最多的那个。
-- ⚠️ **表格高度分两种**（2026-10-15 定稿）：`AlarmTable.vue` 的 `fixedHeight` 开关 —— **AI处置** 传 `fixed-height` → 固定 `height=420`；**P3/人工关单/自动化关单** 不传 → `max-height=420`（行少时变矮）。⚠️ 高度值**必须写成模板字面量**，写成模块级常量模板取不到（踩过：node 断言全绿但页面没高度）。
-- ⚠️ **概览区的「告警总量」2026-10-16 已按用户要求删除**（指标条里的「告警总量」保留 —— 那是后端统计值，两者同名不同值，删的是概览那个「页面明细行数」）。删后概览区只剩「重复性分析」，**整块 v-if 以 `duplicateGroupCount > 0` 为前提**（否则会留一个空的虚线分隔框）；`totalCount` computed 与 `sectionRowCount` 导入一并移除。`AI处置` 是 nested 型、两级数量不固定（二级 chip 是**筛选**）。
-- **细节（`levelTone` 顺序、`flattenLevel` 兜底、窄屏降级、三个校验脚本、字典 SQL）→ `REF-alarm-analysis.md`。**
+- **页面不认 P1/P2/P3，只认「形态」**：唯一判定 `alarmAnalysis/shape.js`（纯函数）。`metrics` 型 key 合成一条指标条；顺序唯一来源 `METRIC_ORDER`，页面不许再抄一份。
+- ⚠️ **接口/mock 数据不要擅自改**：用户要「页面不这么分」就只改展示层（合并 mock 的 P1+P2 被打回过）；**用户点名要改的**才改。
+- 表格列 `alertKey / summary / misinfoReason / alertReasonDesc / AgentTrace / output / more`；⚠️ `misinfoReason` 的 i 是小写；`alertSource`/`closedBy` 不展示。**按钮文字 2026-10-15 对调过**：output=「查看简报」（开弹窗）、more=「告警详情」（跳外链）——只换文字，弹窗标题仍叫「告警详情」（刻意不一致，别改）。
+- 两个外链（新 tab，常量在 `AlarmTable.vue` 顶部）：`alertKey` → `http://alt.eprod-kzx1.cncb/#/jiraAlertInfo?alertKey=<值>`；more → `http://10.2.64.23/gdb_screen/#/agentInfo?activeRunId=<runId>`。判空别用 `||`（`runId: 0` 会被当空）。「更多字段」弹窗因此没了入口。
+- 组别下拉走字典 `dict_system_group`，`form.teamName` 默认**「全量」**且**始终进请求参数**；日期默认**当天-当天**。
+- ⚠️ **同一层级一律按条数降序**（`shape.js / sortByCountDesc` 排 `section.lists` 与 `section.levels`，**二级「告警源」chip 没排**）；只在展示层排，副作用是多 tab 区块默认选中条数最多的。
+- ⚠️ **表格高度分两种**：`AlarmTable.vue` 的 `fixedHeight` —— AI处置 传 `fixed-height`（固定 420）；P3/人工关单/自动化关单 不传（`max-height=420`）。高度值**必须写成模板字面量**，模块级常量模板取不到。
+- ⚠️ **概览区「告警总量」2026-10-16 已删**（指标条里的同名统计值保留）。概览区只剩「重复性分析」，整块 `v-if` 以 `duplicateGroupCount > 0` 为前提；`totalCount`/`sectionRowCount` 一并移除。
+- 细节（`levelTone`、`flattenLevel`、窄屏降级、校验脚本、字典 SQL）→ `REF-alarm-analysis.md`。
 
 ## 执行页面 / 明细弹窗 / 执行界面简版
-- 简版环境 chip **0 流不展示**：走 `visibleEnvList`（`!e.responded || e.flowCount > 0`）——⚠️ **判据是 `responded`（请求回没回来）而不是 `loaded`（拿没拿到数据）**：请求**失败**时 `loaded` 也是 false，用 loaded 会把「取不到详情」的环境漏出来显示成「0 流」（2026-10-10 的 bug）。首屏 `results` 为空时 `responded` 为假 ⇒ 全保留，不闪空。`ensureSelection` 也用它（选中态不能落在隐藏环境上）。只做展示层过滤，`envList` 数据保持完整。节点卡片右下角 = **计划开始时间的时分秒**（`planStartClock` ← `aniNodePlanStarttime`），耗时挪进悬停提示。
-- ⚠️ **mock 数据不全**：`mockData/res.js` 的 `planRes` 有 **31** 个计划，`executeResMap` 只有 **11** 个 key —— 页面一点进 BPC/DPS/PAY/DSI/LMP/DNET/CIS 这些系统时环境**全部取不到详情**（`未找到执行详情：<id>`），页面看着像「一堆 0 流环境」。
-- **动手前必读**（三个 REF）：轮询必须静默 / 横滚在每条流内部 / 页头进度算法 / 哑组件契约 / `type="expand"` 不能加 `fixed`；execPlanList / execPageSimple 与 execPage **代码零共享**，别互相 import。
-- 简版画布自动滚动：**只认输入事件（wheel/touchmove/滚动键/mousedown 判滚动条），画布刻意不监听 `scroll`** —— 按 scroll 记会被轮询刷新的程序化滚动误判成「用户刚滚过」，自动滚动永远冻着且不报错。目标节点 `bad > run`；用户滚动后 20s 让位；`anyDialogOpen` 里新增弹窗要记得加。
-- 简版右栏「文档信息」**默认不展示**（流独占整宽）；用户在查看明细表里**双击工单**才展出（工单号 + 多文档 tab + iframe），左右变 6:4。文档地址 = `DOC_VIEW_BASE + file_name`，**不是**接口返回里的 `url` 字段；⚠️ `el-table-column` 的 `class-name` 会同时落到表头 `th` 上。
-- ⚠️ **文档 iframe 是跨源的**（`10.2.64.36:8121`），父页面**碰不到里面**（`contentWindow`/`contentDocument` 被同源策略挡）⇒ 横向滚动只能靠「把 iframe 撑得比容器宽、让父容器出横条」：`.esp-doc__frame { overflow: auto }`（**绝不能**改回 `hidden`）+ `iframe { min-width: 1440px }`。**纵向滚动仍在 iframe 内部**，别想着挪出来。
+- 简版环境 chip **0 流不展示**：`visibleEnvList`（`!e.responded || e.flowCount > 0`）——⚠️ **判据是 `responded` 不是 `loaded`**（请求失败时 loaded 也 false，会把「取不到详情」显示成 0 流）。`ensureSelection` 同用；只做展示层过滤。节点卡片右下角 = 计划开始时分的时分秒（`planStartClock`）。
+- ⚠️ **mock 不全**：`planRes` 31 个计划、`executeResMap` 只有 11 个 key ⇒ BPC/DPS/PAY/DSI/LMP/DNET/CIS 取不到详情（`未找到执行详情：<id>`），页面像「一堆 0 流环境」。
+- 简版画布自动滚动：**只认输入事件（wheel/touchmove/滚动键/mousedown）**，**刻意不监听 `scroll`**（轮询的程序化滚动会被误判成用户滚动，自动滚动永久冻住）。目标节点 `bad > run`；用户滚动后 20s 让位；新弹窗要加进 `anyDialogOpen`。
+- 简版右栏「文档信息」**默认不展示**；查看明细表里**双击工单**才展出（工单号 + 多文档 tab + iframe，6:4）。地址 = `DOC_VIEW_BASE + file_name`，**不是**接口的 `url`；⚠️ `el-table-column` 的 `class-name` 会同时落到表头 `th`。
+- ⚠️ **文档 iframe 跨源**（`10.2.64.36:8121`）⇒ 横向滚动只能把 iframe 撑宽让父容器出横条：`.esp-doc__frame { overflow: auto }`（**不能改回 hidden**）+ `iframe { min-width: 1440px }`；纵向仍在 iframe 内部。
+- 动手前必读：`REF-exec-page.md` / `REF-exec-detail.md` / `REF-exec-simple.md`（轮询静默、横滚在流内部、页头进度算法、哑组件契约、`type="expand"` 不能加 `fixed`；execPlanList / execPageSimple 与 execPage **代码零共享**）。
 
 ## 工单甘特图（orderGantt）
-- ⚠️ **横坐标固定为「当天 18:00 → 次日 06:00」**（2026-10-16）：唯一判定处 = `ganttLayout.js` 的 `buildDayWindow(date)`（常量 `WINDOW_START_HOUR=18` / `WINDOW_END_HOUR=30`），「当天」= 页面弹窗的 `date`（**动态、不写死**，写死的只有 18/06 两个时刻）；`measureTimeAxis(items,maxTicks,timeWindow)` 第三参 / `buildLayout` 的 `options.window`，**不传就退回自适应**。窗口外工单被裁成 **width 0**（组件 computed `visibleBars` 过滤，仍计入 `stats.total`）—— ⚠️ 原来 `width += left` 没下限，会算出负宽度、`left>plotWidth` 还会撑出横向滚动条，已修。mock 日期走 `shiftMockDates` **单次正则回调**替换占位日期（两轮 split/join 会在「所选日期=占位值」时二次替换）。校验：`og_window_check.mjs` + `og_probe_window_live.mjs`，改横坐标必跑。
-- **气泡右侧三枚胶囊** = 总耗时 → 节点耗时 → **实际耗时**（2026-10-16 加第三枚）。实际耗时取 `hover.raw.actualCostTime`，**原样展示、不换算**（后端已带单位，形如 `"1.5小时"`），**空串/null → 「暂无」** ⇒ 这一枚**始终渲染、不加 `v-if`**；唯一计算处 = computed `hoverActualCostText`。⚠️ hover 类校验脚本每次 hover 前要先 `moveAway()` —— 420px 宽的气泡会盖住相邻行的柱子，鼠标落在气泡上触发不了 `onBarEnter`，会读到上一个工单（`og_probe_rest_live` 踩过）。
-- ⚠️ **柱体文字 2026-10-23 起「统一显示 + 省略号截断」**（用户原话「柱子上都显示出工单号……显示不完整就用省略号，主要是能看到前面的系统」；**09-23 的「完整或没有」已作废**）：唯一实现 = 纯函数 `truncateLabel(text, measure, barWidth)`（ganttLayout.js）—— 二分找「最长前缀 + …」（`BAR_LABEL_ELLIPSIS`），**保留头部**（系统前缀），至少 1 字符，放不下返回 ''。`canFitLabel` 仅剩「完整放得下」快路径语义。CSS `.og-bar__text` 的 ellipsis + `min-width: 0` 是兜底（正常不触发）。实测 8 条 mock 8/8 有文字；og_check_labels 断言「不以 … 开头 / 无 CSS 二次截断」。
-- ⚠️ **矩形宽度按 mode 拆**：**MANUAL** 结束 = `beginTime + total_cost 分钟`，**`endTime` 不参与绘图**（2026-09-22 用户明确要求）；**AUTO 例外**（2026-10-12 需求变更）= `max(beginTime+total_cost, node_detail 末位节点真正结束)`。判定只此一处 = `ganttLayout.js` 的 `resolveSpan()`（AUTO 分支把 `computeNodeTimeline` 挂 `span.timeline` 供 buildLayout 复用）。**改这个页面前读 `REF-order-gantt.md`**（硬规则 9 条、气泡可达性、分组标签条 chip、柱体文字截断规则、气泡占比进度条、弹窗**日期**过滤条 `date`、校验脚本）。
-- 配色（2026-09-24 用户要求对调）：**AUTO 自动 = 绿，MANUAL 手动 = 蓝**；变量名不变、只换值，但气泡 `.og-tip__mode` 徽标是**硬编码**的要手动跟。分组标签条量词是「**单**」不是「条」。
-- **AUTO 柱子暂停区域**（2026-10-12）：`node_detail` **先按 plan_start_time 升序排、再串行执行**（⚠️ 曾试过「按数组序」，被 0206（首节点 plan 在跨度外 → 整柱全暂停）证伪，别改回去）；`plan_start_time` = 「最早可开工」不是开始时间，null→外层 beginTime；纯函数 `computeNodeTimeline`（ganttLayout.js）挂 `bar.timeline`，暂停块 % 宽不参与布局。详见 `REF-order-gantt.md` §6。
-- 气泡明细表占比进度条调色板（`BAR_PALETTE`）：**不许有红 / 玫红 / 粉**（2026-10-08 用户要求，原第 2 色粉 `#fbd8e3`/`#f090b1` 撞告警红 → 换蓝 `#d6e6ff`/`#7ba7f5`）。现 6 色 = 绿蓝黄橙青紫；`og_syntax_check.mjs` 有按色相的防回归断言。
+- ⚠️ **横坐标固定「当天 18:00 → 次日 06:00」**：唯一判定 `ganttLayout.js` 的 `buildDayWindow(date)`（`WINDOW_START_HOUR=18`/`END=30`），「当天」= 弹窗 `date`（动态，别写死）；`measureTimeAxis` 第三参 / `buildLayout` 的 `options.window`，不传退回自适应。窗口外工单 width 裁成 0（`visibleBars` 过滤，仍计入 `stats.total`）。mock 日期走 `shiftMockDates` **单次正则回调**替换。改横坐标必跑 `og_window_check.mjs` + `og_probe_window_live.mjs`。
+- 气泡右侧三枚胶囊 = 总耗时 → 节点耗时 → **实际耗时**。实际耗时取 `hover.raw.actualCostTime`，**原样展示**（后端已带单位），空/null → 「暂无」⇒ **始终渲染不加 `v-if`**；唯一计算处 `hoverActualCostText`。⚠️ hover 校验脚本每次 hover 前先 `moveAway()`（420px 气泡会盖住相邻行）。
+- ⚠️ **柱体文字「统一显示 + 省略号截断」**（2026-10-23，09-23 的「完整或没有」作废）：唯一实现 `truncateLabel(text, measure, barWidth)`（二分找最长前缀+…，保留头部，至少 1 字符）；`canFitLabel` 只剩「完整放得下」快路径语义；CSS ellipsis 是兜底。
+- ⚠️ **矩形宽度按 mode 拆**：**MANUAL** 结束 = `beginTime + total_cost` 分钟，**`endTime` 不参与绘图**；**AUTO** = `max(beginTime+total_cost, node_detail 末位节点真正结束)`。判定只此一处 `resolveSpan()`。
+- 配色：**AUTO 绿 / MANUAL 蓝**（2026-09-24 对调，变量名不变只换值；气泡 `.og-tip__mode` 徽标硬编码要手动跟）。分组标签条量词是「**单**」。
+- **AUTO 暂停区域**：`node_detail` **按 plan_start_time 升序串行执行**（按数组序被 0206 证伪，别改回去）；`plan_start_time` = 最早可开工，null→外层 beginTime；纯函数 `computeNodeTimeline` 挂 `bar.timeline`。
+- `BAR_PALETTE` **不许有红/玫红/粉**（撞告警红）；现 6 色 = 绿蓝黄橙青紫，`og_syntax_check.mjs` 有按色相断言。
+- **人数说明（2026-11-02）**：`explainStaffResult(result)` 只解读 par、**不重算也不往 par 塞字段**（par 原样 POST 给后端）；0 人 → null 不渲染。**展示分工**：可见区只写 winner 那条逻辑（逻辑二用 `runBrief` 不带时间段，否则「N 人」被挤到下一行），完整两条逻辑 + 取大 + 口径演算挂在 i 图标的 `el-tooltip`（`popper-class="wrd-why-pop"`）。⚠️ popper 挂 body：样式只能写**非 scoped**、`--wrd-*` 要在 popper 上重声明、判可见别用 `offsetParent`。文案由 `buildExplainLines` 拼成 `{t,b,nw}` 段（node 里 join 就能断言）。⚠️ mock 现有 **11 条**，0211/0212/0213（MANUAL、18:30+6h、三条并发）让人数 = **3**（连续 4 段超载 → 逻辑二 4−1），改这三条会让 `og_workload_check.mjs` C 节全红（故意的）。hover 类脚本必须 `mouse.move` 不传 `steps`。
+- 详见 `REF-order-gantt.md`（硬规则 9 条、气泡可达性、chip、进度条、弹窗日期过滤条、§8 人数计算、§9 人数说明）。
 
 ## 系统画像（systemProfile）
-- ⚠️ **右侧链路图 = 「选中组件的 key + 它下游的整条链」**（2026-10-29 改为向下传递闭包）：命中判定 `filterLinksByClusters` **只认 fnode（起点）**、**全等**（不是包含），然后从根沿链路**一路展开下游**（根→子→孙→曾孙……，如 MYSQL→CANAL→KAFKA→ES→GW），不是只画第一层。**不看终点**：指向集合内的上游边不画（选 MYSQL 不带出 NGINX→MYSQL）。环靠 visited 兜住。**根节点只认 `expandedClusters`（组件拓扑第二层 key）**；`集群关系[组件].nodes` **绝不能并进根集合**（那份数据不随折叠变，并进去会让「收起集群→右侧跟着变」彻底失效：单点无反应 / 全收起无图 / 只展开一个却显示全部——内网实测打回过），只在「全展开却零命中」时兜底。另外闭包算完后还要**剔掉「已收起集群」作为起点的边**（否则别的集群指向它时它的出边会留着，看着像点了没反应）。集群名 = 组件拓扑第二层 key = **链路节点名本身**（别再写 `集群名@角色`，那种名字主机列表里查不到）。两份链路：`allLinks`（全量，**只给顶部概览「链路」总数**）+ `links`（展开结果）；顶部概览**不跟着组件变**（用户确认）。改 mock 链路前先对一遍组件拓扑的 key，对不上就静默少几条。
-- ⚠️ **主机列表折叠状态和右侧链路图共用一份 `openClusters`**：链路根集合输入是 `linkRootNames`（= 已展开集群 `expandedClusters` ∪ 集群关系节点 `relationNodeNames`），收起一个集群它的 fnode（节点+连线）就从图上消失；**默认全展开**；写 `openClusters` 一律走 `setOpenClusters()`（集合没变不重算）；`toggleAllClusters` 是切换语义（全展开→收，否则→展），按钮在搜索框左边。空态文案三种（没链路 / 全收起 / 展开的没匹配到）。
-- ⚠️ **小图节点名空间够就常显**：`inlineLabelsFit` 把每个名字按「节点正下方」摆矩形，两两不压、不压任何节点才常显；判定与渲染共用 `TOPO_NODE_LABEL_DISTANCE`/`TOPO_NODE_LABEL_LINE_H`；常显时表头藏掉「悬浮查看节点」。
-- ⚠️ **echarts 4.9 的 `lines` 系列不渲染 label** ⇒ 线段上的 desc 只能用 **scatter** 挂锚点，且 **`symbol:'none'` 会让元素根本不创建**（`SymbolDraw.symbolNeedsDraw` 里判了 `!== 'none'`），锚点用 `symbol:'circle'`+透明色。⚠️ **label 字号与元素 scale 无关**（zrender 的 `RectText` 只 applyTransform 矩形、不 setTransform）——改字号改 `label.fontSize`，别动 `symbolSize`。**文字横着画、锚在曲线中点**（用户否掉了「顺着线段转」和「离线偏移」两版）。「空间合适」= 节点≤14 且线段≤12 且每条带 desc 的线段放得下 ≥60px；desc 过长**按线段实际宽度逐字估算后截断**（不能按「字数×常量」估，中英混排会忽长忽短，上限 200px），一条不满足就**全部**退回悬浮卡片（卡片里给全文）。
-- 细节（`refreshTopo`/`applyComponentLinks`/`disposeTopoChart`、`setOpenClusters`/`inlineLabelsFit`、空态三种文案、`topoLabelOf` 不许削两段式名字、**悬浮卡片单击固定+复制**、校验脚本、像素断言要 A/B 不要 hex 匹配）→ **`REF-systemProfile.md`**。
+- ⚠️ **右侧链路图 = 选中组件的 key + 它下游整条链**（向下传递闭包，2026-10-29）：`filterLinksByClusters` **只认 fnode（起点）、全等**，从根一路展开下游（MYSQL→CANAL→KAFKA→ES→GW）；**不看终点**（指向集合内的上游边不画）；环靠 visited。**根只认 `expandedClusters`**；`集群关系[组件].nodes` **绝不能并进根集合**（不随折叠变，并进去「收起集群→右侧跟着变」彻底失效，内网实测打回过），只在「全展开却零命中」兜底。闭包后还要**剔掉「已收起集群」作为起点的边**。集群名 = 组件拓扑第二层 key = **链路节点名本身**。`allLinks`（全量，只给顶部概览「链路」总数）+ `links`（展开结果）；顶部概览不跟组件变。
+- ⚠️ **主机列表折叠态与右侧链路图共用 `openClusters`**：链路根集合 = `linkRootNames`（`expandedClusters` ∪ `relationNodeNames`），收起即消失；**默认全展开**；写一律走 `setOpenClusters()`（集合没变不重算）；`toggleAllClusters` 是切换语义，按钮在搜索框左边。空态三种文案。
+- ⚠️ **小图节点名空间够就常显**：`inlineLabelsFit`（节点正下方矩形两两不压、不压节点），判定与渲染共用 `TOPO_NODE_LABEL_DISTANCE`/`_LINE_H`；常显时藏掉「悬浮查看节点」。
+- ⚠️ **echarts 4.9 `lines` 系列不渲染 label** ⇒ desc 只能用 **scatter** 挂锚点，且 **`symbol:'none'` 元素根本不创建**（用 `circle`+透明色）。**label 字号与元素 scale 无关**，改 `label.fontSize` 别动 `symbolSize`。文字横着画、锚在曲线中点（另两版被否）。「空间合适」= 节点≤14 且线段≤12 且每条带 desc 线段 ≥60px；desc 按线段实际宽度逐字估宽截断（上限 200px），一条不满足就**全部**退回悬浮卡片。
+- 细节（`refreshTopo`/`applyComponentLinks`/`disposeTopoChart`、`topoLabelOf` 不许削两段式名字、**悬浮卡片单击固定+复制**、像素断言要 A/B 不要 hex）→ `REF-systemProfile.md`。
 
 ## 校验 / 协作
-- node 校验：`cd C:/Users/lenovo/AppData/Local/Temp && node --experimental-loader ./resolve_ext_loader.mjs ./test_xxx.mjs`；浏览器像素校验见技能 `ruoyi-ui-node-verify`。**dev server 日志认人**：根目录 `frontend.log` 是旧的，真正在写的是 `ruoyi-ui/npm-dev.log`。
+- node 校验：`cd C:/Users/lenovo/AppData/Local/Temp && node --experimental-loader ./resolve_ext_loader.mjs ./test_xxx.mjs`；浏览器像素校验见技能 `ruoyi-ui-node-verify`。
 - 不自动跑构建；纯前端改动无需构建。后端 `java -jar` 改动需重构建+重启，**须先说明并等用户明确要求**。工具链 `C:\Users\lenovo\.codex\tools\ruoyi-vue`。
+- 已知无害告警：`src/views/tool/systemProfile/systemProfile.zip` 被 `require.context` 扫到 → `Compiled with 1 warning`（不影响运行）。

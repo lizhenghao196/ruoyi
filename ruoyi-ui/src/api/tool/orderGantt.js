@@ -463,6 +463,62 @@ export function getOrderList(params) {
               },
             ],
           },
+          /* ---- 以下三条为 2026-11-02 新增：给「获取额外变更支持人数」造一个
+           **人数 = 3、且由逻辑二（连续 4 个时间段总分 > 1）算出来**的样例 ----
+              三条 MANUAL 同时开工（18:30，各 6 小时 → 00:30），覆盖 18-20 / 20-22 /
+              22-24 / 00-02 四个时间段，每段都有 3 单在跑：
+                段1 手动 max(4, 6.5)/4 = 1.63  → 段总分 1.83
+                段2 手动 max(4, 6.25)/4 = 1.56 → 段总分 1.76
+                段3 手动 max(3, 6)/4 = 1.5     → 段总分 1.70
+                段4 手动 max(4, 3.5)/4 = 1.0   → 段总分 1.20
+                段5 0.38（三条都结束了）
+              ⇒ 峰值 d = 1.83 没超过 2 → 逻辑一 0 人；连续 4 段 > 1 → 逻辑二 4−1 = 3 人
+              ⇒ 人数 3，结果弹窗里「人数计算说明」会显示「由逻辑二决定」。
+           ⚠️ 为什么是 3 条并发：单个 2 小时时间段里，1 条 MANUAL 最多贡献 max(1,2)/4 = 0.5，
+              2 条是 max(2,4)/4 = 1.0（不超过 1），**必须 3 条同时覆盖**才能让段总分 > 1。
+              所以这三条会各占一行（互相重叠），MANUAL 组从 2 行变 4 行，属预期。
+           ⚠️ 改条数 / 改时长会让上面的期望值全变 —— og_workload_check.mjs 的 C 节有断言。 */
+          {
+            orderId: "CHGU-20260917-0211",
+            total_cost: 360,
+            beginTime: "2026-09-17 18:30:00",
+            endTime: "2026-09-18 00:30:00",
+            mode: "MANUAL",
+            detail: [
+              { type: "容器云工程发布/重启", count: 6, type_cost: 180 },
+              { type: "数据库发布", count: 3, type_cost: 90 },
+              { type: "配置发布", count: 2, type_cost: 30 },
+            ],
+            url: "https://www.baidu.com",
+            actualCostTime: "5.8小时",
+          },
+          {
+            orderId: "CHGU-20260917-0212",
+            total_cost: 360,
+            beginTime: "2026-09-17 18:30:00",
+            endTime: "2026-09-18 00:30:00",
+            mode: "MANUAL",
+            detail: [
+              { type: "ITSM_原子变更_YUM包更新", count: 8, type_cost: 240 },
+              { type: "人工确认", count: 4, type_cost: 60 },
+            ],
+            url: "https://www.qq.com",
+            actualCostTime: "5.5小时",
+          },
+          {
+            orderId: "CHGU-20260917-0213",
+            total_cost: 360,
+            beginTime: "2026-09-17 18:30:00",
+            endTime: "2026-09-18 00:30:00",
+            mode: "MANUAL",
+            detail: [
+              { type: "数据库发布", count: 5, type_cost: 150 },
+              { type: "配置发布", count: 4, type_cost: 60 },
+              { type: "ITSM_屏蔽告警", count: 2, type_cost: 20 },
+            ],
+            url: "https://www.jd.com",
+            actualCostTime: "6.1小时",
+          },
         ],
         params && params.date
       ),
