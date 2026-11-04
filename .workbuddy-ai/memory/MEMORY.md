@@ -52,7 +52,8 @@
 - 配色：**AUTO 绿 / MANUAL 蓝**（2026-09-24 对调，变量名不变只换值；气泡 `.og-tip__mode` 徽标硬编码要手动跟）。分组标签条量词是「**单**」。
 - **AUTO 暂停区域**：`node_detail` **按 plan_start_time 升序串行执行**（按数组序被 0206 证伪，别改回去）；`plan_start_time` = 最早可开工，null→外层 beginTime；纯函数 `computeNodeTimeline` 挂 `bar.timeline`。
 - `BAR_PALETTE` **不许有红/玫红/粉**（撞告警红）；现 6 色 = 绿蓝黄橙青紫，`og_syntax_check.mjs` 有按色相断言。
-- **人数说明（2026-11-02）**：`explainStaffResult(result)` 只解读 par、**不重算也不往 par 塞字段**（par 原样 POST 给后端）；0 人 → null 不渲染。**展示分工**：可见区只写 winner 那条逻辑（逻辑二用 `runBrief` 不带时间段，否则「N 人」被挤到下一行），完整两条逻辑 + 取大 + 口径演算挂在 i 图标的 `el-tooltip`（`popper-class="wrd-why-pop"`）。⚠️ popper 挂 body：样式只能写**非 scoped**、`--wrd-*` 要在 popper 上重声明、判可见别用 `offsetParent`。文案由 `buildExplainLines` 拼成 `{t,b,nw}` 段（node 里 join 就能断言）。⚠️ mock 现有 **11 条**，0211/0212/0213（MANUAL、18:30+6h、三条并发）让人数 = **3**（连续 4 段超载 → 逻辑二 4−1），改这三条会让 `og_workload_check.mjs` C 节全红（故意的）。hover 类脚本必须 `mouse.move` 不传 `steps`。
+- **人数两条逻辑（2026-11-02 改版）**：逻辑一 = 五段总分最大值**先四舍五入**成 D，`D>2` 才 `D-2` 人（2.1→0 人、2.5→1 人，**不是 ceil**）；逻辑二 = **只看后四段**（跳过 18:00-20:00），连续 N 段 > 1 → N-1 人。改动要同时改 `calcExtraStaff` 和 `explainStaffResult` 两处，**外加 `py/order_workload.py` 的 `calc_extra_staff`**（py 四舍五入必须用 `js_round`，内置 `round` 是银行家舍入会差 1 人）。
+- **人数说明（2026-11-02）**：`explainStaffResult(result)` 只解读 par、**不重算也不往 par 塞字段**（par 原样 POST 给后端）；0 人 → null 不渲染。**展示分工**：可见区只写 winner 那条逻辑（逻辑二用 `runBrief` 不带时间段，否则「N 人」被挤到下一行），完整两条逻辑 + 取大 + 口径演算挂在 i 图标的 `el-tooltip`（`popper-class="wrd-why-pop"`）。⚠️ popper 挂 body：样式只能写**非 scoped**、`--wrd-*` 要在 popper 上重声明、判可见别用 `offsetParent`。文案由 `buildExplainLines` 拼成 `{t,b,nw}` 段（node 里 join 就能断言）。⚠️ mock 现有 **11 条**，0211/0212/0213（MANUAL、18:30+6h、三条并发）现在算出 **2 人**（后四段连续 3 段；首段 1.83 已被逻辑二排除），改这三条会让 `og_workload_check.mjs` C 节全红（故意的）。hover 类脚本必须 `mouse.move` 不传 `steps`。
 - 详见 `REF-order-gantt.md`（硬规则 9 条、气泡可达性、chip、进度条、弹窗日期过滤条、§8 人数计算、§9 人数说明）。
 
 ## 系统画像（systemProfile）

@@ -17,8 +17,12 @@
  *      —— 耗时看的是**该时间段内的节点耗时**；一个工单跨多个时间段时，
  *         在每个时间段内分别计算它落在该段内的节点耗时；
  *   3. 手动数值 b = max(x, y) / 4，自动数值 c = max(z, a) / 10，段总分 = b + c；
- *   4. 逻辑一：五段总分取最大 d，**d > 2 起每超过 1 加 1 人** → e；
- *   5. 逻辑二：有连续 N 个时间段总分 > 1 就加 N - 1 人（N < 2 时为 0）→ f；
+ *   4. 逻辑一：五段总分取最大 d，**先把 d 四舍五入成整数 D**，
+ *      D > 2 起每超过 1 加 1 人（D - 2）→ e；
+ *      —— 2026-11-02 用户改动：原来是 ceil(d - 2)，现在先四舍五入再判：
+ *         d = 2.1 → D = 2 → 没超过 2 → 0 人；d = 2.5 → D = 3 → 加 1 人；
+ *   5. 逻辑二：**只看后四个时间段**（跳过 18:00 - 20:00），
+ *      有连续 N 个时间段总分 > 1 就加 N - 1 人（N < 2 时为 0）→ f；
  *   6. 最终人数 g = max(e, f)。
  *
  * 为什么也拆成纯函数：规则全是「算」，一条浏览器都不需要；
@@ -52,10 +56,16 @@ export const WORKLOAD_SEGMENTS = [
 export const MANUAL_DIVISOR = 4
 /** 自动数值的分母：max(单数, 耗时) / 10 */
 export const AUTO_DIVISOR = 10
-/** 逻辑一阈值：单时段总分超过它才开始算人 */
+/** 逻辑一阈值：单时段总分**四舍五入后**超过它才开始算人 */
 export const PEAK_THRESHOLD = 2
 /** 逻辑二阈值：单时段总分超过它才算「超载段」 */
 export const RUN_THRESHOLD = 1
+/**
+ * 逻辑二从第几段开始看（2026-11-02 用户改动：**不看 18:00 - 20:00，只看后四段**）。
+ * 下标对应 WORKLOAD_SEGMENTS，1 = 从「20:00 - 22:00」起算。
+ * ⚠️ 只影响逻辑二；五段仍然全部参与统计和明细表，逻辑一也仍在五段里取峰值。
+ */
+export const RUN_SEGMENT_START = 1
 
 /** 保留两位小数（页面上要打印的值，也用来参与后续比较，避免「显示的和算的不是一个数」） */
 function round2(v) {
@@ -165,16 +175,21 @@ export function calcExtraStaff(orders, date) {
   /* ---------------- 两条逻辑，取最大值 ---------------- */
   const totals = detail.map((d) => d.totalVal)
 
-  // 逻辑一：五段总分取最大 d，d > 2 起每超过 1 加 1 人。
-  // 取整方向 = **向上**：d 只比 2 大一丝丝（如 2.05）也是「超过」，
-  // 「大于 2 就需要增加人手」这句话里人手至少是 1 个；用人不能招 0.3 个。
+  // 逻辑一：五段总分取最大 d，**四舍五入成整数 D**，D > 2 起每超过 1 加 1 人。
+  // 2026-11-02 用户改动（原来 ceil(d - 2)）：
+  //   d = 2.1 → D = 2 → 没超过 2 → 0 人；d = 2.5 → D = 3 → 3 - 2 = 1 人。
+  // ⚠️ 用 Math.round（.5 向上）正好符合用户举的例子；别改回 Math.ceil，
+  //    og_workload_check.mjs 的 B5 有 2.1 / 2.25 会红的断言。
   const peak = totals.reduce((m, t) => Math.max(m, t), 0)
-  const peakExtra = peak > PEAK_THRESHOLD ? Math.ceil(peak - PEAK_THRESHOLD) : 0
+  const peakRounded = Math.round(peak)
+  const peakExtra = peakRounded > PEAK_THRESHOLD ? peakRounded - PEAK_THRESHOLD : 0
 
-  // 逻辑二：最长连续超载段（总分 > 1）为 N → 加 N - 1 人；只有一段超载时 N-1 = 0。
+  // 逻辑二：**只看后四段**（跳过 18:00 - 20:00）最长连续超载段（总分 > 1）为 N
+  // → 加 N - 1 人；只有一段超载时 N-1 = 0。
+  // 首段即使超载也不参与连续段（否则「18-20 + 20-22」会被算成连续 2 段）。
   let longest = 0
   let run = 0
-  totals.forEach((t) => {
+  totals.slice(RUN_SEGMENT_START).forEach((t) => {
     run = t > RUN_THRESHOLD ? run + 1 : 0
     if (run > longest) {
       longest = run
@@ -225,14 +240,20 @@ export function explainStaffResult(result) {
   })
   const peakRow = detail[peakIdx]
   const peakVal = totals[peakIdx]
-  const peakExtra = peakVal > PEAK_THRESHOLD ? Math.ceil(peakVal - PEAK_THRESHOLD) : 0
+  // 逻辑一：和 calcExtraStaff 同一套判据（先四舍五入，再 D - 2）
+  const peakRounded = Math.round(peakVal)
+  const peakExtra = peakRounded > PEAK_THRESHOLD ? peakRounded - PEAK_THRESHOLD : 0
 
-  /* 逻辑二：最长连续超载段（段总分 > 1），同长取靠前的那一段 */
+  /* 逻辑二：后四段里最长连续超载段（段总分 > 1），同长取靠前的那一段 */
   let bestStart = 0
   let bestLen = 0
   let curStart = 0
   let curLen = 0
   totals.forEach((t, i) => {
+    // 2026-11-02：18:00 - 20:00 不参与逻辑二，直接跳过（不打断、也不计入连续段）
+    if (i < RUN_SEGMENT_START) {
+      return
+    }
     if (t > RUN_THRESHOLD) {
       if (curLen === 0) {
         curStart = i
@@ -259,6 +280,8 @@ export function explainStaffResult(result) {
     peak: {
       time: peakRow.time,
       value: peakVal,
+      // 四舍五入后的整数（逻辑一真正拿来判 > 2 的那个数，文案里要展示）
+      rounded: peakRounded,
       extra: peakExtra,
       manualNum: peakRow.manualNum,
       manualCost: peakRow.manualCost,
@@ -302,33 +325,35 @@ export function buildExplainLines(explain) {
   const peopleNum = explain.peopleNum
   const winner = explain.winner
 
-  /* 逻辑一：峰值 + ceil(d - 2) */
+  /* 逻辑一：峰值 d → 四舍五入 D → D - 2
+     2026-11-02 改动：先把 d 四舍五入再判 > 2，文案要把「四舍五入 = D」摆出来，
+     否则用户看到 d = 2.1 却 0 人会以为算错。 */
   const peakParts = [
     { t: '五段总分最高 d = ' },
     { t: String(peak.value), b: true },
     { t: '（' },
     { t: peak.time, nw: true },
-    { t: '）' }
+    { t: '），四舍五入 = ' },
+    { t: String(peak.rounded), b: true }
   ]
   if (peak.extra > 0) {
     peakParts.push(
-      { t: '，d > 2 → 向上取整(' },
-      { t: String(peak.value), b: true },
-      { t: ' − 2) = ' },
+      { t: ' > 2 → ' },
+      { t: peak.rounded + ' − 2 = ' },
       { t: peak.extra + ' 人', b: true }
     )
   } else {
     peakParts.push({ t: '，未超过 2 → ' }, { t: '0 人', b: true })
   }
 
-  /* 逻辑二：最长连续超载段 N → N - 1
+  /* 逻辑二：后四段（跳过 18:00 - 20:00）最长连续超载段 N → N - 1
      - `run`      = 完整版（带具体哪几段）→ 悬浮卡片用；
      - `runBrief` = 精简版（不带时间段）→ 弹窗可见区用：四段的时间串加起来太长，
        摆进去会把「N 人」挤到下一行，读起来很别扭（时间段在明细表和悬浮卡片里都有）。 */
   const runParts = []
   const runBrief = []
   if (run.extra > 0) {
-    runParts.push({ t: '连续 ' }, { t: String(run.length), b: true }, { t: ' 段总分 > 1（' })
+    runParts.push({ t: '后四段连续 ' }, { t: String(run.length), b: true }, { t: ' 段总分 > 1（' })
     run.times.forEach((t, i) => {
       if (i) {
         runParts.push({ t: '、' })
@@ -341,7 +366,7 @@ export function buildExplainLines(explain) {
       { t: run.extra + ' 人', b: true }
     )
     runBrief.push(
-      { t: '连续 ' },
+      { t: '后四段连续 ' },
       { t: String(run.length), b: true },
       { t: ' 段总分 > 1 → ' },
       { t: run.length + ' − 1 = ' },
@@ -349,18 +374,18 @@ export function buildExplainLines(explain) {
     )
   } else if (run.length === 1) {
     runParts.push(
-      { t: '只有 1 段总分 > 1（' },
+      { t: '后四段只有 1 段总分 > 1（' },
       { t: run.times[0] || '', nw: true },
       { t: '），不足 2 段 → ' },
       { t: '0 人', b: true }
     )
     runBrief.push(
-      { t: '只有 1 段总分 > 1，不足 2 段 → ' },
+      { t: '后四段只有 1 段总分 > 1，不足 2 段 → ' },
       { t: '0 人', b: true }
     )
   } else {
-    runParts.push({ t: '没有连续 2 段总分 > 1 → ' }, { t: '0 人', b: true })
-    runBrief.push({ t: '没有连续 2 段总分 > 1 → ' }, { t: '0 人', b: true })
+    runParts.push({ t: '后四段没有连续 2 段总分 > 1 → ' }, { t: '0 人', b: true })
+    runBrief.push({ t: '后四段没有连续 2 段总分 > 1 → ' }, { t: '0 人', b: true })
   }
 
   /* 两条取较大值 */

@@ -36,8 +36,12 @@
    2. 每段统计：手动单数 x、手动耗时 y、自动单数 z、自动耗时 a（单位 H）；
       耗时 = **该时间段内的节点耗时**；一个工单跨多个时间段时，各段分别算它落进来的部分；
    3. 手动数值 b = max(x, y) / 4，自动数值 c = max(z, a) / 10，段总分 = b + c；
-   4. 逻辑一：五段总分取最大 d，d > 2 起每超过 1 加 1 人 → e（向上取整）；
-   5. 逻辑二：有连续 N 段总分 > 1 就加 N - 1 人（N < 2 时为 0）→ f；
+   4. 逻辑一：五段总分取最大 d，**先把 d 四舍五入成整数 D**，
+      D > 2 起每超过 1 加 1 人（D - 2）→ e；
+      —— 2026-11-02 用户改动：原来是 ceil(d - 2)，现在先四舍五入再判：
+         d = 2.1 → D = 2 → 没超过 2 → 0 人；d = 2.5 → D = 3 → 加 1 人；
+   5. 逻辑二：**只看后四个时间段**（跳过 18:00 - 20:00），
+      有连续 N 段总分 > 1 就加 N - 1 人（N < 2 时为 0）→ f；
    6. 最终人数 g = max(e, f)。
 
 用法
@@ -50,7 +54,7 @@
    # 3) 用本地 JSON 文件当数据源（接口还没通时联调用）
    python order_workload.py --orders-file orders.json
 
-   # 4) 内置样例自检（和前端 mock 那 8 条工单完全一致，不需要任何后端）
+   # 4) 内置样例自检（和前端 mock 那 11 条工单完全一致，不需要任何后端）
    python order_workload.py --mock
 
    # 5) 算完顺手推送到企微
@@ -87,10 +91,14 @@ WORKLOAD_SEGMENTS = [
 MANUAL_DIVISOR = 4
 #: 自动数值的分母：max(单数, 耗时) / 10
 AUTO_DIVISOR = 10
-#: 逻辑一阈值：单时段总分超过它才开始算人
+#: 逻辑一阈值：单时段总分**四舍五入后**超过它才开始算人
 PEAK_THRESHOLD = 2
 #: 逻辑二阈值：单时段总分超过它才算「超载段」
 RUN_THRESHOLD = 1
+#: 逻辑二从第几段开始看（2026-11-02 用户改动：**不看 18:00 - 20:00，只看后四段**）。
+#: 下标对应 WORKLOAD_SEGMENTS，1 = 从「20:00 - 22:00」起算。
+#: ⚠️ 只影响逻辑二；五段仍然全部参与统计和明细表，逻辑一也仍在五段里取峰值。
+RUN_SEGMENT_START = 1
 
 #: 窗口起点：当天 18:00
 WINDOW_START_HOUR = 18
@@ -493,15 +501,21 @@ def calc_extra_staff(orders, date_value=None):
     # ---------------- 两条逻辑，取最大值 ----------------
     totals = [d["totalVal"] for d in detail]
 
-    # 逻辑一：五段总分取最大 d，d > 2 起每超过 1 加 1 人。取整方向 = **向上**：
-    # d 只比 2 大一丝丝（如 2.05）也算「超过」—— 人手至少是 1 个，不能招 0.3 个人。
+    # 逻辑一：五段总分取最大 d，**四舍五入成整数 D**，D > 2 起每超过 1 加 1 人。
+    # 2026-11-02 用户改动（原来 ceil(d - 2)）：
+    #   d = 2.1 → D = 2 → 没超过 2 → 0 人；d = 2.5 → D = 3 → 3 - 2 = 1 人。
+    # ⚠️ 必须用 js_round（.5 往 +∞），**不能用 Python 内置 round**：内置是银行家舍入，
+    #    round(2.5) = 2，会和前端 JS 算出不一样的人数。
     peak = max(totals) if totals else 0
-    peak_extra = math.ceil(peak - PEAK_THRESHOLD) if peak > PEAK_THRESHOLD else 0
+    peak_rounded = js_round(peak)
+    peak_extra = peak_rounded - PEAK_THRESHOLD if peak_rounded > PEAK_THRESHOLD else 0
 
-    # 逻辑二：最长连续超载段（总分 > 1）为 N → 加 N - 1 人；只有一段超载时 N-1 = 0。
+    # 逻辑二：**只看后四段**（跳过 18:00 - 20:00）最长连续超载段（总分 > 1）为 N
+    # → 加 N - 1 人；只有一段超载时 N-1 = 0。
+    # 首段即使超载也不参与连续段（否则「18-20 + 20-22」会被算成连续 2 段）。
     longest = 0
     run = 0
-    for t in totals:
+    for t in totals[RUN_SEGMENT_START:]:
         run = run + 1 if t > RUN_THRESHOLD else 0
         if run > longest:
             longest = run
@@ -646,7 +660,7 @@ def push_to_wecom(payload, url=None, token=None, timeout=10):
 
 # ---------------------------------------------------------------- 内置样例（自检用）
 
-#: 与前端 api/tool/orderGantt.js 里 USE_MOCK 那 8 条样例**完全一致**，
+#: 与前端 api/tool/orderGantt.js 里 USE_MOCK 那 11 条样例**完全一致**，
 #: 只把日期写成占位符：'__DAY__' = 窗口当天，'__NEXT__' = 次日。
 _MOCK_ORDERS = [
     {
@@ -733,6 +747,29 @@ _MOCK_ORDERS = [
             {"cost": 50, "node_name": "批处理-容器云发布", "plan_start_time": None},
         ],
     },
+    # 2026-11-02 与前端同步：三条并发 MANUAL（18:30 + 6h），给「人数 >= 1」造样例。
+    # 后四段连续 3 段超载 → 逻辑二 3 - 1 = 2 人（首段 1.83 已被逻辑二排除）。
+    {
+        "orderId": "CHGU-20260917-0211",
+        "total_cost": 360,
+        "beginTime": "__DAY__ 18:30:00",
+        "endTime": "__NEXT__ 00:30:00",
+        "mode": "MANUAL",
+    },
+    {
+        "orderId": "CHGU-20260917-0212",
+        "total_cost": 360,
+        "beginTime": "__DAY__ 18:30:00",
+        "endTime": "__NEXT__ 00:30:00",
+        "mode": "MANUAL",
+    },
+    {
+        "orderId": "CHGU-20260917-0213",
+        "total_cost": 360,
+        "beginTime": "__DAY__ 18:30:00",
+        "endTime": "__NEXT__ 00:30:00",
+        "mode": "MANUAL",
+    },
 ]
 
 
@@ -783,7 +820,7 @@ def main(argv=None):
     parser.add_argument("--push-url", default=None, help="推送接口（默认 %s）" % DEFAULT_PUSH_URL)
     parser.add_argument("--orders-file", default=None, help="用本地 JSON 文件当数据源（数组或 {data:[...]}）")
     parser.add_argument("--token", default=None, help="可选，Authorization 头的值")
-    parser.add_argument("--mock", action="store_true", help="用内置 8 条样例工单（和前端 mock 一致）")
+    parser.add_argument("--mock", action="store_true", help="用内置 11 条样例工单（和前端 mock 一致）")
     parser.add_argument("--push", action="store_true", help="算完直接推送到企微")
     parser.add_argument("--compact", action="store_true", help="输出单行 JSON")
     args = parser.parse_args(argv)

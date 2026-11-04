@@ -372,11 +372,20 @@
 - **数值**：`b = max(x,y)/4`、`c = max(z,a)/10`、段总分 = b+c；`MANUAL_DIVISOR=4` /
   `AUTO_DIVISOR=10` 是导出常量。**显示值 round2，后续比较也用 round2 后的值**
   （保持「打出来的人数」和「打印的分数」自洽）。
-- **两条逻辑**：d = 五段总分最大 ⇒ **逻辑一 `e = d > 2 ? Math.ceil(d - 2) : 0`**
-  （⚠️ 向上取整是**当前解读**：用户原话「d大于2则需要增加人手，每超过1则增加一人」，
-  取 ceil 才能保证 d=2.05 也出 1 人；若用户要 floor，只改 `Math.ceil` 一处，
-  `og_workload_check.mjs` 的 B5 有对应断言会红）。逻辑二：最长连续 N 段总分 > 1 ⇒
-  `f = N - 1`（N<2 为 0）。**g = max(e, f)** = `peopleNum`。
+- **两条逻辑**（⚠️ 2026-11-02 用户改版，旧规则已作废）：
+  - **逻辑一**：d = 五段总分最大 ⇒ **先把 d 四舍五入成整数 D**，
+    `e = D > 2 ? D - 2 : 0`（`Math.round(peak)`，**不是** ceil / floor）。
+    用户原话：「d 是 2.1 那么视作 2，没有大于 2 所以这个时间段不用增加人手；
+    d 是 2.5 那么视作 3，大于 2 了，需要增加 1 人」。⇒ d=2.1/2.25 → 0 人；
+    d=2.5/3.25 → 1 人；d=3.5/5.0 → 2/3 人。
+    ⚠️ 取五段最大值再四舍五入 ≡ 每段先四舍五入再取最大（round 单调），两种理解等价。
+  - **逻辑二**：**只看后四段**（`RUN_SEGMENT_START = 1`，跳过 18:00 - 20:00），
+    最长连续 N 段总分 > 1 ⇒ `f = N - 1`（N<2 为 0）。
+    首段超载**不算**连续段，也不能和后四段连起来（18-20 与 20-22 都超载 ≠ 连续 2 段）。
+    ⚠️ 只影响逻辑二：五段仍全部参与统计 / 明细表 / 逻辑一峰值。
+  - **g = max(e, f)** = `peopleNum`。
+  - 改动同时要改两处（`calcExtraStaff` 与 `explainStaffResult` 各算一遍），
+    漏一处会出现「结论 2 人、说明写 3 人」。
 - **按钮与接线**：`OrderGantt.vue` 的 `.og__head` 里、图例右侧（`.og__calc` 描边小按钮，
   icon flex 居中）→ `handleCalcStaff()`：`calcExtraStaff(this.orders, this.windowDate)` →
   `console.log(par)` + 打开结果弹窗。数据源 = 当前弹窗工单 + 当前日期（和图同源，
@@ -403,6 +412,14 @@
 - ⚠️ **`computeNodeTimeline` 排序坑**（本次连踩两次）：null 的 `plan_start_time`
   取外层 beginTime **参与排序**，所以 0110/0111/0205 的真实执行序是
   n1 → n3(null) → n2(晚 plan)，不是数组序；手推期望值必错，以脚本输出为准。
+- ⚠️ **改规则必须同时改 `py/order_workload.py`**（后端同款实现，前端是唯一权威）：
+  `calc_extra_staff` 里是 `js_round(peak)` + `totals[RUN_SEGMENT_START:]`，
+  常量 `RUN_SEGMENT_START = 1` 与前端同名同值。
+  **四舍五入必须用 `js_round`，不能用 Python 内置 `round`**（内置是银行家舍入，
+  `round(2.5) = 2`，会和 JS 的 3 差一个人）。
+  对拍工具：`og_fuzz_gen.mjs` 生成 300 组随机用例（JS 算基准）→ `og_fuzz_cmp.py` 用 Python 复算，
+  必须 `mismatch=0`；另有 `py_workload_parity.py` 做真实 11 条 mock 的逐字段对比 + 边界用例。
+  py 内置 `_MOCK_ORDERS` 也要跟前端 11 条保持一致（`--mock` 应算出 2 人）。
 - 校验：`og_workload_check.mjs`（接线 + 纯函数全规则 + mock 8 条端到端，FAILURES 0）；
   `og_probe_workload_live.mjs`（真实浏览器：按钮位置/文案、点击后控制台 par 与
   node 侧期望值 JSON 完全一致、结果弹窗结论行/表头/5 行、推送到企微成功并自动关窗、
@@ -420,8 +437,9 @@
 - ⚠️ **说明字段不许塞进 par**：par 会原样 POST 给后端（`pushExtraStaff` 是 `{ ...par, date }`），
   多出来的字段会跟着进请求体。说明在弹窗里现算（computed `explain`）。
   `og_workload_check.mjs` D6 断言「par 仍然只有 peopleNum / detail」。
-- 返回结构：`{ peopleNum, peak{time,value,extra,manualNum,manualCost,manualVal,autoNum,autoCost,autoVal,partsSum,partsMatch}, run{length,extra,times[]}, winner:'peak'|'run' }`；
+- 返回结构：`{ peopleNum, peak{time,value,rounded,extra,manualNum,manualCost,manualVal,autoNum,autoCost,autoVal,partsSum,partsMatch}, run{length,extra,times[]}, winner:'peak'|'run' }`；
   人数 < 1 / 没有 detail → **null**（用户只要求 >= 1 时说明，0 人整块不渲染）。
+  `peak.rounded` = 四舍五入后的整数（2026-11-02 新增，文案要展示它）。
 - **winner 判定**：`peakExtra >= runExtra ? 'peak' : 'run'`，和 `Math.max` 语义一致；
   逻辑一的峰值段同分取靠前，逻辑二的连续段同长也取靠前。
 - **文案纯函数 = `buildExplainLines(explain)`**（同文件）：把说明数据拼成
@@ -436,7 +454,7 @@
   ```
   ⓘ 人数计算说明                              悬停图标查看完整逻辑
   逻辑二 · 连续超载
-  连续 4 段总分 > 1 → 4 − 1 = 3 人
+  后四段连续 3 段总分 > 1 → 3 − 1 = 2 人
   ```
   实测块高 **93px**（改版前三行 + note 是 236px），弹窗从 649px 缩到 506px。
 - **完整过程挂 i 图标的 `el-tooltip`**（`popper-class="wrd-why-pop"`，`:enterable="true"`）：
@@ -466,17 +484,23 @@
   MANUAL 让真实数据就能跑通主路径，注入只用于补真实数据不出现的分支。
 
 
-## 10. mock 里「人数 = 3（连续 4 段超载）」的样例（2026-11-02 用户要求）
+## 10. mock 里「连续超载」的人数样例（2026-11-02 用户要求）
 
 **需求原话**：「你修改一下 mock，做一个额外需要变更人数为 3 的数据，是连续四个时间段都大于 1 的那种」。
+
+> ⚠️ **2026-11-02 晚改版后实际是 2 人**：逻辑二改成不看 18:00 - 20:00，
+> 这 3 条 MANUAL 造出的 1.83 / 1.76 / 1.70 / 1.20 / 0.38 里，
+> 首段 1.83 被排除 ⇒ 后四段只剩 **3 段**连续超载 ⇒ `3 − 1 = 2` 人。
+> 数据本身没动（用户没要求改）；要再回到 3 人得让 02:00 - 06:00 也超载（目前 0.38），
+> 即「后四段连续 4 段」。`og_workload_check.mjs` C 节现在钉的是 2 人 / 3 段。
 
 - 新增 3 条 MANUAL：`CHGU-20260917-0211 / 0212 / 0213`，**18:30 开工、`total_cost` 360 分钟
   （6 小时，画到 00:30）**，三条时间完全相同（并发）。
 - 为什么必须 3 条并发：单个 2 小时时间段里，1 条 MANUAL 最多贡献 `max(1, 2)/4 = 0.5`，
   2 条是 `max(2, 4)/4 = 1.0`（**不大于 1**），只有 3 条同时覆盖才能让段总分 > 1。
 - 结果（`og_mock_print.mjs` 实测）：段总分 **1.83 / 1.76 / 1.70 / 1.20 / 0.38** ⇒
-  峰值 1.83 没超过 2 → 逻辑一 0 人；连续 4 段 > 1 → 逻辑二 `4 − 1 = 3` 人 ⇒ **人数 3，由逻辑二决定**。
-  弹窗说明块会显示「连续 4 段总分 > 1（18:00-20:00、20:00-22:00、22:00-24:00、00:00-02:00）→ 4 − 1 = 3 人」。
+  峰值 1.83 四舍五入 2 → 逻辑一 0 人；后四段连续 3 段 > 1 → 逻辑二 `3 − 1 = 2` 人 ⇒ **人数 2，由逻辑二决定**。
+  弹窗说明块显示「后四段连续 3 段总分 > 1 → 3 − 1 = 2 人」，悬浮卡片带具体三段。
 - 副作用（预期内）：
   - MANUAL 组从 2 行变 **4 行**（三条互相重叠各占一行；0087 与 0047 不重叠可共行），
     全图 7 行，柱体文字实测 11/11 仍全部显示；
@@ -485,6 +509,6 @@
   0206 正好在 0111 上一行，从 `(20,700)` 分步走过去会**沿途扫过 0111 的柱子**，
   把 0111 的 420px 气泡重新唤出来、再压住 0206 的中心点 → 读到的是 0111（假红 3 条，
   2026-11-02 踩过）。`moveAway()` 照旧要保留。
-- 校验：`og_workload_check.mjs` C 节期望值全部改成 11 条的新数（段总分 / 人数 3 / `winner: 'run'` /
-  `run.times` 四段）；`og_probe_why_live.mjs` 第 1 节直接用真实数据验说明块。
+- 校验：`og_workload_check.mjs` C 节期望值全部改成 11 条的新数（段总分 / 人数 2 / `winner: 'run'` /
+  `run.times` 三段 = 20-22 / 22-24 / 0-2）；`og_probe_why_live.mjs` 第 1 节直接用真实数据验说明块。
 - ⚠️ 改这三条的条数 / 时长会让上面所有期望值失效，C 节断言会红 —— 那是故意的（防悄悄改坏）。
