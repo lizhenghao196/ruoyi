@@ -72,6 +72,21 @@
 - 写 `openClusters` 一律走 `setOpenClusters(names)`（集合没变就不重算拓扑）；
   入口有 `selectComponent` / `onClusterToggle` / `toggleAllClusters` / 搜索框那个 watcher。
 - `toggleAllClusters` 是**切换**语义：全展开 → 收，否则 → 展开（按钮文案跟着变）。
+- **默认展开策略 = 只开第一个集群**（2026-11-04，用户诉求：生产上单个组件动辄上百集群
+  如 HAPROXY 310 个，全展开会把右侧链路图画成上千条线的「碗」，既难看又卡）：
+  - 唯一入口 `defaultOpenClusters()`，`doSearch`（查询成功回调里定完 `activeComponent` 之后）
+    和 `selectComponent` 都调它。**别再写回 `this.openClusters = this.activeClusters.slice()`**。
+  - 「第一个」= `filteredGroups[0].name`，即主机列表里**第一个可见**的集群。
+    ⚠️ 不等于组件拓扑 `Object.keys()` 的第一个：`componentList` 里 clusters 按
+    `name.localeCompare` **排过序**（HAPROXY / 应用 两个组件的两种顺序确实不同），
+    用拓扑 key 顺序当期望值写断言会假红。
+  - 搜索把当前组件的集群全过滤掉时兜底到 `activeClusters[0]`，否则链路图会退化成
+    「左侧集群都收起了」的空态。`searchQuery` 那个 watcher 保持不变（无交集时自动开第一个可见集群）。
+  - 默认态 `allClustersExpanded === false` ⇒ 表头按钮显示「一键展开」（不是「一键收起」）。
+  - 效果（mock，NGINX）：默认 2 节点 / 1 边；一键展开 4 节点 / 3 边。
+  - 校验：`Temp/sp_default_open_check.mjs`（51 项，纯函数 + 源码断言）+
+    浏览器侧 19 项（折叠 `is-active` 计数、展开项 = 列表第一项、切组件仍只开一个、
+    按钮文案、控制台无报错）。
 - `index.vue` 的两份链路：
   - `allLinks` —— 全量（`prepareData` 里 `normalizeLinks` 一次），**只给顶部概览的「链路」总数用**；
   - `links` —— 当前组件展开下游后的结果，右侧链路图 / 放大弹窗 / 表头计数都用它。
@@ -188,6 +203,74 @@
   Vue 2 在对象赋给 `topoHover` 之后再加的新属性不是响应式的。
 - 校验：`Temp/sp_pin_check.mjs`（38 项：固定/取消/点空白/Esc/连线 desc/复制内容拼装/源码断言）。
 
+## 3.6 性能：几百个集群时的卡顿（2026-11-04 实测）
+
+**场景**：生产上单个组件 310 个集群 / 1550 台主机 / 170 条链路（232 节点），点「一键展开」卡 3.4s。
+
+**测量方法**（可复现）：playwright + `channel: 'msedge'`（本机 Chrome 起不来，见 §4 末尾），
+注入合成数据到 `vm.profileData` 后 `prepareData()` + `renderTopoChart()`，
+用 `PerformanceObserver({entryTypes:['longtask']})` 统计主线程阻塞、CDP `Profiler` 抓函数级耗时。
+
+**结论：主因不是 echarts**。
+
+| 指标 | 数值 |
+|---|---|
+| 点击 → 绘制完成 | 3456 ms |
+| 主线程阻塞 | 2289 ms（单次长任务 1692 ms） |
+| echarts `setOption`（170 边） | 191 ms（3.4%） |
+| 筛选 + `buildTopology` | 7 ms |
+| 首屏 DOM（**只展开 1 个面板**） | 70608 节点 / 310 个 el-table / 1550 行 |
+
+CPU 采样 top：`getTransitionInfo`(Vue) 1215ms/14.7%、`collapse-transition.enter`(Element) 1154ms/14%、
+`resizeListener`(el-table 布局) 904ms/10.9%。
+
+**三个根因**：
+1. `el-collapse` 的内容用 **`v-show`**，310 个 `el-table` 首屏就全建好了（哪怕只展开一个）。
+2. 展开时 310 个面板同时改 display ⇒ 每个都读 computed style（`getTransitionInfo`）⇒
+   **310 次强制同步布局串成 1.7s 长任务**。
+3. 310 个 el-table 各自 `doLayout`（`resizeListener`）。
+
+⚠️ **CSS 禁 transition 完全无效**（3456→3364ms）：Element 的 `collapse-transition` 是
+JS 内联 style + rAF 驱动的，外部 CSS 压不住；而且根因是布局次数，不是动画时长。
+
+**已做（2026-11-04，三层懒加载，缺一层就会退化）**：
+
+1. **默认只展开第一个集群**（`defaultOpenClusters`，见 §2）。
+2. **表格 `v-if` 懒渲染**：`isClusterOpen(name)` —— 只有展开的集群才建 `el-table`。
+   ⚠️ `el-collapse` 的内容是 `v-show`，收起时表格照样在 DOM 里，这是 7 万节点的来源。
+   ⚠️ 加了 v-if 后展开的一瞬间没有内容可量高度，`el-collapse` 的 max-height 过渡会把
+   表格压成 0 —— 必须配 `.el-collapse-item__wrap { max-height: none !important }`。
+3. **视口懒挂载**：`isClusterMounted(name)` + `IntersectionObserver`（root = `.profile-hosts__panel`，
+   `rootMargin: 400px 0px`）。展开但屏外的先渲染 `.profile-cluster__loading` 占位块，
+   滚进视口 400px 才换成真表格。`mountedClusters` 在 `doSearch` / `selectComponent` 里重置为
+   默认展开的那一个，`setOpenClusters` 里把收起集群的标记撤掉（否则再展开会瞬间重建全部）。
+4. `.el-collapse-item__wrap` 的 `content-visibility: auto` + `contain-intrinsic-size: auto 300px`。
+
+⚠️ **占位高度口径必须一致**：`placeholderStyle` = `min(320, 41 + 行数 × 37)`，
+`contain-intrinsic-size` 用 300 —— 两者对不上，滚过之后真实高度替换估算值，滚动条会跳
+（实测偏差 0.13%，可接受，但别再放大）。
+
+实测（310 集群 / 1550 主机 / 170 链路）：
+
+| 场景 | 改前 | 改后 |
+|---|---|---|
+| 切到 310 集群的组件 | 几秒 | **118 ms**（DOM 70608 → 3858） |
+| 一键展开 310 个 | 3456 ms | **1011 ms**（只建 3 个表格，307 个占位） |
+| 滚动 4500px（挂 18 个表） | — | fps 44.8，单次最长任务 61 ms |
+
+验证：21 项（切组件/展开/滚动挂载/收起清理/滚动条）+ 20 项（真实 mock 数据回归）+
+既有 28/38/51/34 项全过。
+
+**没做的（可选）**：
+- **echarts 降级**（大图 >150 边时）：关流动光点 + 关入场动画，`setOption` 191→126ms，
+  静止帧率 55→60fps。光点层是 motionBlur 整层重绘，170 个动画符号持续吃 CPU ——
+  这是「页面一直卡」的**第二个独立原因**，和点击卡是两回事。
+- **el-table 换轻量表格**：310 个组件实例（layout/ResizeObserver/事件）本身重，
+  但懒挂载后同时存在的表格只有 3~8 个，收益已经不大。
+
+**兼容性**：`content-visibility` 需 Chrome 85+，不支持时自动降级为普通渲染（无副作用）。
+打印和 Ctrl+F 查找时浏览器会临时渲染（规范要求），不影响。
+
 ## 4. 校验脚本（都在 `C:/Users/lenovo/AppData/Local/Temp/`）
 
 ```bash
@@ -195,6 +278,8 @@ cd "C:/Users/lenovo/AppData/Local/Temp" && \
   "C:/Users/lenovo/.workbuddy-ai/binaries/node/versions/22.22.2-6/node.exe" \
   --experimental-loader ./resolve_ext_loader.mjs ./sp_verify.mjs    # 纯函数 + mock + 页面集成 + SCSS + 源码
 # 浏览器侧（playwright + 本机 Chrome，需要 dev server 在 :80）
+#   ⚠️ 2026-11-04 起：channel:'chrome' 在本机报 `spawn UNKNOWN`（bash 里直接执行 chrome.exe
+#   是 Permission denied），改用 channel:'msedge' 正常。浏览器侧脚本一律用 Edge。
   ... ./sp_shot.mjs
 ```
 

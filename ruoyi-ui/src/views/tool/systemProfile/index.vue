@@ -194,8 +194,8 @@
           </header>
 
           <div ref="hostsPanel" class="profile-hosts__panel">
-            <!-- 每个集群一个可展开收起的表格；**默认全部展开**，展开状态同时决定
-                 右侧链路图画哪些集群（收起一个集群，它的节点和连线也跟着从图上消失） -->
+            <!-- 每个集群一个可展开收起的表格；**默认只展开第一个**（其余收起），
+                 展开状态同时决定右侧链路图画哪些集群（收起一个集群，它的节点和连线也跟着从图上消失） -->
             <el-collapse
               v-if="filteredGroups.length"
               :value="openClusters"
@@ -216,49 +216,69 @@
                 </template>
                 <!-- 动态列：列来自数据字段并集，字段增减/新增组件类型都无需改代码；
                      主机名/机房/类型/CPU/内存保留图标与标签样式，其余字段原样展示。
-                     max-height：数据多（80+ 条）时表内滚动，表头固定 -->
-                <el-table
-                  :data="cluster.hosts"
-                  size="mini"
-                  border
-                  max-height="320"
-                >
-                  <el-table-column
-                    v-for="col in cluster.columns"
-                    :key="col.prop"
-                    :prop="col.prop"
-                    :label="col.label"
-                    :width="col.width"
-                    :min-width="col.minWidth"
-                    :render-header="renderColumnHeader"
-                    show-overflow-tooltip
+                     max-height：数据多（80+ 条）时表内滚动，表头固定。
+                     ⚠️ 两层懒加载是必需的：el-collapse 的内容默认只是 v-show，收起时表格
+                     照样建在 DOM 里 —— 生产上一个组件 310 个集群就是 310 个 el-table /
+                     7 万节点，切组件时要全量销毁重建，好几秒才出画面。
+                     ① isClusterOpen：只有展开的集群才建表格；
+                     ② isClusterMounted：展开但还在屏外的先占位，滚到附近才真正建表
+                     （否则「一键展开 310 个」会一次性建 310 个表格，又卡回去） -->
+                <template v-if="isClusterOpen(cluster.name)">
+                  <el-table
+                    v-if="isClusterMounted(cluster.name)"
+                    :data="cluster.hosts"
+                    size="mini"
+                    border
+                    max-height="320"
                   >
-                    <template slot-scope="scope">
-                      <span v-if="col.prop === 'hostname'" class="profile-host">
-                        <i class="el-icon-monitor profile-host__icon" />
-                        <span class="profile-host__name">{{
-                          scope.row.hostname
+                    <el-table-column
+                      v-for="col in cluster.columns"
+                      :key="col.prop"
+                      :prop="col.prop"
+                      :label="col.label"
+                      :width="col.width"
+                      :min-width="col.minWidth"
+                      :render-header="renderColumnHeader"
+                      show-overflow-tooltip
+                    >
+                      <template slot-scope="scope">
+                        <span v-if="col.prop === 'hostname'" class="profile-host">
+                          <i class="el-icon-monitor profile-host__icon" />
+                          <span class="profile-host__name">{{
+                            scope.row.hostname
+                          }}</span>
+                        </span>
+                        <span v-else-if="col.prop === 'idc'" class="profile-idc">{{
+                          scope.row.idc
                         }}</span>
-                      </span>
-                      <span v-else-if="col.prop === 'idc'" class="profile-idc">{{
-                        scope.row.idc
-                      }}</span>
-                      <span
-                        v-else-if="col.prop === 'mtype'"
-                        class="profile-mtype"
-                        :class="scope.row.mtype === 'P' ? 'is-p' : 'is-v'"
-                        >{{ machineType(scope.row.mtype) }}</span
-                      >
-                      <span v-else-if="col.prop === 'cpu'"
-                        >{{ scope.row.cpu }}C</span
-                      >
-                      <span v-else-if="col.prop === 'memory'"
-                        >{{ scope.row.memory }}G</span
-                      >
-                      <span v-else>{{ scope.row[col.prop] }}</span>
-                    </template>
-                  </el-table-column>
-                </el-table>
+                        <span
+                          v-else-if="col.prop === 'mtype'"
+                          class="profile-mtype"
+                          :class="scope.row.mtype === 'P' ? 'is-p' : 'is-v'"
+                          >{{ machineType(scope.row.mtype) }}</span
+                        >
+                        <span v-else-if="col.prop === 'cpu'"
+                          >{{ scope.row.cpu }}C</span
+                        >
+                        <span v-else-if="col.prop === 'memory'"
+                          >{{ scope.row.memory }}G</span
+                        >
+                        <span v-else>{{ scope.row[col.prop] }}</span>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                  <!-- 屏外占位：高度按行数估算（约 41px 表头 + 33px/行），
+                       滚进视口 400px 内才换成真表格。占位高度贴近真实值，滚动条不会跳 -->
+                  <div
+                    v-else
+                    class="profile-cluster__loading"
+                    :data-cluster="cluster.name"
+                    :style="placeholderStyle(cluster)"
+                  >
+                    <i class="el-icon-loading" />
+                    <span>滚动到此加载主机明细</span>
+                  </div>
+                </template>
               </el-collapse-item>
             </el-collapse>
             <div v-else class="profile-hosts__empty">
@@ -815,9 +835,13 @@ export default {
       tableWidth: 0,
       activeComponent: "",
       searchQuery: "",
-      // 展开的集群（非手风琴）。**默认全展开**，而且它同时是右侧链路图的筛选依据：
-      // 展开了才画这个集群发出的链路，收起就从图上消失
+      // 展开的集群（非手风琴）。**默认只展开第一个**（见 defaultOpenClusters），
+      // 而且它同时是右侧链路图的筛选依据：展开了才画这个集群发出的链路，收起就从图上消失
       openClusters: [],
+      // 已经真正建出表格的集群（v-if 懒渲染的第二层：展开 ≠ 立刻建表）。
+      // 展开但在屏外的集群先渲染占位块，滚进视口附近才把名字加进来 ——
+      // 这样「一键展开 310 个」只建视口里那几个表格，而不是 310 个
+      mountedClusters: [],
       systemQuery: "", // 系统英文名称搜索框
       searched: false, // 是否已执行查询（未查询前仅显示居中的搜索入口）
       switchDialogVisible: false, // 系统切换弹窗
@@ -866,6 +890,11 @@ export default {
     window.addEventListener("keydown", this.onTopoKeydown);
   },
 
+  // 每次渲染后重新盯住新出现的占位块（切组件 / 展开收起 / 搜索都会产生新的）
+  updated() {
+    this.observeClusterPlaceholders();
+  },
+
   beforeDestroy() {
     window.removeEventListener("resize", this.handleResize);
     window.removeEventListener("keydown", this.onTopoKeydown);
@@ -876,6 +905,15 @@ export default {
     if (this.panelObserver) {
       this.panelObserver.disconnect();
       this.panelObserver = null;
+    }
+    // 视口懒挂载的观察器（占位块 → 真表格）
+    if (this._clusterObserver) {
+      this._clusterObserver.disconnect();
+      this._clusterObserver = null;
+    }
+    if (this._placeholderRaf) {
+      window.cancelAnimationFrame(this._placeholderRaf);
+      this._placeholderRaf = 0;
     }
     if (this.linkChart) {
       this.linkChart.dispose();
@@ -1125,10 +1163,14 @@ export default {
           this.searched = true;
           // 先把默认选中的组件定下来，再建拓扑 —— 顺序反了会先按上一次查询的组件
           // 筛一遍链路（拓扑白算一次），还得再补一次重算。
-          // 集群默认**全部展开**（第一次进来就是全展示），右侧链路图跟着画全部集群
+          // 集群默认**只展开第一个**：生产上单个组件动辄上百个集群（HAPROXY 310 个），
+          // 全部展开会让右侧链路图一次画上百节点、上千条线，糊成一整片还卡，
+          // 其余收起，需要时再手动展开或一键展开
           const first = this.componentList[0];
           this.activeComponent = first ? first.name : "";
-          this.openClusters = this.activeClusters.slice();
+          this.openClusters = this.defaultOpenClusters();
+          // 默认展开的那个集群直接建表（不闪一下占位块）
+          this.mountedClusters = this.openClusters.slice();
           this.prepareData();
         })
         .catch(() => {
@@ -2424,14 +2466,101 @@ export default {
       this.panelObserver.observe(el);
     },
 
-    // 切换组件类型：左侧主机列表联动筛选（默认**全部展开**），
+    // 主机列表的默认展开策略：**只展开第一个集群**，其余收起。
+    // 生产上单个组件下可能有几百个集群（如 HAPROXY 310 个），全部展开会让左侧列表
+    // 拉得极长、右侧链路图一次画上百节点上千条线 —— 既难看又卡；只开第一个，
+    // 图上的规模就和「当前关注的那个集群」一致，要看别的再手动展开 / 一键展开。
+    // 「第一个」= 主机列表里第一个**可见**的集群（搜索过滤后），保证展开的那个一定在眼前
+    defaultOpenClusters() {
+      const first = this.filteredGroups[0];
+      if (first) return [first.name];
+      // 搜索把当前组件的集群全过滤掉了：仍按组件里的第一个兜底，
+      // 否则右侧链路图会退化成「左侧集群都收起了」的空态
+      return this.activeClusters.length ? [this.activeClusters[0]] : [];
+    },
+
+    // 切换组件类型：左侧主机列表联动筛选（默认**只展开第一个集群**），
     // 右侧链路图也换成「这个组件下集群发出的链路」；重复点同一个组件不用重算
     selectComponent(name) {
       const changed = name !== this.activeComponent;
       this.activeComponent = name;
-      // activeClusters 是 computed，跟着 activeComponent 走 —— 换组件就全部展开
-      this.openClusters = this.activeClusters.slice();
+      // activeClusters 是 computed，跟着 activeComponent 走 —— 换组件就重置成「只开第一个」
+      this.openClusters = this.defaultOpenClusters();
+      // 换组件后旧集群的「已挂载」标记全部作废，只保留新组件默认展开的那个
+      this.mountedClusters = this.openClusters.slice();
       if (changed) this.applyComponentLinks();
+    },
+
+    // 集群是否展开 —— 模板里用它做 v-if 懒渲染（只有展开的集群才建 el-table）。
+    // el-collapse 的内容默认是 v-show，收起时表格照样在 DOM 里；生产上一个组件
+    // 几百个集群就是几百个 el-table，切组件时全量重建会卡好几秒
+    isClusterOpen(name) {
+      return this.openClusters.indexOf(name) >= 0;
+    },
+
+    // 表格是否已经建出来（第二层懒加载）：展开但还在屏外的集群只渲染占位块
+    isClusterMounted(name) {
+      return this.mountedClusters.indexOf(name) >= 0;
+    },
+
+    // 占位块高度：按真实表格量出来的尺寸估算（41px 表头 + 37px/行，上限 = max-height 320）。
+    // ⚠️ 必须和 SCSS 里 contain-intrinsic-size 的口径一致（那边按 42+26+294 估），
+    // 估算偏了滚动条会随挂载跳动
+    placeholderStyle(cluster) {
+      const rows = (cluster.hosts && cluster.hosts.length) || 1;
+      return { height: Math.min(320, 41 + rows * 37) + "px" };
+    },
+
+    // 视口观察器：占位块滚进视口 400px 内，就把对应集群标记成「已挂载」换成真表格。
+    // root 必须用主机列表的滚动容器（面板是内部滚动的），不是 window
+    ensureClusterObserver() {
+      if (this._clusterObserver) return this._clusterObserver;
+      if (!window.IntersectionObserver) return null;
+      const root = this.$refs.hostsPanel;
+      if (!root) return null;
+      this._clusterObserver = new IntersectionObserver(
+        (entries) => {
+          const add = [];
+          entries.forEach((e) => {
+            if (!e.isIntersecting) return;
+            const name = e.target.getAttribute("data-cluster");
+            if (name && this.mountedClusters.indexOf(name) < 0) add.push(name);
+            this._clusterObserver.unobserve(e.target);
+          });
+          if (add.length) {
+            this.mountedClusters = this.mountedClusters.concat(add);
+          }
+        },
+        { root, rootMargin: "400px 0px" }
+      );
+      return this._clusterObserver;
+    },
+
+    // 每次渲染后把还没被观察的占位块挂上去。
+    // rAF 节流：updated 里直接扫 DOM 会和 Vue 的渲染互相拖慢
+    observeClusterPlaceholders() {
+      if (this._placeholderRaf) return;
+      this._placeholderRaf = window.requestAnimationFrame(() => {
+        this._placeholderRaf = 0;
+        const panel = this.$refs.hostsPanel;
+        if (!panel) return;
+        const obs = this.ensureClusterObserver();
+        if (!obs) {
+          // 老浏览器没有 IntersectionObserver：退回「展开即建表」，不能留一片空白
+          if (this.mountedClusters.length !== this.filteredGroups.length) {
+            this.mountedClusters = this.filteredGroups.map((g) => g.name);
+          }
+          return;
+        }
+        const list = panel.querySelectorAll(".profile-cluster__loading");
+        for (let i = 0; i < list.length; i += 1) {
+          const el = list[i];
+          if (!el.__spObserved) {
+            el.__spObserved = true;
+            obs.observe(el);
+          }
+        }
+      });
     },
 
     // 展开/收起集群（非手风琴，value 为展开的集群名数组）。
@@ -2449,6 +2578,13 @@ export default {
         next.length === open.length && next.every((n) => open.indexOf(n) >= 0);
       if (same) return;
       this.openClusters = next;
+      // 收起的集群把「已挂载」标记一起撤掉：否则下次再展开会瞬间重建全部表格（又卡回去）
+      if (this.mountedClusters.length) {
+        const kept = this.mountedClusters.filter((n) => next.indexOf(n) >= 0);
+        if (kept.length !== this.mountedClusters.length) {
+          this.mountedClusters = kept;
+        }
+      }
       this.applyComponentLinks();
     },
 
@@ -3125,10 +3261,40 @@ $stat-colors: (
   .el-collapse-item__wrap {
     border-bottom: none;
     background: #fff;
+    /* 内容改 v-if 懒渲染后，展开的一瞬间表格还没建出来，el-collapse 的高度过渡
+       读到的是 0 ⇒ 会把表格压成 0 高（看不见）。这里取消高度过渡，展开即显示；
+       几百个集群的列表里，逐个展开动画本身也是负担 */
+    max-height: none !important;
+    /* 生产上一个组件动辄几百个集群（HAPROXY 310 个），一键展开时 310 个面板同时从
+       display:none 变成 block，浏览器要把每个表格都布局一遍 —— 实测主线程阻塞 2.3s。
+       屏外的面板跳过 layout/paint 后降到 0.8s（-73%）。
+       contain-intrinsic-size 是「屏外时的占位高度」，必须和模板里占位块的高度
+       （placeholderStyle：42px 标题 + 26px 内边距 + 41px 表头 + 37px/行）算出来一致，
+       否则滚过之后真实高度替换估算值，滚动条会跳。auto 关键字会记住上次的真实高度 */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 300px;
   }
 
   .el-collapse-item__content {
     padding: 12px 10px 14px;
+  }
+
+  /* 屏外占位块：高度由模板按行数内联给（贴真实表格高度），这里只管居中提示 */
+  .profile-cluster__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-sizing: border-box;
+    color: #a8abb2;
+    font-size: 12px;
+    background: #fafbfc;
+    border: 1px dashed #e4e7ed;
+    border-radius: 6px;
+
+    i {
+      font-size: 13px;
+    }
   }
 
   /* 【Element 覆写】表格：表头浅灰底、行 hover 淡蓝、去底部横线 */

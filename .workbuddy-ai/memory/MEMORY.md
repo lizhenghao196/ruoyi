@@ -58,9 +58,11 @@
 
 ## 系统画像（systemProfile）
 - ⚠️ **右侧链路图 = 选中组件的 key + 它下游整条链**（向下传递闭包，2026-10-29）：`filterLinksByClusters` **只认 fnode（起点）、全等**，从根一路展开下游（MYSQL→CANAL→KAFKA→ES→GW）；**不看终点**（指向集合内的上游边不画）；环靠 visited。**根只认 `expandedClusters`**；`集群关系[组件].nodes` **绝不能并进根集合**（不随折叠变，并进去「收起集群→右侧跟着变」彻底失效，内网实测打回过），只在「全展开却零命中」兜底。闭包后还要**剔掉「已收起集群」作为起点的边**。集群名 = 组件拓扑第二层 key = **链路节点名本身**。`allLinks`（全量，只给顶部概览「链路」总数）+ `links`（展开结果）；顶部概览不跟组件变。
-- ⚠️ **主机列表折叠态与右侧链路图共用 `openClusters`**：链路根集合 = `linkRootNames`（`expandedClusters` ∪ `relationNodeNames`），收起即消失；**默认全展开**；写一律走 `setOpenClusters()`（集合没变不重算）；`toggleAllClusters` 是切换语义，按钮在搜索框左边。空态三种文案。
+- ⚠️ **主机列表折叠态与右侧链路图共用 `openClusters`**：链路根集合 = `linkRootNames`（当前组件有集群时**只等于 `expandedClusters`**，一个集群都没有才退回 `relationNodeNames`），收起即消失；**默认只展开第一个集群**（2026-11-04 起，唯一入口 `defaultOpenClusters()`，`doSearch` 和 `selectComponent` 都走它，别再写回 `activeClusters.slice()`）；写一律走 `setOpenClusters()`（集合没变不重算）；`toggleAllClusters` 是切换语义，按钮在搜索框左边。空态三种文案。
 - ⚠️ **小图节点名空间够就常显**：`inlineLabelsFit`（节点正下方矩形两两不压、不压节点），判定与渲染共用 `TOPO_NODE_LABEL_DISTANCE`/`_LINE_H`；常显时藏掉「悬浮查看节点」。
 - ⚠️ **echarts 4.9 `lines` 系列不渲染 label** ⇒ desc 只能用 **scatter** 挂锚点，且 **`symbol:'none'` 元素根本不创建**（用 `circle`+透明色）。**label 字号与元素 scale 无关**，改 `label.fontSize` 别动 `symbolSize`。文字横着画、锚在曲线中点（另两版被否）。「空间合适」= 节点≤14 且线段≤12 且每条带 desc 线段 ≥60px；desc 按线段实际宽度逐字估宽截断（上限 200px），一条不满足就**全部**退回悬浮卡片。
+- ⚠️ **几百个集群时的卡顿主因不是 echarts**（2026-11-04 实测 310 集群/1550 主机/170 链路）：CPU 采样里 Vue `getTransitionInfo` 14.7% + `collapse-transition.enter` 14% + el-table `resizeListener` 10.9%，**echarts 合计只有 3.4%**。根因是 `el-collapse` 用 `v-show`（310 个 el-table 首屏就全建好，7 万 DOM 节点），切组件/展开时全量重建。**CSS 禁用 transition 无效**（Element 用内联 style + rAF 驱动）。
+- ⚠️ **主机列表表格是三层懒加载，别退回 v-show**：① 只有 `openClusters` 里的才建表（`isClusterOpen`）；② 展开但屏外的先渲染占位块（`isClusterMounted` + `IntersectionObserver`，root = `.profile-hosts__panel`，rootMargin 400px），滚到附近才建；③ `.el-collapse-item__wrap` 加 `content-visibility: auto` + `contain-intrinsic-size: auto 300px`（**占位高度必须和 `placeholderStyle` 的 41+37×行数 口径一致，否则滚动条跳**）。实测：切 310 集群 **118ms**、一键展开 310 个 **1011ms**（只建 3 个表格）、滚动 4500px fps 44.8。`setOpenClusters` 里必须把收起集群的挂载标记一起撤掉，否则再展开会瞬间重建全部表格。
 - 细节（`refreshTopo`/`applyComponentLinks`/`disposeTopoChart`、`topoLabelOf` 不许削两段式名字、**悬浮卡片单击固定+复制**、像素断言要 A/B 不要 hex）→ `REF-systemProfile.md`。
 
 ## 校验 / 协作
