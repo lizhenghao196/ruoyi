@@ -911,6 +911,7 @@ export default {
       this._clusterObserver.disconnect();
       this._clusterObserver = null;
     }
+    this._clusterObserverRoot = null;
     if (this._placeholderRaf) {
       window.cancelAnimationFrame(this._placeholderRaf);
       this._placeholderRaf = 0;
@@ -2512,20 +2513,39 @@ export default {
     },
 
     // 视口观察器：占位块滚进视口 400px 内，就把对应集群标记成「已挂载」换成真表格。
-    // root 必须用主机列表的滚动容器（面板是内部滚动的），不是 window
+    // root 必须用主机列表的滚动容器（面板是内部滚动的），不是 window。
+    // ⚠️ root 变了必须重建观察器，不能只判「有没有实例」就返回缓存：
+    // 每次查询 loading=true 时内容区被 v-if 整体换成加载态，hostsPanel 这个 DOM 会
+    // 连同旧 root 一起销毁重建；观察器还盯着已脱离文档的旧 root 时，交叉计算恒为 0，
+    // 占位块会永久停在「滚动到此加载主机明细」——而默认展开的首个集群因为已在
+    // mountedClusters 里、直接建表，看不出异常，只有收起再展开 / 展开其他集群才暴露
     ensureClusterObserver() {
-      if (this._clusterObserver) return this._clusterObserver;
-      if (!window.IntersectionObserver) return null;
       const root = this.$refs.hostsPanel;
       if (!root) return null;
-      this._clusterObserver = new IntersectionObserver(
+      if (this._clusterObserver && this._clusterObserverRoot === root) {
+        return this._clusterObserver;
+      }
+      if (!window.IntersectionObserver) return null;
+      if (this._clusterObserver) {
+        this._clusterObserver.disconnect();
+        this._clusterObserver = null;
+      }
+      // 新面板里的占位块可能带着旧观察器留下的标记（DOM 复用/缓存），
+      // 清掉才能重新 observe
+      const stale = root.querySelectorAll(".profile-cluster__loading");
+      for (let i = 0; i < stale.length; i += 1) {
+        stale[i].__spObserved = false;
+      }
+      // 回调里用局部变量而不是 this._clusterObserver：重建后实例已换，
+      // 闭包若读 this 会去 unobserve 一个不相干的观察器
+      const observer = new IntersectionObserver(
         (entries) => {
           const add = [];
           entries.forEach((e) => {
             if (!e.isIntersecting) return;
             const name = e.target.getAttribute("data-cluster");
             if (name && this.mountedClusters.indexOf(name) < 0) add.push(name);
-            this._clusterObserver.unobserve(e.target);
+            observer.unobserve(e.target);
           });
           if (add.length) {
             this.mountedClusters = this.mountedClusters.concat(add);
@@ -2533,7 +2553,9 @@ export default {
         },
         { root, rootMargin: "400px 0px" }
       );
-      return this._clusterObserver;
+      this._clusterObserver = observer;
+      this._clusterObserverRoot = root;
+      return observer;
     },
 
     // 每次渲染后把还没被观察的占位块挂上去。

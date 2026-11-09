@@ -244,6 +244,18 @@ JS 内联 style + rAF 驱动的，外部 CSS 压不住；而且根因是布局�
    `rootMargin: 400px 0px`）。展开但屏外的先渲染 `.profile-cluster__loading` 占位块，
    滚进视口 400px 才换成真表格。`mountedClusters` 在 `doSearch` / `selectComponent` 里重置为
    默认展开的那一个，`setOpenClusters` 里把收起集群的标记撤掉（否则再展开会瞬间重建全部）。
+   ⚠️ **观察器必须校验 root 身份**（2026-11-05 修）：`ensureClusterObserver` 里判
+   `_clusterObserver && _clusterObserverRoot === this.$refs.hostsPanel` 才复用，否则
+   `disconnect()` 重建并把新实例存进 `_clusterObserverRoot`。**不能只判「有没有实例」**：
+   `doSearch` 里 `loading = true` 会把整个内容区（第 26 行 `v-else-if="loading"`）换成加载态，
+   `hostsPanel` 这个 DOM 连同旧 root 一起销毁重建，观察器还盯着已脱离文档的旧 root 时
+   交叉计算恒为 0 ⇒ 占位块永久停在「滚动到此加载主机明细」。
+   症状极具误导：**默认展开的首个集群正常**（它在 `mountedClusters` 里、直接建表，根本不走观察器），
+   只有「收起再展开」和「展开其他集群」才暴露；且**空态输入框查询正常、弹窗切系统才坏** ——
+   空态时 `hostsPanel` 还没挂载（`searched=false`），`ensure` 返回 null 不缓存，所以首次没踩到。
+   回调里用**局部 `observer` 变量** `unobserve`，不要用 `this._clusterObserver`（重建后实例已换）。
+   验证脚本 `Temp/sp_lazy_check.mjs`（A 空态 / B 弹窗 / C 连续切），回退对照能精确复现
+   `tables:0 placeholders:1`。
 4. `.el-collapse-item__wrap` 的 `content-visibility: auto` + `contain-intrinsic-size: auto 300px`。
 
 ⚠️ **占位高度口径必须一致**：`placeholderStyle` = `min(320, 41 + 行数 × 37)`，
