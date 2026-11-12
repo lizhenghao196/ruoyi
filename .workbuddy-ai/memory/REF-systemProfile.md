@@ -344,3 +344,92 @@ cd "C:/Users/lenovo/AppData/Local/Temp" && \
   `isStandard` 算在 `componentList` 的**组件对象**上，而模板读的是 `filteredGroups` 里**集群对象**的
   `cluster.isStandard`（`filteredGroups` 只 spread 了 `{name, hosts}`，该字段是 undefined）。
   顶部组件 tag 的 tooltip 用的是组件级 `c.isStandard`，那个是对的。用户没提，**没动**。
+
+## 6. 组件配套操作（三个按钮 + 两个弹窗，2026-11-09）
+
+### 6.1 折叠头三列布局
+
+模板：`<template slot="title">` 里放一个 `<span class="profile-cluster__head">`，
+内部三块：`__lead`（圆点 + 集群名）· `__actions`（三个按钮）· `__count`（记录数）。
+
+```scss
+.profile-cluster__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  flex: 1 1 auto;   // Element 的 header 是 flex，slot 内容直接是它的子项
+  min-width: 0;
+}
+.profile-cluster__actions { grid-column: 2; }
+.profile-cluster__count { grid-column: 3; justify-self: end; }  // 原来靠 margin-left:auto
+```
+
+要点：
+- **中间列 auto + 两侧等宽 1fr** ⇒ 按钮恒居中（实测中心偏差 0px），且不会随集群名长短漂移。
+  用 `margin: 0 auto` 不行：count 也需要 auto 边距时，多个 auto 边距会平分剩余空间，按钮就偏了。
+- Element 的展开箭头是 header 的**兄弟节点**（`margin: 0 8px 0 auto`），所以 slot 内容 `flex:1 1 auto`
+  之后，第三列右对齐的记录数天然贴在箭头左边。
+- 高度不用动：按钮 22px 塞进原来的 42px header，实测 header 仍是 42px。
+- 1280 宽下（HAPROXY 4 个长名集群）仍是单行，名字不截断、按钮不换行。
+
+### 6.2 「点按钮别折叠」只有一个办法：`@click.stop`
+
+Element 把展开/收起绑在 `.el-collapse-item__header` 上，按钮是它的后代 ⇒ 必须拦冒泡。
+**容器和每个按钮都加**（容器上的点用于按钮之间的空隙）：容器绑 `@click.stop="blockBubble"`，
+`blockBubble()` 是空函数（modifier 已 stop，函数体只为可读）。
+浏览器实测：点「收起态集群」的按钮，`openClusters` 不变。
+
+### 6.3 三个接口
+
+`api/tool/systemProfile.js`：`downloadConfigToLocal` / `readComponentConfig` / `readComponentLink`，
+post，参数 `{ systemId, module, clusterName }`（下载多一个 `refresh: 1`）。
+- `module` = `activeComponent`（组件拓扑名），`clusterName` = 主机列表的集群名。
+- `systemId` = computed：`基础信息.systemId || 基础信息.系统编码 || systemQuery`。
+  真实数据若带系统标识就用它，否则退回「页面上查询用的系统英文名」（`getSystemProfile` 也拿它当 systemId）。
+- 顶部 `USE_MOCK` 默认 true，三份 mock 在文件内；接真实后端改 false（每个函数开头那段 `if (USE_MOCK)` 可整段删）。
+- **成功码是字符串 `'0000'`**，`utils/request.js` 的白名单已经覆盖（见 MEMORY.md）。
+
+### 6.4 loading 与提示
+
+`cfgLoading` 是对象，key = `` `${集群名}|${动作}` ``：同屏多个集群、多个动作可以同时跑。
+- **必须 `$set` / `$delete`**（Vue 2 新 key 不响应，按钮的 disabled 和转圈图标都不会变）。
+- 图标：`cfgActionIcon(name, action, 空闲图标)` 返回 `el-icon-loading` 或原图标。
+- 下载完成后 `$message({ message: res.data, type:'success', duration:4000, showClose:true })`
+  —— **原样展示接口 data**（形如 `node: xxx successs`），不要自己加工文案。
+- 没有 systemId 时不发请求，提示「缺少系统标识，请重新查询系统画像」（`cfgReady`）。
+
+### 6.5 文件弹窗（readconfig）
+
+`el-tabs` + 一个文件一个 `el-tab-pane`，`name` 用**下标字符串**（文件名可能重复），`label` 取 `filename`。
+内容：`<pre class="profile-cfg__text">{{ cfgFileText(file) }}</pre>`
+- **`white-space: pre` + `tab-size: 4`**：`\n` `\t` 原样保留，一个字符都不重排
+  （`pre-line` 会吃掉行首缩进，普通 div 会把换行折叠成一行）。实测 36 行原文逐行一致。
+- `max-height: 52vh` + `overflow: auto`：内容长了框内滚动，弹窗不撑高。
+- `cfgFileText` 只在 content **不是字符串**时才 `JSON.stringify`，字符串直接返回。
+- `cfgFileList` 兼容 `data` 数组 / JSON 字符串 / `rows`，并过滤非对象项。
+- 底部 `__msg` 是**独立一行**，取 `res.msg`，与 tab 切换无关（实测切 tab 后仍是 success）。
+
+### 6.6 链路弹窗（readLink）
+
+`vue-json-viewer`（**局部注册**：`import JsonViewer from 'vue-json-viewer'` + `import 'vue-json-viewer/style.css'`，
+同 capacity 页），`:expand-depth="2"`、`:show-array-index="false"`、`:boxed="false"`。
+- 外层 `.profile-json__box`：`max-height: 56vh; overflow: auto` ⇒ 长了框内上下滚。
+- 右上角「复制 JSON」→ `copyPlainText(JSON.stringify(data, null, 2))`。
+- DOM 类名（断言用）：`.jv-container` / `.jv-node` / `.jv-key-node` / `.jv-toggle.open` / `.jv-ellipsis`。
+  **没有 `.jv-row`**（第一次断言写错了）。默认 2 层的表现 = 根节点 `.jv-toggle.open` + 数组项 `.jv-ellipsis`（`{...}`）。
+- `cfgJsonValue` 兼容「data 是 JSON 字符串」：能 parse 就 parse，空串 → null。
+
+### 6.7 复制
+
+`copyPlainText(text)` 从原 `copyTopoHover` 里抽出来的（悬浮卡片和 JSON 共用）：
+`navigator.clipboard` 优先，内网 http 非安全上下文必须有 `execCommand` 兜底。
+
+### 6.8 校验脚本
+
+- `Temp/sp_cfg_verify.mjs`（87 条）：SFC/模板/脚本、SCSS 产物（grid 三列、`pre`、`tab-size`）、
+  request 白名单、api url/method、页面实例（`showConfigActions` 四种组件、`systemId` 回退、
+  `cfgFileList`/`cfgFileText`/`cfgJsonValue` 边界、loading 锁、三个 handler、复制 JSON）。
+- `Temp/sp_cfg_shot.mjs`（playwright+msedge）：折叠头几何 + 不折叠 + 两弹窗内容 + 下载 loading/提示 + MYSQL 无按钮。
+- `Temp/sp_cfg_narrow.mjs`：1280 宽下的挤压检查。
+- 踩点：`.profile-cluster` **只是 BEM 前缀、没有同名元素**；`el-tabs` 的 nav 第一个子节点是
+  `.el-tabs__active-bar`，所以 `nth-child(2)` 命中的是**第一个 tab**（要用 `:has-text`）。

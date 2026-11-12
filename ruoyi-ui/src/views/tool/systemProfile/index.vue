@@ -207,11 +207,82 @@
                 :name="cluster.name"
               >
                 <template slot="title">
-                  <i class="profile-cluster__dot" />
-                  <span class="profile-cluster__title">{{ cluster.name }}</span>
-                  <span class="profile-cluster__count">
-                    {{ cluster.hostCount }}
-                    {{ cluster.isStandard ? "台主机" : "条记录" }}
+                  <!-- 折叠头三列：左（圆点 + 集群名）· 中（组件配套操作按钮）· 右（记录数）。
+                       中间列独立成列，按钮永远在正中间，不随集群名长短漂移；
+                       记录数放在最右、紧挨 Element 自带的展开箭头
+                       （箭头是 header 的兄弟节点，自带 margin-left:auto，所以记录数要贴到列尾） -->
+                  <span class="profile-cluster__head">
+                    <span class="profile-cluster__lead">
+                      <i class="profile-cluster__dot" />
+                      <span class="profile-cluster__title">{{ cluster.name }}</span>
+                    </span>
+                    <!-- 三个按钮只在 NGINX / HAPROXY / 微服务 / JAVA微服务 下出现。
+                         ⚠️ 容器和按钮都必须 stop 冒泡：header 自己绑了展开/收起，
+                         不拦下来就会出现「点按钮，集群跟着折叠」 -->
+                    <span
+                      v-if="showConfigActions"
+                      class="profile-cluster__actions"
+                      @click.stop="blockBubble"
+                    >
+                      <button
+                        type="button"
+                        class="profile-cluster__act"
+                        title="从源端下载资源配置至本地"
+                        :disabled="isCfgLoading(cluster.name, 'download')"
+                        @click.stop="onDownloadConfig(cluster)"
+                      >
+                        <i
+                          :class="
+                            cfgActionIcon(
+                              cluster.name,
+                              'download',
+                              'el-icon-download'
+                            )
+                          "
+                        />
+                        <span>下载配置</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="profile-cluster__act"
+                        title="组件配套文件读取"
+                        :disabled="isCfgLoading(cluster.name, 'readconfig')"
+                        @click.stop="onReadConfig(cluster)"
+                      >
+                        <i
+                          :class="
+                            cfgActionIcon(
+                              cluster.name,
+                              'readconfig',
+                              'el-icon-document'
+                            )
+                          "
+                        />
+                        <span>读取文件</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="profile-cluster__act"
+                        title="读取配置文件中的链路信息"
+                        :disabled="isCfgLoading(cluster.name, 'readlink')"
+                        @click.stop="onReadLink(cluster)"
+                      >
+                        <i
+                          :class="
+                            cfgActionIcon(
+                              cluster.name,
+                              'readlink',
+                              'el-icon-share'
+                            )
+                          "
+                        />
+                        <span>读取链路</span>
+                      </button>
+                    </span>
+                    <span class="profile-cluster__count">
+                      {{ cluster.hostCount }}
+                      {{ cluster.isStandard ? "台主机" : "条记录" }}
+                    </span>
                   </span>
                 </template>
                 <!-- 动态列：列来自数据字段并集，字段增减/新增组件类型都无需改代码；
@@ -462,6 +533,72 @@
       </el-table>
     </el-dialog>
 
+    <!-- 组件配套文件读取弹窗：data 是数组，一个文件一个 tab（标题取 filename）；
+         内容按后端给的原文展示 —— \n \t 原样保留，前端不做任何重排。
+         底部固定一行 msg，跟 tab 切换无关 -->
+    <el-dialog
+      :title="'组件配套文件 - ' + cfgFileCluster"
+      :visible.sync="cfgFileDialogVisible"
+      width="860px"
+      top="7vh"
+      append-to-body
+      custom-class="profile-cfg-dialog"
+      :close-on-click-modal="false"
+    >
+      <div class="profile-cfg">
+        <el-tabs v-model="cfgFileTab" class="profile-cfg__tabs">
+          <el-tab-pane
+            v-for="(file, i) in cfgFiles"
+            :key="i"
+            :name="String(i)"
+            :label="file.filename || '文件' + (i + 1)"
+          >
+            <pre class="profile-cfg__text">{{ cfgFileText(file) }}</pre>
+          </el-tab-pane>
+        </el-tabs>
+        <div class="profile-cfg__msg">
+          <span class="profile-cfg__msg-label">返回信息</span>
+          <span class="profile-cfg__msg-text">{{ cfgFileMsg || "-" }}</span>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 链路信息弹窗：data 是 JSON，用 json-viewer 展示（默认展开 2 层）；
+         内容过长时框内上下滚动，右上角一键复制整段 JSON -->
+    <el-dialog
+      :title="'链路信息 - ' + cfgLinkCluster"
+      :visible.sync="cfgLinkDialogVisible"
+      width="720px"
+      top="7vh"
+      append-to-body
+      custom-class="profile-json-dialog"
+      :close-on-click-modal="false"
+    >
+      <div class="profile-json">
+        <div class="profile-json__bar">
+          <span class="profile-json__tip"
+            >默认展开 2 层 · 内容过长可在框内上下滚动</span
+          >
+          <el-button
+            size="mini"
+            type="primary"
+            plain
+            icon="el-icon-document-copy"
+            @click="copyCfgLinkJson"
+            >复制 JSON</el-button
+          >
+        </div>
+        <div class="profile-json__box">
+          <json-viewer
+            :value="cfgLinkData"
+            :expand-depth="2"
+            :show-array-index="false"
+            :boxed="false"
+          />
+        </div>
+      </div>
+    </el-dialog>
+
     <!-- 链路关系图放大弹窗：大画布展示瀑布拓扑，节点文字常显，
          滚轮缩放 / 拖拽平移 / 一键重置；关闭时销毁图表实例 -->
     <el-dialog
@@ -542,7 +679,14 @@
 
 <script>
 import * as echarts from "echarts";
-import { getSystemProfile } from "@/api/tool/systemProfile";
+import JsonViewer from "vue-json-viewer";
+import "vue-json-viewer/style.css";
+import {
+  getSystemProfile,
+  downloadConfigToLocal,
+  readComponentConfig,
+  readComponentLink,
+} from "@/api/tool/systemProfile";
 import {
   normalizeLinks,
   buildTopology,
@@ -563,6 +707,10 @@ const COMPONENT_ORDER = [
   "GREATDB",
   "HADOOP",
 ];
+
+// 需要「组件配套操作」（下载配置 / 读取文件 / 读取链路）三个按钮的组件类型。
+// 只有这几类组件的集群有源端配置文件可读，其余组件折叠头里不出现按钮
+const CONFIG_ACTION_COMPONENTS = ["NGINX", "HAPROXY", "微服务", "JAVA微服务"];
 
 // 链路关系图（瀑布拓扑）视觉配置：和页面同色系的浅色「蓝图」。
 // 节点就是链路里出现的原始名字，不区分类型/集群，全部同一个色系；
@@ -822,6 +970,10 @@ const MIN_COLUMN_WIDTH = 56;
 export default {
   name: "SystemProfile",
 
+  components: {
+    JsonViewer,
+  },
+
   data() {
     return {
       loading: false,
@@ -858,6 +1010,20 @@ export default {
       // 页面内小图里节点名是不是常显（图够稀疏、名字互相压不上才常显）。
       // 由 renderTopoChart 按实际排版算出来，用来决定表头那句「悬浮查看节点」还要不要
       inlineNodeLabels: false,
+      // ---- 组件配套操作（下载配置 / 读取文件 / 读取链路）----
+      // 每个集群、每个动作各自一把 loading 锁：key = `集群名|动作`，值 true 表示请求中。
+      // 用对象而不是布尔，是因为同一屏可能同时有多个集群在跑不同动作
+      cfgLoading: {},
+      // 组件配套文件弹窗：cfgFiles = 接口 data 数组，一个文件一个 tab
+      cfgFiles: [],
+      cfgFileTab: "0", // 当前 tab（用下标字符串，文件名重复也不会串）
+      cfgFileMsg: "", // 弹窗底部固定的 msg（与 tab 切换无关）
+      cfgFileCluster: "", // 当前弹窗对应的集群（标题用）
+      cfgFileDialogVisible: false,
+      // 链路信息弹窗：cfgLinkData = 接口 data（JSON 对象）
+      cfgLinkData: null,
+      cfgLinkCluster: "",
+      cfgLinkDialogVisible: false,
     };
   },
 
@@ -931,6 +1097,16 @@ export default {
   computed: {
     basic() {
       return (this.profileData && this.profileData["基础信息"]) || {};
+    },
+    // 当前组件是否提供「组件配套操作」三个按钮（只有 NGINX / HAPROXY / 微服务 / JAVA微服务 有）
+    showConfigActions() {
+      return CONFIG_ACTION_COMPONENTS.indexOf(this.activeComponent) >= 0;
+    },
+    // 三个接口都要的 systemId：优先用基础信息里带的系统标识（真实数据可能叫 systemId / 系统编码），
+    // 没有就退回页面上查询用的系统英文名 —— getSystemProfile 也是拿它当 systemId 传的
+    systemId() {
+      const b = this.basic || {};
+      return b.systemId || b.系统编码 || this.systemQuery || "";
     },
     // 统计卡片：组件类型 / 集群 / 主机 / 链路。
     // 前三个都是系统级全量，链路也保持系统级全量（= 接口返回的全部链路），
@@ -1761,17 +1937,22 @@ export default {
     },
 
     // 复制卡片内容（标题 + 指标 + 描述）。
-    // 内网是 http，navigator.clipboard 在非安全上下文里不可用，必须有 execCommand 兜底
     copyTopoHover(card) {
       if (!card) return;
       const lines = [card.title];
       if (card.meta && card.meta.length) lines.push(card.meta.join(" · "));
       if (card.desc) lines.push(card.desc);
-      const text = lines.join("\n");
+      this.copyPlainText(lines.join("\n"));
+    },
+
+    // 纯文本复制（悬浮卡片、链路 JSON 共用）。
+    // 内网是 http，navigator.clipboard 在非安全上下文里不可用，必须有 execCommand 兜底
+    copyPlainText(text) {
+      const content = String(text == null ? "" : text);
       const done = () => this.$message.success("已复制");
       const fallback = () => {
         const ta = document.createElement("textarea");
-        ta.value = text;
+        ta.value = content;
         ta.setAttribute("readonly", "");
         ta.style.position = "fixed";
         ta.style.top = "-9999px";
@@ -1788,7 +1969,7 @@ export default {
         else this.$message.warning("复制失败，请手动选中文字复制");
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(done).catch(fallback);
+        navigator.clipboard.writeText(content).then(done).catch(fallback);
       } else {
         fallback();
       }
@@ -2617,6 +2798,179 @@ export default {
       );
     },
 
+    // ============ 组件配套操作（下载配置 / 读取文件 / 读取链路） ============
+    // 折叠头里按钮容器的 click：本身不做事，只是把冒泡在这里截断
+    // （modifier 已经 stopPropagation，函数体留空即可，写成空函数是为了可读）
+    blockBubble() {},
+
+    // loading 的 key：一个集群 + 一个动作一把锁
+    cfgKey(name, action) {
+      return name + "|" + action;
+    },
+
+    isCfgLoading(name, action) {
+      return !!this.cfgLoading[this.cfgKey(name, action)];
+    },
+
+    // 按钮图标：请求中显示转圈，空闲显示各自图标
+    cfgActionIcon(name, action, idleIcon) {
+      return this.isCfgLoading(name, action) ? "el-icon-loading" : idleIcon;
+    },
+
+    // 用 $set/$delete 增删 key —— 直接赋值新 key 在 Vue 2 里不是响应式的，
+    // 按钮的 loading 图标和 disabled 都不会变
+    setCfgLoading(name, action, val) {
+      const key = this.cfgKey(name, action);
+      if (val) this.$set(this.cfgLoading, key, true);
+      else this.$delete(this.cfgLoading, key);
+    },
+
+    // 三个接口共用的参数：systemId 从页面取，module = 组件拓扑名，clusterName = 主机列表（集群）名
+    cfgParams(cluster) {
+      return {
+        systemId: this.systemId,
+        module: this.activeComponent,
+        clusterName: cluster ? cluster.name : "",
+      };
+    },
+
+    // 统一前置校验：该动作已经在跑 / 没有 systemId 都不发请求
+    cfgReady(cluster, action) {
+      if (this.isCfgLoading(cluster.name, action)) return false;
+      if (!this.systemId) {
+        this.$message.warning("缺少系统标识，请重新查询系统画像");
+        return false;
+      }
+      return true;
+    },
+
+    // 按钮 1：从源端下载资源配置至本地（refresh 默认 1）
+    onDownloadConfig(cluster) {
+      if (!this.cfgReady(cluster, "download")) return;
+      this.setCfgLoading(cluster.name, "download", true);
+      downloadConfigToLocal(Object.assign(this.cfgParams(cluster), { refresh: 1 }))
+        .then((res) => {
+          // 接口把结果文案放在 data 里（形如 "node: xxx successs"），原样提示给用户
+          const text =
+            (res && res.data) || (res && res.msg) || "已从源端下载资源配置";
+          this.$message({
+            message: String(text),
+            type: "success",
+            duration: 4000,
+            showClose: true,
+          });
+        })
+        .catch(() => {
+          this.$message.error("从源端下载资源配置失败");
+        })
+        .finally(() => {
+          this.setCfgLoading(cluster.name, "download", false);
+        });
+    },
+
+    // 按钮 2：组件配套文件读取 —— data 数组进弹窗，一个文件一个 tab
+    onReadConfig(cluster) {
+      if (!this.cfgReady(cluster, "readconfig")) return;
+      this.setCfgLoading(cluster.name, "readconfig", true);
+      readComponentConfig(this.cfgParams(cluster))
+        .then((res) => {
+          const list = this.cfgFileList(res);
+          if (!list.length) {
+            this.$message.warning("未读取到组件配套文件");
+            return;
+          }
+          this.cfgFiles = list;
+          this.cfgFileTab = "0";
+          this.cfgFileMsg = (res && res.msg) || "";
+          this.cfgFileCluster = cluster.name;
+          this.cfgFileDialogVisible = true;
+        })
+        .catch(() => {
+          this.$message.error("组件配套文件读取失败");
+        })
+        .finally(() => {
+          this.setCfgLoading(cluster.name, "readconfig", false);
+        });
+    },
+
+    // 配置文件列表：正常是 data 数组（[{ filename, content }]）；
+    // 兜底兼容 data 为 JSON 字符串、或载荷放在 rows 里的情况，取不到就返回空数组
+    cfgFileList(res) {
+      let raw =
+        res && res.data !== undefined && res.data !== null
+          ? res.data
+          : res && res.rows;
+      if (typeof raw === "string") {
+        try {
+          raw = JSON.parse(raw);
+        } catch (e) {
+          raw = null;
+        }
+      }
+      if (!Array.isArray(raw)) return [];
+      return raw.filter((f) => f && typeof f === "object");
+    },
+
+    // tab 里的文件内容：字符串**原样输出**（\n \t 就是后端的排版，绝不重排）；
+    // 万一后端把 content 给成对象，才转成带缩进的 JSON 文本
+    cfgFileText(file) {
+      const c = file && file.content;
+      if (typeof c === "string") return c;
+      if (c === undefined || c === null) return "";
+      try {
+        return JSON.stringify(c, null, 2);
+      } catch (e) {
+        return String(c);
+      }
+    },
+
+    // 按钮 3：读取配置文件中的链路信息 —— data 是 JSON，弹窗里用 json-viewer 展示
+    onReadLink(cluster) {
+      if (!this.cfgReady(cluster, "readlink")) return;
+      this.setCfgLoading(cluster.name, "readlink", true);
+      readComponentLink(this.cfgParams(cluster))
+        .then((res) => {
+          const data = this.cfgJsonValue(res && res.data);
+          if (data === null || data === undefined) {
+            this.$message.warning("未读取到链路信息");
+            return;
+          }
+          this.cfgLinkData = data;
+          this.cfgLinkCluster = cluster.name;
+          this.cfgLinkDialogVisible = true;
+        })
+        .catch(() => {
+          this.$message.error("读取配置文件中的链路信息失败");
+        })
+        .finally(() => {
+          this.setCfgLoading(cluster.name, "readlink", false);
+        });
+    },
+
+    // 链路 JSON：正常是对象；后端若把 JSON 序列化成字符串，解析回来再展示
+    cfgJsonValue(raw) {
+      if (typeof raw !== "string") return raw;
+      const s = raw.trim();
+      if (!s) return null;
+      try {
+        return JSON.parse(s);
+      } catch (e) {
+        return raw;
+      }
+    },
+
+    // 一键复制整段 JSON（缩进 2 空格，粘出来就是可读的 json）
+    copyCfgLinkJson() {
+      const data = this.cfgLinkData;
+      let text = "";
+      try {
+        text = JSON.stringify(data, null, 2);
+      } catch (e) {
+        text = String(data);
+      }
+      this.copyPlainText(text);
+    },
+
     // 打开集群关系弹窗（数据来自 relationGroups computed）
     openRelationDialog() {
       this.relationDialogVisible = true;
@@ -3363,6 +3717,23 @@ $stat-colors: (
 
 /* 集群标题：统一主题蓝圆点 + 集群名 + 台数徽标 */
 .profile-cluster {
+  /* 折叠头三列：左（圆点 + 集群名）· 中（组件配套操作按钮）· 右（记录数）。
+     中间列是 auto，按钮永远落在正中间，不随集群名长短漂移；
+     左右两列都 minmax(0,1fr) 才允许集群名省略号收缩 */
+  &__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__lead {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
   &__dot {
     display: inline-block;
     width: 7px;
@@ -3377,10 +3748,56 @@ $stat-colors: (
     font-weight: 600;
     color: #303133;
     margin-right: 10px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 三个操作按钮（只在 NGINX / HAPROXY / 微服务 / JAVA微服务 的集群头里出现） */
+  &__actions {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    flex-shrink: 0;
+  }
+
+  &__act {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 22px;
+    padding: 0 9px;
+    border: 1px solid #dbe7f7;
+    border-radius: 11px;
+    background: #fff;
+    color: $profile-accent;
+    font-size: 11.5px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    i {
+      font-size: 12px;
+    }
+
+    &:hover:not(:disabled) {
+      background: #ecf5ff;
+      border-color: $profile-accent;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
   }
 
   &__count {
-    margin-left: auto;
+    grid-column: 3;
+    justify-self: end;
     font-size: 11px;
     font-weight: 400;
     color: #909399;
@@ -3388,6 +3805,7 @@ $stat-colors: (
     border-radius: 8px;
     padding: 1px 8px;
     line-height: 18px;
+    white-space: nowrap;
   }
 }
 
@@ -3757,6 +4175,101 @@ $stat-colors: (
   width: 100%;
   height: 100%;
 }
+
+/* ============ 组件配套文件弹窗（一个文件一个 tab） ============ */
+.profile-cfg {
+  &__tabs {
+    ::v-deep .el-tabs__header {
+      margin-bottom: 10px;
+    }
+
+    ::v-deep .el-tabs__item {
+      height: 34px;
+      line-height: 34px;
+      font-size: 12.5px;
+      color: #606266;
+    }
+
+    ::v-deep .el-tabs__item.is-active {
+      color: $profile-accent;
+      font-weight: 600;
+    }
+  }
+
+  /* ⚠️ 必须是 white-space: pre —— content 里的 \n \t 就是后端给的排版，
+     换成普通 div 会被折叠成一整行，用 pre-line 又会吃掉行首缩进。
+     这里只负责「原样呈现 + 超出滚动」，一个字符都不重排 */
+  &__text {
+    margin: 0;
+    padding: 12px 14px;
+    max-height: 52vh;
+    overflow: auto;
+    background: #f7f9fc;
+    border: 1px solid $profile-card-border;
+    border-radius: 8px;
+    color: #303133;
+    font-family: Menlo, Consolas, "Courier New", monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    white-space: pre;
+    tab-size: 4;
+  }
+
+  /* 底部固定一行 msg：和 tab 切换无关，始终展示当前集群的返回信息 */
+  &__msg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: $profile-stat-bg;
+    font-size: 12px;
+    color: #606266;
+  }
+
+  &__msg-label {
+    flex-shrink: 0;
+    color: #909399;
+  }
+
+  &__msg-text {
+    min-width: 0;
+    word-break: break-all;
+  }
+}
+
+/* ============ 链路信息弹窗（json-viewer） ============ */
+.profile-json {
+  &__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  &__tip {
+    font-size: 12px;
+    color: #909399;
+  }
+
+  /* JSON 过长时框内上下滚动（不撑高弹窗） */
+  &__box {
+    padding: 10px 12px;
+    max-height: 56vh;
+    overflow: auto;
+    background: #fafbfd;
+    border: 1px solid $profile-card-border;
+    border-radius: 8px;
+
+    ::v-deep .jv-container {
+      font-family: Menlo, Consolas, "Courier New", monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+    }
+  }
+}
 </style>
 
 <!-- dialog 挂载在 body 上，覆盖 el-dialog 内部样式需非 scoped（同 AtomDetailDialog 做法）。
@@ -3803,6 +4316,39 @@ $stat-colors: (
       border-color: #409eff;
       color: #409eff;
     }
+  }
+}
+
+/* 组件配套文件 / 链路信息两个弹窗：外框和放大拓扑弹窗保持同一观感 */
+.profile-cfg-dialog,
+.profile-json-dialog {
+  max-width: calc(100vw - 40px);
+  border: 1px solid #ebeef5;
+  border-radius: 12px;
+  overflow: hidden;
+
+  .el-dialog__header {
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid #f0f3f8;
+  }
+
+  .el-dialog__title {
+    color: #303133;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .el-dialog__headerbtn .el-dialog__close {
+    color: #909399;
+
+    &:hover {
+      color: #409eff;
+    }
+  }
+
+  .el-dialog__body {
+    padding: 14px 18px 18px;
+    color: #606266;
   }
 }
 </style>
