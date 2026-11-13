@@ -1,5 +1,13 @@
 <template>
-  <div class="profile-page">
+  <!-- refreshing：集群关系右侧刷新图标触发时的整页 loading 遮罩。
+       刻意不用「把内容区换成加载占位」那种写法 —— 那样刷新按钮自己也会被卸载，
+       用户看到的是闪一下；遮罩式则内容还在、只是盖一层，刷新完原地换数据 -->
+  <div
+    class="profile-page"
+    v-loading="refreshing"
+    element-loading-text="正在刷新系统画像..."
+    element-loading-background="rgba(245, 247, 250, 0.72)"
+  >
     <!-- 空状态：居中的搜索入口（未查询前只显示这里） -->
     <div v-if="!searched" class="profile-empty">
       <i class="el-icon-monitor profile-empty__icon" />
@@ -129,8 +137,31 @@
         <!-- 集群关系：选中组件的 key 在“集群关系”中存在时展示文字按钮，点击弹窗查看明细；否则显示空态
              （用 div 而非 aside：全局 index.scss 对 aside 有 margin/背景/内边距默认样式） -->
         <div class="profile-topo__relation">
-          <template v-if="relationGroups">
+          <!-- 标题行：左「集群关系」+ 右刷新图标。刷新 = 用当前系统英文名重新请求整页画像 -->
+          <div class="profile-topo__relation-head">
             <span class="profile-topo__relation-title">集群关系</span>
+            <el-tooltip
+              content="刷新系统画像（重新请求当前系统数据）"
+              placement="top"
+              :open-delay="300"
+            >
+              <button
+                type="button"
+                class="profile-topo__relation-refresh"
+                :disabled="loading || refreshing || !systemQuery"
+                @click="refreshProfile"
+              >
+                <i
+                  :class="
+                    loading || refreshing
+                      ? 'el-icon-loading'
+                      : 'el-icon-refresh'
+                  "
+                />
+              </button>
+            </el-tooltip>
+          </div>
+          <template v-if="relationGroups">
             <button
               type="button"
               class="profile-topo__relation-btn"
@@ -533,8 +564,12 @@
       </el-table>
     </el-dialog>
 
-    <!-- 组件配套文件读取弹窗：data 是数组，一个文件一个 tab（标题取 filename）；
-         内容按后端给的原文展示 —— \n \t 原样保留，前端不做任何重排。
+    <!-- 组件配套文件读取弹窗：data 是数组，一个文件一个 tab（标题取 filename）。
+         内容分两种形态，按 content 自动判定：
+           1. 普通文本（nginx.conf 这类）—— <pre> 原样输出，\n \t 一个字符都不重排
+           2. JSON 字符串（形如 {"eureka.client.httpPing.enable": true, ...}）—— 先 parse 成
+              对象再用 json-viewer 展示，默认展开 2 层（与「读取链路」弹窗口径一致）
+         两种形态都有右上角一键复制：JSON 复制的是格式化后的 json，文本复制的是原文。
          底部固定一行 msg，跟 tab 切换无关 -->
     <el-dialog
       :title="'组件配套文件 - ' + cfgFileCluster"
@@ -546,6 +581,25 @@
       :close-on-click-modal="false"
     >
       <div class="profile-cfg">
+        <div class="profile-cfg__bar">
+          <span class="profile-cfg__tip">
+            <template v-if="cfgCurrentFile && cfgCurrentFile.json"
+              >JSON 内容 · 默认展开 2 层 · 内容过长可在框内滚动</template
+            >
+            <template v-else
+              >原始文本 · 按后端给的排版原样展示 · 内容过长可在框内滚动</template
+            >
+          </span>
+          <el-button
+            size="mini"
+            type="primary"
+            plain
+            icon="el-icon-document-copy"
+            :disabled="!cfgCurrentFile"
+            @click="copyCfgFile"
+            >复制内容</el-button
+          >
+        </div>
         <el-tabs v-model="cfgFileTab" class="profile-cfg__tabs">
           <el-tab-pane
             v-for="(file, i) in cfgFiles"
@@ -553,7 +607,17 @@
             :name="String(i)"
             :label="file.filename || '文件' + (i + 1)"
           >
-            <pre class="profile-cfg__text">{{ cfgFileText(file) }}</pre>
+            <!-- JSON 型：已 parse 成对象（file.json），交给 json-viewer -->
+            <div v-if="file.json" class="profile-cfg__json">
+              <json-viewer
+                :value="file.json"
+                :expand-depth="2"
+                :show-array-index="false"
+                :boxed="false"
+              />
+            </div>
+            <!-- 文本型：原样输出 -->
+            <pre v-else class="profile-cfg__text">{{ cfgFileText(file) }}</pre>
           </el-tab-pane>
         </el-tabs>
         <div class="profile-cfg__msg">
@@ -977,6 +1041,8 @@ export default {
   data() {
     return {
       loading: false,
+      // 静默刷新中（只驱动集群关系右侧那个刷新图标，不切整页加载态）
+      refreshing: false,
       profileData: null,
       // 全量链路（接口返回多少就是多少，只做规范化）。顶部概览的「链路」用它的条数，
       // 右侧链路图不用它 —— 那边画的是「当前组件下集群发出的链路」子集
@@ -1296,6 +1362,12 @@ export default {
       }
       return "当前展开的集群未匹配到链路，展开其他集群试试";
     },
+
+    // 组件配套文件弹窗里「当前 tab」的文件（tab 名是下标字符串）
+    cfgCurrentFile() {
+      const list = this.cfgFiles || [];
+      return list[Number(this.cfgFileTab)] || null;
+    },
   },
 
   methods: {
@@ -1325,15 +1397,32 @@ export default {
       this.doSearch(this.switchQuery);
     },
 
+    // 集群关系右侧的刷新图标：用**当前**系统英文名重新请求整页画像
+    // （复用 doSearch，所以组件默认选中、集群默认只展开第一个这些口径跟首次查询完全一致）。
+    // 请求中按钮已 disabled，这里再兜一次，防止连点重复发请求
+    refreshProfile() {
+      if (this.loading || this.refreshing) return;
+      const name = (this.systemQuery || "").trim();
+      if (!name) {
+        this.$message.warning("请输入系统英文名称");
+        return;
+      }
+      this.doSearch(name, { silent: true });
+    },
+
     // 统一查询逻辑（空值校验 → 请求 → 更新状态）
-    doSearch(q) {
+    // opts.silent：刷新用 —— 不把整页换成「正在加载」占位（内容区一卸载，刷新按钮自己也
+    // 跟着消失，用户看到的是「闪一下」而不是「刷新中」），改用 refreshing 只驱动图标转圈
+    doSearch(q, opts) {
       const name = (q || "").trim();
       if (!name) {
         this.$message.warning("请输入系统英文名称");
         return;
       }
+      const silent = !!(opts && opts.silent);
       this.systemQuery = name;
-      this.loading = true;
+      if (silent) this.refreshing = true;
+      else this.loading = true;
       getSystemProfile({ systemId: name })
         .then((res) => {
           this.profileData = res.data || res;
@@ -1355,6 +1444,7 @@ export default {
         })
         .finally(() => {
           this.loading = false;
+          this.refreshing = false;
           this.switchDialogVisible = false;
           // loading 置 false 后内容区（含图表容器）才挂载，此时再测量表格宽度、渲染链路关系图
           this.$nextTick(() => {
@@ -2894,7 +2984,9 @@ export default {
     },
 
     // 配置文件列表：正常是 data 数组（[{ filename, content }]）；
-    // 兜底兼容 data 为 JSON 字符串、或载荷放在 rows 里的情况，取不到就返回空数组
+    // 兜底兼容 data 为 JSON 字符串、或载荷放在 rows 里的情况，取不到就返回空数组。
+    // 每个文件额外挂一个 json 字段：content 是「JSON 文本」时放 parse 后的对象，
+    // 否则为 null —— 模板据此决定用 json-viewer 还是 <pre>，不用在渲染里反复 parse
     cfgFileList(res) {
       let raw =
         res && res.data !== undefined && res.data !== null
@@ -2908,7 +3000,29 @@ export default {
         }
       }
       if (!Array.isArray(raw)) return [];
-      return raw.filter((f) => f && typeof f === "object");
+      return raw
+        .filter((f) => f && typeof f === "object")
+        .map((f) => ({
+          filename: f.filename,
+          content: f.content,
+          json: this.cfgJsonOfContent(f.content),
+        }));
+    },
+
+    // 判断 content 是不是「JSON 内容」：对象/数组直接认；字符串先看首字符
+    // （`{` / `[`）再 try parse —— 纯数字、纯字符串、yaml、nginx.conf 都不会被误判。
+    // parse 失败就返回 null，走原来的原样文本展示，绝不因为解析失败吞掉内容
+    cfgJsonOfContent(content) {
+      if (content && typeof content === "object") return content;
+      if (typeof content !== "string") return null;
+      const s = content.trim();
+      if (!s || (s.charAt(0) !== "{" && s.charAt(0) !== "[")) return null;
+      try {
+        const parsed = JSON.parse(s);
+        return parsed && typeof parsed === "object" ? parsed : null;
+      } catch (e) {
+        return null;
+      }
     },
 
     // tab 里的文件内容：字符串**原样输出**（\n \t 就是后端的排版，绝不重排）；
@@ -2922,6 +3036,25 @@ export default {
       } catch (e) {
         return String(c);
       }
+    },
+
+    // 当前 tab 对应的文件（复制按钮、顶部提示都跟着 tab 走）
+    // 一键复制当前文件内容：JSON 型给格式化后的 json（粘出来可读），文本型给原文
+    cfgFileCopyText(file) {
+      if (file && file.json) {
+        try {
+          return JSON.stringify(file.json, null, 2);
+        } catch (e) {
+          /* 落到下面的原文兜底 */
+        }
+      }
+      return this.cfgFileText(file);
+    },
+
+    copyCfgFile() {
+      const file = this.cfgCurrentFile;
+      if (!file) return;
+      this.copyPlainText(this.cfgFileCopyText(file));
     },
 
     // 按钮 3：读取配置文件中的链路信息 —— data 是 JSON，弹窗里用 json-viewer 展示
@@ -3403,6 +3536,51 @@ $stat-colors: (
       flex-shrink: 0;
       font-size: 11.5px;
       color: #909399;
+    }
+
+    /* 标题行：撑满整块宽度，「集群关系」靠左、刷新图标贴右侧。
+       用 head 而不是给 relation 加 padding，是为了图标在「有/无集群关系」两种状态下位置一致 */
+    &-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    /* 刷新图标：小号描边圆形按钮，hover 才点亮，避免和「点击查看集群关系」抢注意力 */
+    &-refresh {
+      margin-left: auto;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 1px solid #dcdfe6;
+      border-radius: 50%;
+      background: $profile-card-bg;
+      color: #909399;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease,
+        background 0.15s ease;
+
+      i {
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      &:hover:not(:disabled) {
+        color: $profile-accent;
+        border-color: $profile-accent;
+        background: #ecf5ff;
+      }
+
+      &:disabled {
+        color: #c0c4cc;
+        border-color: #ebeef5;
+        cursor: not-allowed;
+      }
     }
 
     /* 文字按钮：点击后弹窗用表格展示集群关系明细 */
@@ -4178,6 +4356,20 @@ $stat-colors: (
 
 /* ============ 组件配套文件弹窗（一个文件一个 tab） ============ */
 .profile-cfg {
+  /* 顶部工具条：左侧说明当前 tab 是 JSON 还是文本，右侧一键复制 */
+  &__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  &__tip {
+    font-size: 12px;
+    color: #909399;
+  }
+
   &__tabs {
     ::v-deep .el-tabs__header {
       margin-bottom: 10px;
@@ -4213,6 +4405,23 @@ $stat-colors: (
     line-height: 1.65;
     white-space: pre;
     tab-size: 4;
+  }
+
+  /* JSON 型 content 的展示区：和 __text 同尺寸同底色，只是里面换成 json-viewer，
+     这样文本 / JSON 两种 tab 切换时框体大小不跳 */
+  &__json {
+    padding: 10px 12px;
+    max-height: 52vh;
+    overflow: auto;
+    background: #f7f9fc;
+    border: 1px solid $profile-card-border;
+    border-radius: 8px;
+
+    ::v-deep .jv-container {
+      font-family: Menlo, Consolas, "Courier New", monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+    }
   }
 
   /* 底部固定一行 msg：和 tab 切换无关，始终展示当前集群的返回信息 */

@@ -104,6 +104,26 @@ const MOCK_READ_CONFIG = {
         '\t\tproxy_pass http://auth_service;\n' +
         '\t}\n' +
         '}\n'
+    },
+    {
+      // JSON 型 content（生产上 JAVA微服务/微服务组件的配置文件常是这个形态）：
+      // 用来验证弹窗会把字符串 parse 成对象、用 json-viewer 展开 2 层展示
+      filename: 'pay-gateway@prod',
+      content: JSON.stringify(
+        {
+          'eureka.client.httpPing.enable': true,
+          'eureka.client.httpPing.retryCount': 2,
+          'eureka.client.service-url.defaultZone':
+            'http://eureka-kzx1:8761/eureka/',
+          'spring.datasource.url':
+            'jdbc:mysql://bjb-dasp-mysql-kzx:3306/pay?useUnicode=true',
+          'server.port': 8080,
+          logging: { level: { root: 'INFO', 'com.cncb': 'DEBUG' } },
+          'thread-pool': { core: 8, max: 32, queue: 200 }
+        },
+        null,
+        2
+      )
     }
   ]
 }
